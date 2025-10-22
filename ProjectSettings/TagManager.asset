@@ -3,7 +3,11 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - Normal_Monster
+  - Epic_Monster
+  - Boss_Monster
+  - Event_Monster
   layers:
   - Default
   - TransparentFX
