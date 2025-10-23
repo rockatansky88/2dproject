@@ -8,6 +8,7 @@ TagManager:
   - Epic_Monster
   - Boss_Monster
   - Event_Monster
+  - Monster
   layers:
   - Default
   - TransparentFX

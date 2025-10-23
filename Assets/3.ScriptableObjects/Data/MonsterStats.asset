@@ -9,15 +9,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d130085221b05e44683b82a4139a90b4, type: 3}
-  m_Name: CharacterStats
+  m_Script: {fileID: 11500000, guid: e7ba32a92cc87524080924b090c80def, type: 3}
+  m_Name: MonsterStats
   m_EditorClassIdentifier: 
-  Level: 1
-  Experience: 0
-  ExperienceRequired: 100
-  Strength: 40
-  Dexterity: 0
-  Wisdom: 0
-  Intelligence: 0
-  Health: 300
-  Speed: 8
+  Strength: 3
+  Dexterity: 4
+  Wisdom: 3
+  Intelligence: 4
+  Health: 50
+  Speed: 7

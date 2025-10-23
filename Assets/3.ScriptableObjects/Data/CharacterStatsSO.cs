@@ -12,6 +12,7 @@ public class CharacterStatsSO : ScriptableObject
     public int Wisdom;
     public int Intelligence;
     public int Health;
+    public int Speed; // 속도 추가
 
     public void ResetStats()
     {
@@ -23,5 +24,6 @@ public class CharacterStatsSO : ScriptableObject
         Wisdom = 10;
         Intelligence = 10;
         Health = 100;
+        Speed = 10; // 초기 속도 설정
     }
 }
