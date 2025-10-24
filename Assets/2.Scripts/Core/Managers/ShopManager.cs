@@ -58,6 +58,7 @@ public class ShopManager : MonoBehaviour
     /// </summary>
     public List<ItemDataSO> GetShopItems()
     {
+        Debug.Log($"[ShopManager] 현재 상점 아이템 개수: {currentShopItems.Count}");
         return currentShopItems;
     }
 

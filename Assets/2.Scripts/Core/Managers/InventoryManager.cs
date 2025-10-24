@@ -1,18 +1,19 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using System;
 using System.Collections.Generic;
+using UnityEditor; // AssetDatabaseë¥¼ ì‚¬ìš©í•˜ê¸° ìœ„í•´ í•„ìš”
 
 public class InventoryManager : MonoBehaviour
 {
     public static InventoryManager Instance { get; private set; }
 
-    // ¾ÆÀÌÅÛID, °³¼ö
+    // ì•„ì´í…œID, ê°œìˆ˜
     private Dictionary<string, int> inventory = new Dictionary<string, int>();
 
-    // ÀÎº¥Åä¸® º¯°æ ÀÌº¥Æ®
+    // ì¸ë²¤í† ë¦¬ ë³€ê²½ ì´ë²¤íŠ¸
     public event Action OnInventoryChanged;
 
-    // ¾ÆÀÌÅÛ µ¥ÀÌÅÍ Ä³½Ã (Resources Æú´õ¿¡¼­ ·Îµå)
+    // ì•„ì´í…œ ë°ì´í„° ìºì‹œ (Resources í´ë”ì—ì„œ ë¡œë“œ)
     private Dictionary<string, ItemDataSO> itemDataCache = new Dictionary<string, ItemDataSO>();
 
     private void Awake()
@@ -30,25 +31,36 @@ public class InventoryManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Resources Æú´õ¿¡¼­ ¸ğµç ¾ÆÀÌÅÛ µ¥ÀÌÅÍ ·Îµå
+    /// Resources í´ë”ì—ì„œ ëª¨ë“  ì•„ì´í…œ ë°ì´í„° ë¡œë“œ
     /// </summary>
     private void LoadAllItemData()
     {
-        ItemDataSO[] items = Resources.LoadAll<ItemDataSO>("Items");
+        // Resources ëŒ€ì‹  AssetDatabaseë¥¼ ì‚¬ìš©í•˜ì—¬ íŠ¹ì • ê²½ë¡œì—ì„œ íŒŒì¼ ë¡œë“œ
+        string path = "Assets/3.ScriptableObjects/Items";
+        string[] guids = AssetDatabase.FindAssets("t:ItemDataSO", new[] { path });
 
-        foreach (var item in items)
+        foreach (string guid in guids)
         {
-            if (!itemDataCache.ContainsKey(item.itemID))
+            string assetPath = AssetDatabase.GUIDToAssetPath(guid);
+            ItemDataSO item = AssetDatabase.LoadAssetAtPath<ItemDataSO>(assetPath);
+
+            if (item != null && !itemDataCache.ContainsKey(item.itemID))
             {
                 itemDataCache[item.itemID] = item;
+                Debug.Log($"[InventoryManager] ì•„ì´í…œ ìºì‹œ ë“±ë¡: {item.itemID} ({item.itemName})");
             }
         }
 
-        Debug.Log($"¾ÆÀÌÅÛ µ¥ÀÌÅÍ ·Îµå ¿Ï·á: {itemDataCache.Count}°³");
+        Debug.Log($"[InventoryManager] âœ… ì•„ì´í…œ ë°ì´í„° ë¡œë“œ ì™„ë£Œ: {itemDataCache.Count}ê°œ");
+
+        if (itemDataCache.Count == 0)
+        {
+            Debug.LogError("[InventoryManager] âŒ ì•„ì´í…œì´ í•˜ë‚˜ë„ ë¡œë“œë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤! ê²½ë¡œë¥¼ í™•ì¸í•˜ì„¸ìš”!");
+        }
     }
 
     /// <summary>
-    /// ¾ÆÀÌÅÛ µ¥ÀÌÅÍ °¡Á®¿À±â
+    /// ì•„ì´í…œ ë°ì´í„° ê°€ì ¸ì˜¤ê¸°
     /// </summary>
     public ItemDataSO GetItemData(string itemID)
     {
@@ -57,18 +69,18 @@ public class InventoryManager : MonoBehaviour
             return itemDataCache[itemID];
         }
 
-        Debug.LogWarning($"¾ÆÀÌÅÛ µ¥ÀÌÅÍ¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù: {itemID}");
+        Debug.LogWarning($"ì•„ì´í…œ ë°ì´í„°ë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤: {itemID}");
         return null;
     }
 
     /// <summary>
-    /// ¾ÆÀÌÅÛ Ãß°¡
+    /// ì•„ì´í…œ ì¶”ê°€
     /// </summary>
     public void AddItem(ItemDataSO item, int amount = 1)
     {
         if (item == null)
         {
-            Debug.LogError("¾ÆÀÌÅÛÀÌ nullÀÔ´Ï´Ù!");
+            Debug.LogError("ì•„ì´í…œì´ nullì…ë‹ˆë‹¤!");
             return;
         }
 
@@ -81,24 +93,24 @@ public class InventoryManager : MonoBehaviour
             inventory[item.itemID] = amount;
         }
 
-        Debug.Log($"¾ÆÀÌÅÛ Ãß°¡: {item.itemName} x{amount}");
+        Debug.Log($"ì•„ì´í…œ ì¶”ê°€: {item.itemName} x{amount}");
         OnInventoryChanged?.Invoke();
     }
 
     /// <summary>
-    /// ¾ÆÀÌÅÛ Á¦°Å
+    /// ì•„ì´í…œ ì œê±°
     /// </summary>
     public bool RemoveItem(string itemID, int amount = 1)
     {
         if (!inventory.ContainsKey(itemID))
         {
-            Debug.Log("ÇØ´ç ¾ÆÀÌÅÛÀÌ ¾ø½À´Ï´Ù!");
+            Debug.Log("í•´ë‹¹ ì•„ì´í…œì´ ì—†ìŠµë‹ˆë‹¤!");
             return false;
         }
 
         if (inventory[itemID] < amount)
         {
-            Debug.Log("¾ÆÀÌÅÛ ¼ö·®ÀÌ ºÎÁ·ÇÕ´Ï´Ù!");
+            Debug.Log("ì•„ì´í…œ ìˆ˜ëŸ‰ì´ ë¶€ì¡±í•©ë‹ˆë‹¤!");
             return false;
         }
 
@@ -109,13 +121,13 @@ public class InventoryManager : MonoBehaviour
             inventory.Remove(itemID);
         }
 
-        Debug.Log($"¾ÆÀÌÅÛ Á¦°Å: {itemID} x{amount}");
+        Debug.Log($"ì•„ì´í…œ ì œê±°: {itemID} x{amount}");
         OnInventoryChanged?.Invoke();
         return true;
     }
 
     /// <summary>
-    /// ¾ÆÀÌÅÛ °³¼ö È®ÀÎ
+    /// ì•„ì´í…œ ê°œìˆ˜ í™•ì¸
     /// </summary>
     public int GetItemCount(string itemID)
     {
@@ -123,7 +135,7 @@ public class InventoryManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ÀüÃ¼ ÀÎº¥Åä¸® ¹İÈ¯
+    /// ì „ì²´ ì¸ë²¤í† ë¦¬ ë°˜í™˜
     /// </summary>
     public Dictionary<string, int> GetAllItems()
     {
@@ -131,7 +143,7 @@ public class InventoryManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ÀÎº¥Åä¸® ÃÊ±âÈ­ (Å×½ºÆ®¿ë)
+    /// ì¸ë²¤í† ë¦¬ ì´ˆê¸°í™” (í…ŒìŠ¤íŠ¸ìš©)
     /// </summary>
     public void Clear()
     {

@@ -1,12 +1,13 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// ÀÎº¥Åä¸® À©µµ¿ì ¸ŞÀÎ ÄÁÆ®·Ñ·¯
+/// ì¸ë²¤í† ë¦¬ ìœˆë„ìš° ë©”ì¸ ì»¨íŠ¸ë¡¤ëŸ¬
 /// </summary>
 public class InventoryWindow : MonoBehaviour
 {
     [Header("Panels")]
+    [SerializeField] private GameObject mainWindow; // âœ… ìƒˆë¡œ ì¶”ê°€: ì‹¤ì œ UI ì°½
     [SerializeField] private GameObject shopPanel;
     [SerializeField] private GameObject statsPanel;
     [SerializeField] private GameObject inventoryPanel;
@@ -18,30 +19,35 @@ public class InventoryWindow : MonoBehaviour
 
     private void Start()
     {
-        // ÃÊ±â »óÅÂ: ¸ğµÎ ´İ±â
+        Debug.Log("[InventoryWindow] Start() í˜¸ì¶œ");
+        // ì´ˆê¸° ìƒíƒœ: ì°½ë§Œ ë‹«ê¸° (ì´ ìŠ¤í¬ë¦½íŠ¸ëŠ” í™œì„±í™” ìœ ì§€)
         //CloseWindow();
     }
 
     private void Update()
     {
-        // I Å°·Î ÀÎº¥Åä¸® Åä±Û
+        // I í‚¤ë¡œ ì¸ë²¤í† ë¦¬ í† ê¸€
         if (Input.GetKeyDown(toggleKey))
         {
+            Debug.Log("[InventoryWindow] I í‚¤ ëˆŒë¦¼ ê°ì§€!");
             ToggleInventory();
         }
 
-        // ESC Å°·Î ´İ±â
+        // ESC í‚¤ë¡œ ë‹«ê¸°
         if (Input.GetKeyDown(KeyCode.Escape) && isOpen)
         {
+            Debug.Log("[InventoryWindow] ESC í‚¤ ëˆŒë¦¼ ê°ì§€!");
             CloseWindow();
         }
     }
 
     /// <summary>
-    /// ÀÎº¥Åä¸® Åä±Û (IÅ°)
+    /// ì¸ë²¤í† ë¦¬ í† ê¸€ (Ií‚¤)
     /// </summary>
     public void ToggleInventory()
     {
+        Debug.Log($"[InventoryWindow] ToggleInventory í˜¸ì¶œ (í˜„ì¬ ìƒíƒœ: {(isOpen ? "ì—´ë¦¼" : "ë‹«í˜")})");
+
         if (isOpen)
         {
             CloseWindow();
@@ -53,60 +59,66 @@ public class InventoryWindow : MonoBehaviour
     }
 
     /// <summary>
-    /// ÀÎº¥Åä¸® ¸ğµå (½ºÅÈ Ç¥½Ã)
+    /// ì¸ë²¤í† ë¦¬ ëª¨ë“œ (ìŠ¤íƒ¯ í‘œì‹œ)
     /// </summary>
     public void OpenInventoryMode()
     {
-        gameObject.SetActive(true);
+        Debug.Log("[InventoryWindow] ì¸ë²¤í† ë¦¬ ëª¨ë“œ ì—´ê¸°");
+
+        if (mainWindow != null) mainWindow.SetActive(true);
         isOpen = true;
 
-        // ÁÂÃø: ½ºÅÈ ÆĞ³Î
+        // ì¢Œì¸¡: ìŠ¤íƒ¯ íŒ¨ë„
         if (shopPanel != null) shopPanel.SetActive(false);
         if (statsPanel != null) statsPanel.SetActive(true);
 
-        // ¿ìÃø: ÀÎº¥Åä¸® ÆĞ³Î
+        // ìš°ì¸¡: ì¸ë²¤í† ë¦¬ íŒ¨ë„
         if (inventoryPanel != null) inventoryPanel.SetActive(true);
 
-        Debug.Log("ÀÎº¥Åä¸® ¸ğµå ¿­¸²");
+        Debug.Log("[InventoryWindow] âœ… ì¸ë²¤í† ë¦¬ ëª¨ë“œ ì—´ë¦¼");
     }
 
     /// <summary>
-    /// »óÁ¡ ¸ğµå
+    /// ìƒì  ëª¨ë“œ
     /// </summary>
     public void OpenShopMode()
     {
-        gameObject.SetActive(true);
+        Debug.Log("[InventoryWindow] ìƒì  ëª¨ë“œ ì—´ê¸°");
+
+        if (mainWindow != null) mainWindow.SetActive(true);
         isOpen = true;
 
-        // ÁÂÃø: »óÁ¡ ÆĞ³Î
+        // ì¢Œì¸¡: ìƒì  íŒ¨ë„
         if (statsPanel != null) statsPanel.SetActive(false);
         if (shopPanel != null)
         {
             shopPanel.SetActive(true);
 
-            // ShopPanel »õ·Î°íÄ§
+            // ShopPanel ìƒˆë¡œê³ ì¹¨
             ShopPanel shop = shopPanel.GetComponent<ShopPanel>();
             if (shop != null) shop.RefreshShop();
         }
 
-        // ¿ìÃø: ÀÎº¥Åä¸® ÆĞ³Î
+        // ìš°ì¸¡: ì¸ë²¤í† ë¦¬ íŒ¨ë„
         if (inventoryPanel != null) inventoryPanel.SetActive(true);
 
-        Debug.Log("»óÁ¡ ¸ğµå ¿­¸²");
+        Debug.Log("[InventoryWindow] âœ… ìƒì  ëª¨ë“œ ì—´ë¦¼");
     }
 
     /// <summary>
-    /// À©µµ¿ì ´İ±â
+    /// ìœˆë„ìš° ë‹«ê¸°
     /// </summary>
     public void CloseWindow()
     {
-        gameObject.SetActive(false);
+        Debug.Log("[InventoryWindow] ìœˆë„ìš° ë‹«ê¸°");
+
+        if (mainWindow != null) mainWindow.SetActive(false);
         isOpen = false;
 
         if (shopPanel != null) shopPanel.SetActive(false);
         if (statsPanel != null) statsPanel.SetActive(false);
         if (inventoryPanel != null) inventoryPanel.SetActive(false);
 
-        Debug.Log("ÀÎº¥Åä¸® À©µµ¿ì ´İÈû");
+        Debug.Log("[InventoryWindow] âœ… ì¸ë²¤í† ë¦¬ ìœˆë„ìš° ë‹«í˜");
     }
 }

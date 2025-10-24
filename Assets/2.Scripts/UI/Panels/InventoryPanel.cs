@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,19 +8,25 @@ public class InventoryPanel : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private GameObject inventorySlotPrefab;
-    [SerializeField] private Transform slotContainer; // GridLayoutGroupÀ» °¡Áø ºÎ¸ğ
+    [SerializeField] private Transform slotContainer; // GridLayoutGroupì„ ê°€ì§„ ë¶€ëª¨
     [SerializeField] private int maxSlots = 24;
 
     private List<ItemSlot> slots = new List<ItemSlot>();
 
     private void Start()
     {
+        Debug.Log("[InventoryPanel] Start() í˜¸ì¶œ");
         InitializeSlots();
 
-        // ÀÎº¥Åä¸® º¯°æ ÀÌº¥Æ® ±¸µ¶
+        // ì¸ë²¤í† ë¦¬ ë³€ê²½ ì´ë²¤íŠ¸ êµ¬ë…
         if (InventoryManager.Instance != null)
         {
             InventoryManager.Instance.OnInventoryChanged += RefreshInventory;
+            Debug.Log("[InventoryPanel] âœ… OnInventoryChanged ì´ë²¤íŠ¸ êµ¬ë… ì™„ë£Œ");
+        }
+        else
+        {
+            Debug.LogError("[InventoryPanel] âŒ InventoryManager.Instanceê°€ nullì…ë‹ˆë‹¤!");
         }
 
         RefreshInventory();
@@ -31,22 +37,37 @@ public class InventoryPanel : MonoBehaviour
         if (InventoryManager.Instance != null)
         {
             InventoryManager.Instance.OnInventoryChanged -= RefreshInventory;
+            Debug.Log("[InventoryPanel] ì´ë²¤íŠ¸ êµ¬ë… í•´ì œ");
         }
     }
 
     /// <summary>
-    /// ½½·Ô ÃÊ±âÈ­
+    /// ìŠ¬ë¡¯ ì´ˆê¸°í™”
     /// </summary>
     private void InitializeSlots()
     {
-        // ±âÁ¸ ½½·Ô Á¦°Å
+        Debug.Log($"[InventoryPanel] ìŠ¬ë¡¯ ì´ˆê¸°í™” ì‹œì‘ (ì´ {maxSlots}ê°œ)");
+
+        // ê¸°ì¡´ ìŠ¬ë¡¯ ì œê±°
         foreach (var slot in slots)
         {
             if (slot != null) Destroy(slot.gameObject);
         }
         slots.Clear();
 
-        // ½½·Ô »ı¼º
+        if (inventorySlotPrefab == null)
+        {
+            Debug.LogError("[InventoryPanel] âŒ inventorySlotPrefabì´ nullì…ë‹ˆë‹¤!");
+            return;
+        }
+
+        if (slotContainer == null)
+        {
+            Debug.LogError("[InventoryPanel] âŒ slotContainerê°€ nullì…ë‹ˆë‹¤!");
+            return;
+        }
+
+        // ìŠ¬ë¡¯ ìƒì„±
         for (int i = 0; i < maxSlots; i++)
         {
             GameObject slotObj = Instantiate(inventorySlotPrefab, slotContainer);
@@ -58,24 +79,38 @@ public class InventoryPanel : MonoBehaviour
                 slot.OnSlotClicked += OnSlotClicked;
                 slots.Add(slot);
             }
+            else
+            {
+                Debug.LogError($"[InventoryPanel] âŒ ìŠ¬ë¡¯ {i}ì— ItemSlot ì»´í¬ë„ŒíŠ¸ê°€ ì—†ìŠµë‹ˆë‹¤!");
+            }
         }
+
+        Debug.Log($"[InventoryPanel] âœ… ìŠ¬ë¡¯ {slots.Count}ê°œ ìƒì„± ì™„ë£Œ");
     }
 
     /// <summary>
-    /// ÀÎº¥Åä¸® »õ·Î°íÄ§
+    /// ì¸ë²¤í† ë¦¬ ìƒˆë¡œê³ ì¹¨
     /// </summary>
     private void RefreshInventory()
     {
-        if (InventoryManager.Instance == null) return;
+        Debug.Log("[InventoryPanel] â”â”â”â”› RefreshInventory í˜¸ì¶œë¨ â”â”â”â”›");
 
-        // ¸ğµç ½½·Ô ºñ¿ì±â
+        if (InventoryManager.Instance == null)
+        {
+            Debug.LogError("[InventoryPanel] âŒ InventoryManager.Instanceê°€ nullì…ë‹ˆë‹¤!");
+            return;
+        }
+
+        // ëª¨ë“  ìŠ¬ë¡¯ ë¹„ìš°ê¸°
         foreach (var slot in slots)
         {
             slot.SetEmpty();
         }
 
-        // ÀÎº¥Åä¸® ¾ÆÀÌÅÛ °¡Á®¿À±â
+        // ì¸ë²¤í† ë¦¬ ì•„ì´í…œ ê°€ì ¸ì˜¤ê¸°
         var allItems = InventoryManager.Instance.GetAllItems();
+        Debug.Log($"[InventoryPanel] ì¸ë²¤í† ë¦¬ì—ì„œ ê°€ì ¸ì˜¨ ì•„ì´í…œ: {allItems.Count}ê°œ");
+
         int slotIndex = 0;
 
         foreach (var kvp in allItems)
@@ -83,22 +118,27 @@ public class InventoryPanel : MonoBehaviour
             string itemID = kvp.Key;
             int quantity = kvp.Value;
 
-            // ItemDataSO Ã£±â (Resources Æú´õ¿¡¼­ ·Îµå)
-            ItemDataSO itemData = Resources.Load<ItemDataSO>($"Items/{itemID}");
+            Debug.Log($"[InventoryPanel] ì²˜ë¦¬ ì¤‘: {itemID} x{quantity}");
+
+            // âœ… ìˆ˜ì •: InventoryManagerì˜ ìºì‹œëœ ë°ì´í„° ì‚¬ìš©
+            ItemDataSO itemData = InventoryManager.Instance.GetItemData(itemID);
 
             if (itemData == null)
             {
-                Debug.LogWarning($"¾ÆÀÌÅÛÀ» Ã£À» ¼ö ¾ø½À´Ï´Ù: {itemID}");
+                Debug.LogError($"[InventoryPanel] âŒ ì•„ì´í…œ ë°ì´í„°ë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤: {itemID}");
                 continue;
             }
 
-            // Æ÷¼ÇÀÎ °æ¿ì ½ºÅÃÀ¸·Î Ã³¸®
+            Debug.Log($"[InventoryPanel] ì•„ì´í…œ ë°ì´í„° ë¡œë“œ ì„±ê³µ: {itemData.itemName} (íƒ€ì…: {itemData.itemType})");
+
+            // í¬ì…˜ì¸ ê²½ìš° ìŠ¤íƒìœ¼ë¡œ ì²˜ë¦¬
             if (itemData.itemType == ItemType.Potion)
             {
                 int maxStack = 5;
                 while (quantity > 0 && slotIndex < slots.Count)
                 {
                     int stackAmount = Mathf.Min(quantity, maxStack);
+                    Debug.Log($"[InventoryPanel] ìŠ¬ë¡¯ {slotIndex}ì— í¬ì…˜ ë°°ì¹˜: {itemData.itemName} x{stackAmount}");
                     slots[slotIndex].Initialize(itemData, SlotType.Player, stackAmount);
                     quantity -= stackAmount;
                     slotIndex++;
@@ -106,32 +146,45 @@ public class InventoryPanel : MonoBehaviour
             }
             else
             {
-                // Àåºñ´Â °³º° ½½·Ô
+                // ì¥ë¹„ëŠ” ê°œë³„ ìŠ¬ë¡¯
                 for (int i = 0; i < quantity && slotIndex < slots.Count; i++)
                 {
+                    Debug.Log($"[InventoryPanel] ìŠ¬ë¡¯ {slotIndex}ì— ì¥ë¹„ ë°°ì¹˜: {itemData.itemName}");
                     slots[slotIndex].Initialize(itemData, SlotType.Player, 1);
                     slotIndex++;
                 }
             }
         }
+
+        Debug.Log($"[InventoryPanel] âœ… ì´ {slotIndex}ê°œ ìŠ¬ë¡¯ì— ì•„ì´í…œ ë°°ì¹˜ ì™„ë£Œ");
     }
 
     /// <summary>
-    /// ½½·Ô Å¬¸¯ Ã³¸® (ÆÇ¸Å)
+    /// ìŠ¬ë¡¯ í´ë¦­ ì²˜ë¦¬ (íŒë§¤)
     /// </summary>
     private void OnSlotClicked(ItemDataSO item, SlotType slotType)
     {
+        Debug.Log($"[InventoryPanel] ìŠ¬ë¡¯ í´ë¦­: {item?.itemName ?? "null"}, íƒ€ì…: {slotType}");
+
         if (item == null || slotType != SlotType.Player) return;
 
-        // ÆÇ¸Å Ã³¸®
+        // íŒë§¤ ì²˜ë¦¬
         if (ShopManager.Instance != null)
         {
             bool success = ShopManager.Instance.SellItem(item, 1);
 
             if (success)
             {
-                Debug.Log($"{item.itemName} ÆÇ¸Å ¿Ï·á!");
+                Debug.Log($"[InventoryPanel] âœ… {item.itemName} íŒë§¤ ì™„ë£Œ!");
             }
+            else
+            {
+                Debug.LogWarning($"[InventoryPanel] âŒ {item.itemName} íŒë§¤ ì‹¤íŒ¨");
+            }
+        }
+        else
+        {
+            Debug.LogError("[InventoryPanel] âŒ ShopManager.Instanceê°€ nullì…ë‹ˆë‹¤!");
         }
     }
 }

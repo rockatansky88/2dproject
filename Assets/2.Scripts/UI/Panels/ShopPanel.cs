@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using System.Collections;
 
 public class ShopPanel : BasePanel
 {
@@ -23,6 +24,12 @@ public class ShopPanel : BasePanel
             Debug.LogError("[ShopPanel] shopItemContainer가 설정되지 않았습니다!");
     }
 
+    private IEnumerator DelayedRefreshShop()
+    {
+        yield return new WaitUntil(() => ShopManager.Instance != null);
+        RefreshShop();
+    }
+
     private void Start()
     {
         // 골드 변경 이벤트 구독
@@ -36,7 +43,7 @@ public class ShopPanel : BasePanel
         if (gameObject.activeInHierarchy)
         {
             Debug.Log("[ShopPanel] Start()에서 RefreshShop() 호출");
-            RefreshShop();
+            StartCoroutine(DelayedRefreshShop());
         }
     }
 
