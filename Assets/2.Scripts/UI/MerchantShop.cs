@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.EventSystems;
 
 /// <summary>
 /// 씬에 있는 MerchantShop 오브젝트 클릭 감지
@@ -55,6 +56,12 @@ public class MerchantShop : MonoBehaviour
 
     private void OnMouseEnter()
     {
+        // UI가 열려 있으면 호버 효과 무시
+        if (IsUIOpen())
+        {
+            return;
+        }
+
         Debug.Log("[MerchantShop] ✅ 마우스 진입!");
         SetOutlineActive(true);
     }
@@ -67,6 +74,13 @@ public class MerchantShop : MonoBehaviour
 
     private void OnMouseDown()
     {
+        // UI가 열려 있거나 UI 위를 클릭하면 무시
+        if (IsUIOpen() || EventSystem.current.IsPointerOverGameObject())
+        {
+            Debug.Log("[MerchantShop] UI가 열려 있거나 UI 클릭 중이므로 무시");
+            return;
+        }
+
         Debug.Log("[MerchantShop] 클릭됨!");
         OpenShop();
     }
@@ -77,6 +91,29 @@ public class MerchantShop : MonoBehaviour
         {
             outlineObject.SetActive(active);
         }
+    }
+
+    /// <summary>
+    /// 현재 UI가 열려 있는지 확인
+    /// </summary>
+    private bool IsUIOpen()
+    {
+        // Lazy Initialization
+        if (inventoryWindow == null)
+        {
+            InventoryWindow[] allWindows = Resources.FindObjectsOfTypeAll<InventoryWindow>();
+
+            foreach (var window in allWindows)
+            {
+                if (window.gameObject.scene.IsValid())
+                {
+                    inventoryWindow = window;
+                    break;
+                }
+            }
+        }
+
+        return inventoryWindow != null && inventoryWindow.IsOpen;
     }
 
     private void OpenShop()
