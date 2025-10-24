@@ -7,14 +7,20 @@ public class InventoryManager : MonoBehaviour
 {
     public static InventoryManager Instance { get; private set; }
 
+    [Header("Settings")]
+    [SerializeField] private int maxSlots = 24; // 최대 슬롯 수
+
     // 아이템ID, 개수
     private Dictionary<string, int> inventory = new Dictionary<string, int>();
 
     // 인벤토리 변경 이벤트
     public event Action OnInventoryChanged;
 
-    // 아이템 데이터 캐시 (Resources 폴더에서 로드)
+    // 아이템 데이터 캐시   
     private Dictionary<string, ItemDataSO> itemDataCache = new Dictionary<string, ItemDataSO>();
+
+    [Header("References")]
+    [SerializeField] private InventoryWindow inventoryWindow;
 
     private void Awake()
     {
@@ -27,6 +33,26 @@ public class InventoryManager : MonoBehaviour
         else
         {
             Destroy(gameObject);
+        }
+    }
+
+    private void Update()
+    {
+        // I 키로 인벤토리 토글
+        if (Input.GetKeyDown(KeyCode.I))
+        {
+            Debug.Log("[InventoryManager] I 키 눌림 감지!");
+            ToggleInventory();
+        }
+
+        // ESC 키로 인벤토리 닫기
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (inventoryWindow != null && inventoryWindow.IsOpen)
+            {
+                Debug.Log("[InventoryManager] ESC 키 눌림 감지!");
+                inventoryWindow.CloseWindow();
+            }
         }
     }
 
@@ -149,5 +175,23 @@ public class InventoryManager : MonoBehaviour
     {
         inventory.Clear();
         OnInventoryChanged?.Invoke();
+    }
+
+    private void ToggleInventory()
+    {
+        if (inventoryWindow == null)
+        {
+            Debug.LogError("[InventoryManager] InventoryWindow가 설정되지 않았습니다!");
+            return;
+        }
+
+        if (inventoryWindow.IsOpen)
+        {
+            inventoryWindow.CloseWindow();
+        }
+        else
+        {
+            inventoryWindow.OpenInventoryMode();
+        }
     }
 }

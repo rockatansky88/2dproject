@@ -50,7 +50,7 @@ public class ItemSlot : MonoBehaviour
     }
 
     /// <summary>
-    /// 빈 슬롯으로 설정 - 이 메서드가 누락되어 있었습니다!
+    /// 빈 슬롯으로 설정
     /// </summary>
     public void SetEmpty()
     {
@@ -93,11 +93,37 @@ public class ItemSlot : MonoBehaviour
     {
         bool isEmpty = itemData == null;
 
-        // 아이콘
+        // 아이콘 표시 (알파값 변경 없이)
         if (iconImage != null)
         {
-            iconImage.sprite = isEmpty ? null : itemData.icon;
-            iconImage.enabled = !isEmpty && itemData.icon != null;
+            if (isEmpty)
+            {
+                iconImage.sprite = null;
+                iconImage.enabled = false;
+                Debug.Log("[ItemSlot] 아이콘 비활성화 (빈 슬롯)");
+            }
+            else
+            {
+                iconImage.sprite = itemData.icon;
+                iconImage.enabled = itemData.icon != null;
+
+                // 아이콘 색상은 항상 불투명하게 유지
+                if (iconImage.enabled)
+                {
+                    var iconColor = iconImage.color;
+                    iconColor.a = 1f; // 아이콘은 항상 불투명
+                    iconImage.color = iconColor;
+                }
+
+                if (itemData.icon == null)
+                {
+                    Debug.LogWarning($"[ItemSlot] 아이템 '{itemData.itemName}'에 아이콘이 설정되지 않았습니다!");
+                }
+                else
+                {
+                    Debug.Log($"[ItemSlot] 아이콘 표시: {itemData.itemName}");
+                }
+            }
         }
 
         // 이름
@@ -147,11 +173,11 @@ public class ItemSlot : MonoBehaviour
             }
         }
 
-        // 배경 투명도
+        // 배경 투명도 (빈 슬롯은 반투명, 아이템 있으면 약간 투명)
         if (backgroundImage != null)
         {
             var color = backgroundImage.color;
-            color.a = isEmpty ? 0.3f : 1f;
+            color.a = isEmpty ? 0.3f : 0.5f; // 빈 슬롯: 0.3, 아이템 있음: 0.5
             backgroundImage.color = color;
         }
     }
