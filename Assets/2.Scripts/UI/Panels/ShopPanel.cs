@@ -14,6 +14,13 @@ public class ShopPanel : BasePanel
     protected override void Awake()
     {
         base.Awake();
+
+        // 필수 참조 체크
+        if (shopItemSlotPrefab == null)
+            Debug.LogError("[ShopPanel] shopItemSlotPrefab이 설정되지 않았습니다!");
+
+        if (shopItemContainer == null)
+            Debug.LogError("[ShopPanel] shopItemContainer가 설정되지 않았습니다!");
     }
 
     private void Start()
@@ -23,6 +30,13 @@ public class ShopPanel : BasePanel
         {
             GameManager.Instance.OnGoldChanged += UpdateGoldDisplay;
             UpdateGoldDisplay(GameManager.Instance.Gold);
+        }
+
+        // 패널이 활성화되어 있으면 즉시 상점 로드
+        if (gameObject.activeInHierarchy)
+        {
+            Debug.Log("[ShopPanel] Start()에서 RefreshShop() 호출");
+            RefreshShop();
         }
     }
 
@@ -46,6 +60,7 @@ public class ShopPanel : BasePanel
     protected override void OnShow()
     {
         base.OnShow();
+        Debug.Log("[ShopPanel] OnShow() 호출됨");
         RefreshShop();
     }
 
@@ -54,6 +69,8 @@ public class ShopPanel : BasePanel
     /// </summary>
     public void RefreshShop()
     {
+        Debug.Log("[ShopPanel] RefreshShop() 시작");
+
         // 기존 슬롯 제거
         foreach (var slot in shopSlots)
         {
@@ -65,14 +82,45 @@ public class ShopPanel : BasePanel
         }
         shopSlots.Clear();
 
-        if (ShopManager.Instance == null) return;
+        if (ShopManager.Instance == null)
+        {
+            Debug.LogError("[ShopPanel] ShopManager.Instance가 null입니다!");
+            return;
+        }
+
+        if (shopItemSlotPrefab == null)
+        {
+            Debug.LogError("[ShopPanel] shopItemSlotPrefab이 null입니다!");
+            return;
+        }
+
+        if (shopItemContainer == null)
+        {
+            Debug.LogError("[ShopPanel] shopItemContainer가 null입니다!");
+            return;
+        }
 
         // 상점 아이템 가져오기
         List<ItemDataSO> items = ShopManager.Instance.GetShopItems();
+        Debug.Log($"[ShopPanel] 생성할 아이템 개수: {items.Count}");
+
+        if (items.Count == 0)
+        {
+            Debug.LogWarning("[ShopPanel] ShopManager에 아이템이 없습니다! ShopManager의 availableItems를 확인하세요.");
+            return;
+        }
 
         foreach (var item in items)
         {
+            if (item == null)
+            {
+                Debug.LogWarning("[ShopPanel] null 아이템 발견, 스킵합니다.");
+                continue;
+            }
+
             GameObject slotObj = Instantiate(shopItemSlotPrefab, shopItemContainer);
+            Debug.Log($"[ShopPanel] 슬롯 생성됨: {item.itemName}");
+
             ShopItemSlot slot = slotObj.GetComponent<ShopItemSlot>();
 
             if (slot != null)
@@ -81,7 +129,13 @@ public class ShopPanel : BasePanel
                 slot.OnBuyClicked += OnItemBuyClicked;
                 shopSlots.Add(slot);
             }
+            else
+            {
+                Debug.LogError("[ShopPanel] ShopItemSlot 컴포넌트를 찾을 수 없습니다!");
+            }
         }
+
+        Debug.Log($"[ShopPanel] 총 {shopSlots.Count}개 슬롯 생성 완료");
     }
 
     /// <summary>

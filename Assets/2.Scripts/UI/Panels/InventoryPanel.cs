@@ -9,7 +9,7 @@ public class InventoryPanel : MonoBehaviour
     [Header("References")]
     [SerializeField] private GameObject inventorySlotPrefab;
     [SerializeField] private Transform slotContainer; // GridLayoutGroup을 가진 부모
-    [SerializeField] private int maxSlots = 20;
+    [SerializeField] private int maxSlots = 24;
 
     private List<ItemSlot> slots = new List<ItemSlot>();
 
