@@ -11,9 +11,9 @@ public class MerchantShop : MonoBehaviour
     [SerializeField] private InventoryWindow inventoryWindow;
 
     [Header("Outline Settings")]
-    [SerializeField] private Color normalColor = Color.white;
-    [SerializeField] private Color outlineColor = new Color(1f, 0.3f, 0.3f, 1f); // 빨간색
-    [SerializeField] private float outlineThickness = 0.05f;
+    [SerializeField] private GameObject outlinePrefab; // 테두리용 별도 스프라이트
+    [SerializeField] private Color outlineColor = new Color(1f, 0.5f, 0f, 1f); // 주황색
+    [SerializeField] private float outlineThickness = 0.1f;
 
     private SpriteRenderer spriteRenderer;
     private GameObject outlineObject;
@@ -47,8 +47,8 @@ public class MerchantShop : MonoBehaviour
         outlineRenderer.sortingLayerName = spriteRenderer.sortingLayerName;
         outlineRenderer.sortingOrder = spriteRenderer.sortingOrder - 1; // 원본 뒤에 표시
 
-        // 테두리 효과를 위해 약간 크게 설정
-        outlineObject.transform.localScale = Vector3.one * (1f + outlineThickness);
+        // 테두리 효과를 위해 약간 작게 설정 (안쪽으로 들어오게)
+        outlineObject.transform.localScale = Vector3.one * (1f - outlineThickness);
 
         Debug.Log($"[MerchantShop] 테두리 오브젝트 생성 완료 - 색상: {outlineColor}, 크기: {outlineObject.transform.localScale}");
     }
@@ -61,13 +61,13 @@ public class MerchantShop : MonoBehaviour
 
     private void OnMouseExit()
     {
-        Debug.Log("[MerchantShop] ❌ 마우스 이탈!");
+        Debug.Log("[MerchantShop] 마우스 이탈!");
         SetOutlineActive(false);
     }
 
     private void OnMouseDown()
     {
-        Debug.Log("[MerchantShop] 🖱️ 클릭됨!");
+        Debug.Log("[MerchantShop] 클릭됨!");
         OpenShop();
     }
 
@@ -76,26 +76,16 @@ public class MerchantShop : MonoBehaviour
         if (outlineObject != null)
         {
             outlineObject.SetActive(active);
-            Debug.Log($"[MerchantShop] 테두리 {(active ? "활성화" : "비활성화")}");
-        }
-        else
-        {
-            Debug.LogError("[MerchantShop] ❌ outlineObject가 null입니다!");
         }
     }
 
     private void OpenShop()
     {
-        Debug.Log("[MerchantShop] 🏪 상점 열기 시도...");
-
         // Lazy Initialization: InventoryWindow를 처음 필요할 때 검색
         if (inventoryWindow == null)
         {
-            Debug.Log("[MerchantShop] InventoryWindow 검색 중...");
-
             // 비활성화된 오브젝트도 검색
             InventoryWindow[] allWindows = Resources.FindObjectsOfTypeAll<InventoryWindow>();
-            Debug.Log($"[MerchantShop] 찾은 InventoryWindow 개수: {allWindows.Length}");
 
             foreach (var window in allWindows)
             {
@@ -103,19 +93,19 @@ public class MerchantShop : MonoBehaviour
                 if (window.gameObject.scene.IsValid())
                 {
                     inventoryWindow = window;
-                    Debug.Log($"[MerchantShop] ✅ InventoryWindow 찾음: {window.gameObject.name}");
                     break;
                 }
             }
 
             if (inventoryWindow == null)
             {
-                Debug.LogError("[MerchantShop] ❌ InventoryWindow를 찾을 수 없습니다!");
+                Debug.LogError("[MerchantShop] InventoryWindow를 찾을 수 없습니다!");
                 return;
             }
+
+            Debug.Log("[MerchantShop] ✅ InventoryWindow를 찾았습니다!");
         }
 
-        Debug.Log("[MerchantShop] OpenShopMode() 호출...");
         inventoryWindow.OpenShopMode();
     }
 }

@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System;
 using System.Collections.Generic;
-using UnityEditor; // AssetDatabase를 사용하기 위해 필요
 
 public class InventoryManager : MonoBehaviour
 {
@@ -61,15 +60,11 @@ public class InventoryManager : MonoBehaviour
     /// </summary>
     private void LoadAllItemData()
     {
-        // Resources 대신 AssetDatabase를 사용하여 특정 경로에서 파일 로드
-        string path = "Assets/3.ScriptableObjects/Items";
-        string[] guids = AssetDatabase.FindAssets("t:ItemDataSO", new[] { path });
+        // Resources/Items 폴더에서 모든 ItemDataSO 로드
+        ItemDataSO[] items = Resources.LoadAll<ItemDataSO>("Items");
 
-        foreach (string guid in guids)
+        foreach (ItemDataSO item in items)
         {
-            string assetPath = AssetDatabase.GUIDToAssetPath(guid);
-            ItemDataSO item = AssetDatabase.LoadAssetAtPath<ItemDataSO>(assetPath);
-
             if (item != null && !itemDataCache.ContainsKey(item.itemID))
             {
                 itemDataCache[item.itemID] = item;
@@ -81,7 +76,7 @@ public class InventoryManager : MonoBehaviour
 
         if (itemDataCache.Count == 0)
         {
-            Debug.LogError("[InventoryManager] ❌ 아이템이 하나도 로드되지 않았습니다! 경로를 확인하세요!");
+            Debug.LogError("[InventoryManager] ❌ 아이템이 하나도 로드되지 않았습니다! Resources/Items 폴더를 확인하세요!");
         }
     }
 

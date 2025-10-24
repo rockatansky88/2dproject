@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -7,9 +7,9 @@ public class ShopManager : MonoBehaviour
     public static ShopManager Instance { get; private set; }
 
     [Header("Shop Inventory")]
-    [SerializeField] private List<ItemDataSO> availableItems = new List<ItemDataSO>(); // ÆÇ¸Å °¡´ÉÇÑ ¸ğµç ¾ÆÀÌÅÛ
-    [SerializeField] private int shopItemCount = 10; // »óÁ¡¿¡ Ç¥½ÃÇÒ ¾ÆÀÌÅÛ ¼ö
-    [SerializeField] private bool randomizeShop = true; // ·£´ı »óÁ¡ ¿©ºÎ
+    [SerializeField] private List<ItemDataSO> availableItems = new List<ItemDataSO>();
+    [SerializeField] private int shopItemCount = 10;
+    [SerializeField] private bool randomizeShop = true;
 
     private List<ItemDataSO> currentShopItems = new List<ItemDataSO>();
 
@@ -19,9 +19,11 @@ public class ShopManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
+            Debug.Log("[ShopManager] âœ… Instance ìƒì„±ë¨");
         }
         else
         {
+            Debug.Log("[ShopManager] ì¤‘ë³µ Instance ì œê±°");
             Destroy(gameObject);
         }
     }
@@ -31,74 +33,93 @@ public class ShopManager : MonoBehaviour
         RefreshShopInventory();
     }
 
-    /// <summary>
-    /// »óÁ¡ Àç°í »õ·Î°íÄ§ (·£´ı ¶Ç´Â ÀüÃ¼)
-    /// </summary>
     public void RefreshShopInventory()
     {
         currentShopItems.Clear();
 
+        Debug.Log($"[ShopManager] ìƒì  ì¬ê³  ê°±ì‹  ì‹œì‘ - availableItems: {availableItems.Count}ê°œ");
+
         if (randomizeShop && availableItems.Count > shopItemCount)
         {
-            // ·£´ıÇÏ°Ô ¾ÆÀÌÅÛ ¼±ÅÃ
             List<ItemDataSO> shuffled = availableItems.OrderBy(x => Random.value).ToList();
             currentShopItems = shuffled.Take(shopItemCount).ToList();
-            Debug.Log($"»óÁ¡ Àç°í ·£´ı »ı¼º: {currentShopItems.Count}°³");
+            Debug.Log($"[ShopManager] ëœë¤ ì„ íƒ: {currentShopItems.Count}ê°œ");
         }
         else
         {
-            // ÀüÃ¼ ¾ÆÀÌÅÛ Ç¥½Ã
             currentShopItems = new List<ItemDataSO>(availableItems);
-            Debug.Log($"»óÁ¡ Àç°í ÀüÃ¼ Ç¥½Ã: {currentShopItems.Count}°³");
+            Debug.Log($"[ShopManager] ì „ì²´ í‘œì‹œ: {currentShopItems.Count}ê°œ");
         }
     }
 
-    /// <summary>
-    /// »óÁ¡¿¡¼­ ÆÇ¸ÅÇÏ´Â ¾ÆÀÌÅÛ ¸ñ·Ï
-    /// </summary>
     public List<ItemDataSO> GetShopItems()
     {
-        Debug.Log($"[ShopManager] ÇöÀç »óÁ¡ ¾ÆÀÌÅÛ °³¼ö: {currentShopItems.Count}");
+        Debug.Log($"[ShopManager] GetShopItems() í˜¸ì¶œ - ë°˜í™˜: {currentShopItems.Count}ê°œ");
         return currentShopItems;
     }
 
-    /// <summary>
-    /// ¾ÆÀÌÅÛ ±¸¸Å
-    /// </summary>
     public bool BuyItem(ItemDataSO item)
     {
-        if (item == null) return false;
+        Debug.Log($"[ShopManager] â”â”â” êµ¬ë§¤ ì‹œë„ â”â”â”");
+        Debug.Log($"[ShopManager] ì•„ì´í…œ: {item?.itemName ?? "null"}");
 
-        // °ñµå È®ÀÎ
+        if (item == null)
+        {
+            Debug.LogError("[ShopManager] âŒ ì•„ì´í…œì´ nullì…ë‹ˆë‹¤!");
+            return false;
+        }
+
+        Debug.Log($"[ShopManager] êµ¬ë§¤ ê°€ê²©: {item.buyPrice}");
+        Debug.Log($"[ShopManager] í˜„ì¬ ê³¨ë“œ: {GameManager.Instance?.Gold ?? -1}");
+
+        // ê³¨ë“œ í™•ì¸
+        if (GameManager.Instance == null)
+        {
+            Debug.LogError("[ShopManager] âŒ GameManager.Instanceê°€ nullì…ë‹ˆë‹¤!");
+            return false;
+        }
+
         if (GameManager.Instance.SpendGold(item.buyPrice))
         {
-            // ÀÎº¥Åä¸®¿¡ Ãß°¡
+            Debug.Log($"[ShopManager] âœ… ê³¨ë“œ ì°¨ê° ì„±ê³µ");
+
+            // ì¸ë²¤í† ë¦¬ì— ì¶”ê°€
+            if (InventoryManager.Instance == null)
+            {
+                Debug.LogError("[ShopManager] âŒ InventoryManager.Instanceê°€ nullì…ë‹ˆë‹¤!");
+                return false;
+            }
+
+            Debug.Log($"[ShopManager] ì¸ë²¤í† ë¦¬ì— ì¶”ê°€ ì‹œë„: {item.itemName}");
             InventoryManager.Instance.AddItem(item, 1);
-            Debug.Log($"±¸¸Å ¿Ï·á: {item.itemName}");
+            Debug.Log($"[ShopManager] âœ…âœ…âœ… êµ¬ë§¤ ì™„ë£Œ: {item.itemName}");
             return true;
         }
 
-        Debug.Log("°ñµå°¡ ºÎÁ·ÇÕ´Ï´Ù!");
+        Debug.LogWarning("[ShopManager] âŒ ê³¨ë“œê°€ ë¶€ì¡±í•©ë‹ˆë‹¤!");
         return false;
     }
 
-    /// <summary>
-    /// ¾ÆÀÌÅÛ ÆÇ¸Å
-    /// </summary>
     public bool SellItem(ItemDataSO item, int amount = 1)
     {
-        if (item == null) return false;
+        Debug.Log($"[ShopManager] â”â”â” íŒë§¤ ì‹œë„ â”â”â”");
+        Debug.Log($"[ShopManager] ì•„ì´í…œ: {item?.itemName ?? "null"}, ìˆ˜ëŸ‰: {amount}");
 
-        // ÀÎº¥Åä¸®¿¡¼­ Á¦°Å
+        if (item == null)
+        {
+            Debug.LogError("[ShopManager] âŒ ì•„ì´í…œì´ nullì…ë‹ˆë‹¤!");
+            return false;
+        }
+
         if (InventoryManager.Instance.RemoveItem(item.itemID, amount))
         {
-            // °ñµå Ãß°¡
             int totalPrice = item.sellPrice * amount;
             GameManager.Instance.AddGold(totalPrice);
-            Debug.Log($"ÆÇ¸Å ¿Ï·á: {item.itemName} x{amount} = {totalPrice}°ñµå");
+            Debug.Log($"[ShopManager] âœ… íŒë§¤ ì™„ë£Œ: {item.itemName} x{amount} = {totalPrice}ê³¨ë“œ");
             return true;
         }
 
+        Debug.LogWarning("[ShopManager] âŒ ì•„ì´í…œ ì œê±° ì‹¤íŒ¨!");
         return false;
     }
 }

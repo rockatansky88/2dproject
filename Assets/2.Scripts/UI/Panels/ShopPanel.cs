@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Collections;
@@ -7,7 +7,7 @@ public class ShopPanel : BasePanel
 {
     [Header("References")]
     [SerializeField] private GameObject shopItemSlotPrefab;
-    [SerializeField] private Transform shopItemContainer; // ScrollViewÀÇ Content
+    [SerializeField] private Transform shopItemContainer;
     [SerializeField] private Text goldText;
 
     private List<ShopItemSlot> shopSlots = new List<ShopItemSlot>();
@@ -16,12 +16,11 @@ public class ShopPanel : BasePanel
     {
         base.Awake();
 
-        // ÇÊ¼ö ÂüÁ¶ Ã¼Å©
         if (shopItemSlotPrefab == null)
-            Debug.LogError("[ShopPanel] shopItemSlotPrefabÀÌ ¼³Á¤µÇÁö ¾Ê¾Ò½À´Ï´Ù!");
+            Debug.LogError("[ShopPanel] âŒ shopItemSlotPrefabì´ ì„¤ì •ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤!");
 
         if (shopItemContainer == null)
-            Debug.LogError("[ShopPanel] shopItemContainer°¡ ¼³Á¤µÇÁö ¾Ê¾Ò½À´Ï´Ù!");
+            Debug.LogError("[ShopPanel] âŒ shopItemContainerê°€ ì„¤ì •ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤!");
     }
 
     private IEnumerator DelayedRefreshShop()
@@ -32,17 +31,24 @@ public class ShopPanel : BasePanel
 
     private void Start()
     {
-        // °ñµå º¯°æ ÀÌº¥Æ® ±¸µ¶
+        Debug.Log("[ShopPanel] Start() í˜¸ì¶œë¨");
+
+        // ê³¨ë“œ ë³€ê²½ ì´ë²¤íŠ¸ êµ¬ë…
         if (GameManager.Instance != null)
         {
             GameManager.Instance.OnGoldChanged += UpdateGoldDisplay;
             UpdateGoldDisplay(GameManager.Instance.Gold);
+            Debug.Log("[ShopPanel] âœ… GameManager ì´ë²¤íŠ¸ êµ¬ë… ì™„ë£Œ");
+        }
+        else
+        {
+            Debug.LogError("[ShopPanel] âŒ GameManager.Instanceê°€ nullì…ë‹ˆë‹¤!");
         }
 
-        // ÆĞ³ÎÀÌ È°¼ºÈ­µÇ¾î ÀÖÀ¸¸é Áï½Ã »óÁ¡ ·Îµå
+        // íŒ¨ë„ì´ í™œì„±í™”ë˜ì–´ ìˆìœ¼ë©´ ì¦‰ì‹œ ìƒì  ë¡œë“œ
         if (gameObject.activeInHierarchy)
         {
-            Debug.Log("[ShopPanel] Start()¿¡¼­ RefreshShop() È£Ãâ");
+            Debug.Log("[ShopPanel] Start()ì—ì„œ DelayedRefreshShop() ì‹œì‘");
             StartCoroutine(DelayedRefreshShop());
         }
     }
@@ -54,7 +60,7 @@ public class ShopPanel : BasePanel
             GameManager.Instance.OnGoldChanged -= UpdateGoldDisplay;
         }
 
-        // ÀÌº¥Æ® ÇØÁ¦
+        // ì´ë²¤íŠ¸ í•´ì œ
         foreach (var slot in shopSlots)
         {
             if (slot != null)
@@ -67,18 +73,15 @@ public class ShopPanel : BasePanel
     protected override void OnShow()
     {
         base.OnShow();
-        Debug.Log("[ShopPanel] OnShow() È£ÃâµÊ");
+        Debug.Log("[ShopPanel] OnShow() í˜¸ì¶œë¨");
         RefreshShop();
     }
 
-    /// <summary>
-    /// »óÁ¡ »õ·Î°íÄ§
-    /// </summary>
     public void RefreshShop()
     {
-        Debug.Log("[ShopPanel] RefreshShop() ½ÃÀÛ");
+        Debug.Log("[ShopPanel] â”â”â” RefreshShop() ì‹œì‘ â”â”â”");
 
-        // ±âÁ¸ ½½·Ô Á¦°Å
+        // ê¸°ì¡´ ìŠ¬ë¡¯ ì œê±°
         foreach (var slot in shopSlots)
         {
             if (slot != null)
@@ -91,29 +94,29 @@ public class ShopPanel : BasePanel
 
         if (ShopManager.Instance == null)
         {
-            Debug.LogError("[ShopPanel] ShopManager.Instance°¡ nullÀÔ´Ï´Ù!");
+            Debug.LogError("[ShopPanel] âŒ ShopManager.Instanceê°€ nullì…ë‹ˆë‹¤!");
             return;
         }
 
         if (shopItemSlotPrefab == null)
         {
-            Debug.LogError("[ShopPanel] shopItemSlotPrefabÀÌ nullÀÔ´Ï´Ù!");
+            Debug.LogError("[ShopPanel] âŒ shopItemSlotPrefabì´ nullì…ë‹ˆë‹¤!");
             return;
         }
 
         if (shopItemContainer == null)
         {
-            Debug.LogError("[ShopPanel] shopItemContainer°¡ nullÀÔ´Ï´Ù!");
+            Debug.LogError("[ShopPanel] âŒ shopItemContainerê°€ nullì…ë‹ˆë‹¤!");
             return;
         }
 
-        // »óÁ¡ ¾ÆÀÌÅÛ °¡Á®¿À±â
+        // ìƒì  ì•„ì´í…œ ê°€ì ¸ì˜¤ê¸°
         List<ItemDataSO> items = ShopManager.Instance.GetShopItems();
-        Debug.Log($"[ShopPanel] »ı¼ºÇÒ ¾ÆÀÌÅÛ °³¼ö: {items.Count}");
+        Debug.Log($"[ShopPanel] ìƒì„±í•  ì•„ì´í…œ ê°œìˆ˜: {items.Count}");
 
         if (items.Count == 0)
         {
-            Debug.LogWarning("[ShopPanel] ShopManager¿¡ ¾ÆÀÌÅÛÀÌ ¾ø½À´Ï´Ù! ShopManagerÀÇ availableItems¸¦ È®ÀÎÇÏ¼¼¿ä.");
+            Debug.LogWarning("[ShopPanel] ShopManagerì— ì•„ì´í…œì´ ì—†ìŠµë‹ˆë‹¤!");
             return;
         }
 
@@ -121,53 +124,65 @@ public class ShopPanel : BasePanel
         {
             if (item == null)
             {
-                Debug.LogWarning("[ShopPanel] null ¾ÆÀÌÅÛ ¹ß°ß, ½ºÅµÇÕ´Ï´Ù.");
+                Debug.LogWarning("[ShopPanel] null ì•„ì´í…œ ë°œê²¬, ìŠ¤í‚µí•©ë‹ˆë‹¤.");
                 continue;
             }
 
             GameObject slotObj = Instantiate(shopItemSlotPrefab, shopItemContainer);
-            Debug.Log($"[ShopPanel] ½½·Ô »ı¼ºµÊ: {item.itemName}");
+            Debug.Log($"[ShopPanel] ìŠ¬ë¡¯ ìƒì„±ë¨: {item.itemName}");
 
             ShopItemSlot slot = slotObj.GetComponent<ShopItemSlot>();
 
             if (slot != null)
             {
+                Debug.Log($"[ShopPanel] ìŠ¬ë¡¯ Initialize í˜¸ì¶œ: {item.itemName}");
                 slot.Initialize(item);
+
+                Debug.Log($"[ShopPanel] ì´ë²¤íŠ¸ êµ¬ë… ì‹œì‘: {item.itemName}");
                 slot.OnBuyClicked += OnItemBuyClicked;
+                Debug.Log($"[ShopPanel] âœ… ì´ë²¤íŠ¸ êµ¬ë… ì™„ë£Œ: {item.itemName}");
+
                 shopSlots.Add(slot);
             }
             else
             {
-                Debug.LogError("[ShopPanel] ShopItemSlot ÄÄÆ÷³ÍÆ®¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù!");
+                Debug.LogError("[ShopPanel] âŒ ShopItemSlot ì»´í¬ë„ŒíŠ¸ë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤!");
             }
         }
 
-        Debug.Log($"[ShopPanel] ÃÑ {shopSlots.Count}°³ ½½·Ô »ı¼º ¿Ï·á");
+        Debug.Log($"[ShopPanel] âœ…âœ…âœ… ì´ {shopSlots.Count}ê°œ ìŠ¬ë¡¯ ìƒì„± ì™„ë£Œ");
     }
 
-    /// <summary>
-    /// ¾ÆÀÌÅÛ ±¸¸Å Å¬¸¯
-    /// </summary>
     private void OnItemBuyClicked(ItemDataSO item)
     {
-        if (ShopManager.Instance != null)
-        {
-            bool success = ShopManager.Instance.BuyItem(item);
+        Debug.Log($"[ShopPanel] â”â”â”â”â”â” OnItemBuyClicked í˜¸ì¶œë¨ â”â”â”â”â”â”");
+        Debug.Log($"[ShopPanel] êµ¬ë§¤ ì‹œë„ ì•„ì´í…œ: {item?.itemName ?? "null"}");
 
-            if (success)
-            {
-                Debug.Log($"{item.itemName} ±¸¸Å ¿Ï·á!");
-            }
-            else
-            {
-                Debug.Log("°ñµå°¡ ºÎÁ·ÇÕ´Ï´Ù!");
-            }
+        if (item == null)
+        {
+            Debug.LogError("[ShopPanel] âŒ ì•„ì´í…œì´ nullì…ë‹ˆë‹¤!");
+            return;
+        }
+
+        if (ShopManager.Instance == null)
+        {
+            Debug.LogError("[ShopPanel] âŒ ShopManager.Instanceê°€ nullì…ë‹ˆë‹¤!");
+            return;
+        }
+
+        Debug.Log("[ShopPanel] ShopManager.BuyItem() í˜¸ì¶œ...");
+        bool success = ShopManager.Instance.BuyItem(item);
+
+        if (success)
+        {
+            Debug.Log($"[ShopPanel] âœ…âœ…âœ… {item.itemName} êµ¬ë§¤ ì™„ë£Œ!");
+        }
+        else
+        {
+            Debug.LogWarning($"[ShopPanel] âŒ {item.itemName} êµ¬ë§¤ ì‹¤íŒ¨! (ê³¨ë“œ ë¶€ì¡±?)");
         }
     }
 
-    /// <summary>
-    /// °ñµå Ç¥½Ã ¾÷µ¥ÀÌÆ®
-    /// </summary>
     private void UpdateGoldDisplay(int gold)
     {
         if (goldText != null)

@@ -303,7 +303,7 @@ Transform:
   m_GameObject: {fileID: 75743392}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1.46, y: -0.02, z: 0}
+  m_LocalPosition: {x: 3.46, y: 0.05, z: 0}
   m_LocalScale: {x: 0.46138483, y: 0.42907563, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -459,6 +459,7 @@ GameObject:
   m_Component:
   - component: {fileID: 105372022}
   - component: {fileID: 105372023}
+  - component: {fileID: 105372024}
   m_Layer: 5
   m_Name: InventoryWindow
   m_TagString: Untagged
@@ -503,6 +504,19 @@ MonoBehaviour:
   shopPanel: {fileID: 144252254}
   statsPanel: {fileID: 1998722487}
   inventoryPanel: {fileID: 783779139}
+  backgroundBlocker: {fileID: 0}
+--- !u!225 &105372024
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 105372021}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &144252254
 GameObject:
   m_ObjectHideFlags: 0
@@ -1520,8 +1534,8 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 144252255}
   - {fileID: 1998722488}
+  - {fileID: 144252255}
   m_Father: {fileID: 862821451}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -3554,7 +3568,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: aba99b3a92317474ebc770edbe88e0fd, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.6666667}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0

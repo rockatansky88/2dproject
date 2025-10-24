@@ -1,10 +1,7 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
 using System;
 
-/// <summary>
-/// »óÁ¡ Àü¿ë ¾ÆÀÌÅÛ ½½·Ô (¾ÆÀÌÄÜ + ÀÌ¸§ + ÄÚÀÎ ¾ÆÀÌÄÜ + °¡°İ + ±¸¸Å ¹öÆ°)
-/// </summary>
 public class ShopItemSlot : MonoBehaviour
 {
     [Header("UI References")]
@@ -24,6 +21,11 @@ public class ShopItemSlot : MonoBehaviour
         if (buyButton != null)
         {
             buyButton.onClick.AddListener(OnButtonClicked);
+            Debug.Log("[ShopItemSlot] êµ¬ë§¤ ë²„íŠ¼ ë¦¬ìŠ¤ë„ˆ ë“±ë¡ë¨");
+        }
+        else
+        {
+            Debug.LogError("[ShopItemSlot] âŒ buyButtonì´ nullì…ë‹ˆë‹¤!");
         }
     }
 
@@ -31,39 +33,55 @@ public class ShopItemSlot : MonoBehaviour
     {
         itemData = item;
 
-        if (itemData == null) return;
+        Debug.Log($"[ShopItemSlot] Initialize - ì•„ì´í…œ: {item?.itemName ?? "null"}");
 
-        // ¾ÆÀÌÅÛ ¾ÆÀÌÄÜ
+        if (itemData == null)
+        {
+            Debug.LogWarning("[ShopItemSlot] âŒ itemDataê°€ nullì…ë‹ˆë‹¤!");
+            return;
+        }
+
+        // ì•„ì´í…œ ì•„ì´ì½˜
         if (itemIcon != null)
         {
             itemIcon.sprite = itemData.icon;
             itemIcon.enabled = itemData.icon != null;
+            Debug.Log($"[ShopItemSlot] ì•„ì´ì½˜ ì„¤ì •: {itemData.icon?.name ?? "null"}");
         }
 
-        // ¾ÆÀÌÅÛ ÀÌ¸§
+        // ì•„ì´í…œ ì´ë¦„
         if (itemNameText != null)
         {
             itemNameText.text = itemData.itemName;
         }
 
-        // °¡°İ
+        // ê°€ê²©
         if (priceText != null)
         {
             priceText.text = itemData.buyPrice.ToString();
         }
 
-        // ¹öÆ° ÅØ½ºÆ®
+        // ë²„íŠ¼ í…ìŠ¤íŠ¸
         if (buyButtonText != null)
         {
-            buyButtonText.text = "±¸¸Å";
+            buyButtonText.text = "êµ¬ë§¤";
         }
+
+        Debug.Log($"[ShopItemSlot] âœ… ì´ˆê¸°í™” ì™„ë£Œ: {itemData.itemName}");
     }
 
     private void OnButtonClicked()
     {
+        Debug.Log($"[ShopItemSlot] ğŸ–±ï¸ êµ¬ë§¤ ë²„íŠ¼ í´ë¦­ë¨! ì•„ì´í…œ: {itemData?.itemName ?? "null"}");
+
         if (itemData != null)
         {
+            Debug.Log($"[ShopItemSlot] OnBuyClicked ì´ë²¤íŠ¸ ë°œìƒ: {itemData.itemName}");
             OnBuyClicked?.Invoke(itemData);
+        }
+        else
+        {
+            Debug.LogError("[ShopItemSlot] âŒ itemDataê°€ nullì´ë¼ ì´ë²¤íŠ¸ë¥¼ ë°œìƒì‹œí‚¬ ìˆ˜ ì—†ìŠµë‹ˆë‹¤!");
         }
     }
 
