@@ -5,7 +5,7 @@ using System.Collections.Generic;
 /// <summary>
 /// 용병 상점 윈도우 (전체 UI 컨테이너)
 /// 좌측: 상점 용병 목록 (8명)
-/// 우측: 고용된 용병 슬롯 (4명)
+/// 우측: 파티 슬롯은 MercenaryParty 컴포넌트가 별도로 관리
 /// </summary>
 public class MercenaryWindow : MonoBehaviour
 {
@@ -17,11 +17,6 @@ public class MercenaryWindow : MonoBehaviour
     [SerializeField] private Transform shopMercenaryContainer; // 용병 슬롯들의 부모
     [SerializeField] private GameObject mercenaryShopSlotPrefab; // 상점 용병 슬롯 프리팹
 
-    [Header("Party Panel - 우측 고용된 용병")]
-    [SerializeField] private Transform partyMercenaryContainer; // 고용된 용병 슬롯들의 부모
-    [SerializeField] private GameObject mercenaryPartySlotPrefab; // 파티 용병 슬롯 프리팹
-    [SerializeField] private int maxPartySlots = 4;
-
     [Header("Detail Popup")]
     [SerializeField] private MercenaryDetailPopup detailPopup;
 
@@ -30,7 +25,6 @@ public class MercenaryWindow : MonoBehaviour
 
     // 슬롯 목록
     private List<MercenaryShopSlot> shopSlots = new List<MercenaryShopSlot>();
-    private List<MercenaryPartySlot> partySlots = new List<MercenaryPartySlot>();
 
     // 프로퍼티
     public bool IsOpen => windowRoot != null && windowRoot.activeSelf;
@@ -66,11 +60,7 @@ public class MercenaryWindow : MonoBehaviour
         if (MercenaryManager.Instance != null)
         {
             MercenaryManager.Instance.OnShopRefreshed += RefreshShopPanel;
-            MercenaryManager.Instance.OnPartyChanged += RefreshPartyPanel;
         }
-
-        // 파티 슬롯 초기화 (4개 고정 슬롯)
-        InitializePartySlots();
 
         Debug.Log("[MercenaryWindow] Start 완료");
     }
@@ -86,7 +76,6 @@ public class MercenaryWindow : MonoBehaviour
         if (MercenaryManager.Instance != null)
         {
             MercenaryManager.Instance.OnShopRefreshed -= RefreshShopPanel;
-            MercenaryManager.Instance.OnPartyChanged -= RefreshPartyPanel;
         }
 
         // 슬롯 이벤트 해제
@@ -95,14 +84,6 @@ public class MercenaryWindow : MonoBehaviour
             if (slot != null)
             {
                 slot.OnSlotClicked -= OnShopSlotClicked;
-            }
-        }
-
-        foreach (var slot in partySlots)
-        {
-            if (slot != null)
-            {
-                slot.OnSlotClicked -= OnPartySlotClicked;
             }
         }
     }
@@ -117,11 +98,19 @@ public class MercenaryWindow : MonoBehaviour
         if (windowRoot != null)
         {
             windowRoot.SetActive(true);
+
+            // CanvasGroup으로 다른 UI 클릭 차단
+            CanvasGroup canvasGroup = windowRoot.GetComponent<CanvasGroup>();
+            if (canvasGroup == null)
+            {
+                canvasGroup = windowRoot.AddComponent<CanvasGroup>();
+            }
+            canvasGroup.blocksRaycasts = true;
+            canvasGroup.interactable = true;
         }
 
-        // 상점 및 파티 패널 갱신
+        // 상점 패널 갱신
         RefreshShopPanel();
-        RefreshPartyPanel();
 
         // 골드 표시 갱신
         if (GameManager.Instance != null)
@@ -203,65 +192,6 @@ public class MercenaryWindow : MonoBehaviour
     }
 
     /// <summary>
-    /// 파티 슬롯 초기화 (4개 고정)
-    /// </summary>
-    private void InitializePartySlots()
-    {
-        Debug.Log("[MercenaryWindow] ━━━ 파티 슬롯 초기화 시작 ━━━");
-
-        for (int i = 0; i < maxPartySlots; i++)
-        {
-            GameObject slotObj = Instantiate(mercenaryPartySlotPrefab, partyMercenaryContainer);
-            MercenaryPartySlot slot = slotObj.GetComponent<MercenaryPartySlot>();
-
-            if (slot != null)
-            {
-                slot.SetEmpty(); // 빈 슬롯으로 초기화
-                slot.OnSlotClicked += OnPartySlotClicked;
-                partySlots.Add(slot);
-
-                Debug.Log($"[MercenaryWindow] 파티 슬롯 {i + 1} 생성");
-            }
-        }
-
-        Debug.Log($"[MercenaryWindow] ✅ 파티 슬롯 {partySlots.Count}개 초기화 완료");
-    }
-
-    /// <summary>
-    /// 파티 패널 갱신 (우측 4개 슬롯)
-    /// </summary>
-    private void RefreshPartyPanel()
-    {
-        Debug.Log("[MercenaryWindow] ━━━ 파티 패널 갱신 시작 ━━━");
-
-        if (MercenaryManager.Instance == null)
-        {
-            Debug.LogError("[MercenaryWindow] ❌ MercenaryManager.Instance가 null입니다!");
-            return;
-        }
-
-        List<MercenaryInstance> recruited = MercenaryManager.Instance.RecruitedMercenaries;
-        Debug.Log($"[MercenaryWindow] 고용된 용병 수: {recruited.Count}");
-
-        // 슬롯 갱신
-        for (int i = 0; i < partySlots.Count; i++)
-        {
-            if (i < recruited.Count)
-            {
-                partySlots[i].Initialize(recruited[i]);
-                Debug.Log($"[MercenaryWindow] 파티 슬롯 {i + 1} 갱신: {recruited[i].mercenaryName}");
-            }
-            else
-            {
-                partySlots[i].SetEmpty();
-                Debug.Log($"[MercenaryWindow] 파티 슬롯 {i + 1} 비움");
-            }
-        }
-
-        Debug.Log("[MercenaryWindow] ✅ 파티 패널 갱신 완료");
-    }
-
-    /// <summary>
     /// 상점 슬롯 클릭 시 상세 팝업 표시
     /// </summary>
     private void OnShopSlotClicked(MercenaryInstance mercenary)
@@ -275,25 +205,6 @@ public class MercenaryWindow : MonoBehaviour
         else
         {
             Debug.LogError("[MercenaryWindow] ❌ detailPopup이 null입니다!");
-        }
-    }
-
-    /// <summary>
-    /// 파티 슬롯 클릭 시 상세 팝업 표시 (추방 모드)
-    /// </summary>
-    private void OnPartySlotClicked(MercenaryInstance mercenary)
-    {
-        if (mercenary == null)
-        {
-            Debug.Log("[MercenaryWindow] 빈 파티 슬롯 클릭됨");
-            return;
-        }
-
-        Debug.Log($"[MercenaryWindow] 🖱️ 파티 슬롯 클릭: {mercenary.mercenaryName}");
-
-        if (detailPopup != null)
-        {
-            detailPopup.ShowDismissMode(mercenary);
         }
     }
 
