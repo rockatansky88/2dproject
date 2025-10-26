@@ -35,6 +35,7 @@ public class MercenaryDetailPopup : MonoBehaviour
 
     private MercenaryInstance currentMercenary;
     private PopupMode currentMode;
+    private CanvasGroup canvasGroup;
 
     private enum PopupMode
     {
@@ -44,11 +45,28 @@ public class MercenaryDetailPopup : MonoBehaviour
 
     private void Awake()
     {
+        Debug.Log("[MercenaryDetailPopup] ━━━ Awake 시작 ━━━");
+
+        // CanvasGroup 설정 (popupRoot에 있어야 함)
+        if (popupRoot != null)
+        {
+            canvasGroup = popupRoot.GetComponent<CanvasGroup>();
+            if (canvasGroup == null)
+            {
+                canvasGroup = popupRoot.AddComponent<CanvasGroup>();
+                Debug.Log("[MercenaryDetailPopup] CanvasGroup 자동 추가됨");
+            }
+        }
+
         // 버튼 리스너 등록
         if (recruitButton != null)
         {
             recruitButton.onClick.AddListener(OnRecruitClicked);
             Debug.Log("[MercenaryDetailPopup] 고용 버튼 리스너 등록됨");
+        }
+        else
+        {
+            Debug.LogError("[MercenaryDetailPopup] ❌ recruitButton이 null입니다!");
         }
 
         if (dismissButton != null)
@@ -56,20 +74,55 @@ public class MercenaryDetailPopup : MonoBehaviour
             dismissButton.onClick.AddListener(OnDismissClicked);
             Debug.Log("[MercenaryDetailPopup] 추방 버튼 리스너 등록됨");
         }
+        else
+        {
+            Debug.LogError("[MercenaryDetailPopup] ❌ dismissButton이 null입니다!");
+        }
 
         if (closeButton != null)
         {
             closeButton.onClick.AddListener(Close);
             Debug.Log("[MercenaryDetailPopup] 닫기 버튼 리스너 등록됨");
         }
-
-        // 초기 상태: 비활성화
-        if (popupRoot != null)
+        else
         {
-            popupRoot.SetActive(false);
+            Debug.LogError("[MercenaryDetailPopup] ❌ closeButton이 null입니다!");
         }
 
-        Debug.Log("[MercenaryDetailPopup] Awake 완료");
+        // 초기 상태: CanvasGroup으로 숨김 (popupRoot는 활성화 유지)
+        HidePopup();
+
+        Debug.Log("[MercenaryDetailPopup] ✅ Awake 완료");
+    }
+
+    /// <summary>
+    /// 팝업 숨기기 (CanvasGroup 사용)
+    /// </summary>
+    private void HidePopup()
+    {
+        if (canvasGroup != null)
+        {
+            canvasGroup.alpha = 0f;
+            canvasGroup.interactable = false;
+            canvasGroup.blocksRaycasts = false;
+        }
+
+        Debug.Log("[MercenaryDetailPopup] 팝업 숨김 (CanvasGroup.alpha = 0)");
+    }
+
+    /// <summary>
+    /// 팝업 표시 (CanvasGroup 사용)
+    /// </summary>
+    private void ShowPopup()
+    {
+        if (canvasGroup != null)
+        {
+            canvasGroup.alpha = 1f;
+            canvasGroup.interactable = true;
+            canvasGroup.blocksRaycasts = true;
+        }
+
+        Debug.Log("[MercenaryDetailPopup] 팝업 표시 (CanvasGroup.alpha = 1)");
     }
 
     /// <summary>
@@ -88,11 +141,8 @@ public class MercenaryDetailPopup : MonoBehaviour
             return;
         }
 
-        // 팝업 활성화
-        if (popupRoot != null)
-        {
-            popupRoot.SetActive(true);
-        }
+        // 팝업 표시
+        ShowPopup();
 
         // UI 설정
         SetupUI(mercenary);
@@ -133,11 +183,8 @@ public class MercenaryDetailPopup : MonoBehaviour
             return;
         }
 
-        // 팝업 활성화
-        if (popupRoot != null)
-        {
-            popupRoot.SetActive(true);
-        }
+        // 팝업 표시
+        ShowPopup();
 
         // UI 설정
         SetupUI(mercenary);
@@ -227,8 +274,6 @@ public class MercenaryDetailPopup : MonoBehaviour
         }
 
         Debug.Log($"[MercenaryDetailPopup] ✅ UI 설정 완료");
-        Debug.Log($"[MercenaryDetailPopup] 스탯 - HP:{mercenary.health} STR:{mercenary.strength} " +
-                  $"DEX:{mercenary.dexterity} WIS:{mercenary.wisdom} INT:{mercenary.intelligence} SPD:{mercenary.speed}");
     }
 
     /// <summary>
@@ -262,7 +307,6 @@ public class MercenaryDetailPopup : MonoBehaviour
         else
         {
             Debug.LogWarning($"[MercenaryDetailPopup] ❌ 고용 실패: {currentMercenary.mercenaryName} (골드 부족 또는 파티 가득참)");
-            // TODO: 실패 메시지 표시 (선택 사항)
         }
     }
 
@@ -297,7 +341,6 @@ public class MercenaryDetailPopup : MonoBehaviour
         else
         {
             Debug.LogWarning($"[MercenaryDetailPopup] ❌ 추방 실패: {currentMercenary.mercenaryName} (최소 인원 유지)");
-            // TODO: 실패 메시지 표시
         }
     }
 
@@ -308,11 +351,7 @@ public class MercenaryDetailPopup : MonoBehaviour
     {
         Debug.Log("[MercenaryDetailPopup] 팝업 닫기");
 
-        if (popupRoot != null)
-        {
-            popupRoot.SetActive(false);
-        }
-
+        HidePopup();
         currentMercenary = null;
     }
 
