@@ -23,8 +23,12 @@ public class MercenaryWindow : MonoBehaviour
     [Header("Gold Display")]
     [SerializeField] private Text goldText;
 
+    [Header("Background Blocker")]
+    [SerializeField] private Image backgroundBlocker; // 배경 클릭 차단용 이미지
+
     // 슬롯 목록
     private List<MercenaryShopSlot> shopSlots = new List<MercenaryShopSlot>();
+    private CanvasGroup canvasGroup;
 
     // 프로퍼티
     public bool IsOpen => windowRoot != null && windowRoot.activeSelf;
@@ -38,10 +42,25 @@ public class MercenaryWindow : MonoBehaviour
             Debug.Log("[MercenaryWindow] Close 버튼 리스너 등록됨");
         }
 
+        // CanvasGroup 가져오기 또는 추가
+        if (windowRoot != null)
+        {
+            canvasGroup = windowRoot.GetComponent<CanvasGroup>();
+            if (canvasGroup == null)
+            {
+                canvasGroup = windowRoot.AddComponent<CanvasGroup>();
+            }
+        }
+
         // 초기 상태: 비활성화
         if (windowRoot != null)
         {
             windowRoot.SetActive(false);
+        }
+
+        if (backgroundBlocker == null)
+        {
+            Debug.LogWarning("[MercenaryWindow] backgroundBlocker가 설정되지 않았습니다!");
         }
 
         Debug.Log("[MercenaryWindow] Awake 완료");
@@ -98,16 +117,10 @@ public class MercenaryWindow : MonoBehaviour
         if (windowRoot != null)
         {
             windowRoot.SetActive(true);
-
-            // CanvasGroup으로 다른 UI 클릭 차단
-            CanvasGroup canvasGroup = windowRoot.GetComponent<CanvasGroup>();
-            if (canvasGroup == null)
-            {
-                canvasGroup = windowRoot.AddComponent<CanvasGroup>();
-            }
-            canvasGroup.blocksRaycasts = true;
-            canvasGroup.interactable = true;
         }
+
+        // 레이캐스트 차단 활성화
+        SetRaycastBlocking(true);
 
         // 상점 패널 갱신
         RefreshShopPanel();
@@ -133,10 +146,30 @@ public class MercenaryWindow : MonoBehaviour
             windowRoot.SetActive(false);
         }
 
+        // 레이캐스트 차단 비활성화
+        SetRaycastBlocking(false);
+
         // 상세 팝업도 닫기
         if (detailPopup != null)
         {
             detailPopup.Close();
+        }
+    }
+
+    /// <summary>
+    /// 레이캐스트 차단 설정
+    /// </summary>
+    private void SetRaycastBlocking(bool block)
+    {
+        if (canvasGroup != null)
+        {
+            canvasGroup.blocksRaycasts = block;
+            canvasGroup.interactable = block;
+        }
+
+        if (backgroundBlocker != null)
+        {
+            backgroundBlocker.raycastTarget = block;
         }
     }
 
