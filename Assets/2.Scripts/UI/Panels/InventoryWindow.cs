@@ -177,10 +177,6 @@ public class InventoryWindow : MonoBehaviour
             return;
         }
 
-        // TODO: 기존 슬롯 제거
-        // TODO: mercenaryInventorySlotPrefab으로 슬롯 생성
-        // TODO: 슬롯 클릭 시 StatsPanel 업데이트
-
         var mercenaries = MercenaryManager.Instance.RecruitedMercenaries;
         Debug.Log($"[InventoryWindow] 보유 용병 수: {mercenaries.Count}");
 
@@ -197,12 +193,26 @@ public class InventoryWindow : MonoBehaviour
             Destroy(child.gameObject);
         }
 
-        // 용병 슬롯 생성
+        // 용병 슬롯 생성 및 초기화
         foreach (var mercenary in mercenaries)
         {
             GameObject slotObj = Instantiate(mercenaryInventorySlotPrefab, mercenaryListContainer);
-            // TODO: MercenaryInventorySlot 스크립트 추가 후 Initialize
-            Debug.Log($"[InventoryWindow] 용병 슬롯 생성: {mercenary.mercenaryName}");
+            MercenaryInventorySlot slotScript = slotObj.GetComponent<MercenaryInventorySlot>();
+
+            if (slotScript != null)
+            {
+                // 슬롯 초기화
+                slotScript.Initialize(mercenary);
+
+                // 슬롯 클릭 이벤트 구독
+                slotScript.OnSlotClicked += ShowMercenaryStats;
+
+                Debug.Log($"[InventoryWindow] ✅ 용병 슬롯 생성 및 초기화: {mercenary.mercenaryName}");
+            }
+            else
+            {
+                Debug.LogError("[InventoryWindow] ❌ MercenaryInventorySlot 컴포넌트를 찾을 수 없습니다!");
+            }
         }
 
         Debug.Log("[InventoryWindow] ✅ 용병 리스트 갱신 완료");
