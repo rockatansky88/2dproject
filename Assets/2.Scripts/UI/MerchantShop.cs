@@ -4,8 +4,8 @@ using UnityEngine.EventSystems;
 /// <summary>
 /// 씬에 있는 MerchantShop 오브젝트 클릭 감지
 /// </summary>
-[RequireComponent(typeof(SpriteRenderer))]
-[RequireComponent(typeof(BoxCollider2D))]
+[RequireComponent(typeof(SpriteRenderer))]  // SpriteRenderer 을 생성 
+[RequireComponent(typeof(BoxCollider2D))]  // BoxCollider2D 을 생성
 public class MerchantShop : MonoBehaviour
 {
     [Header("References")]
@@ -125,8 +125,8 @@ public class MerchantShop : MonoBehaviour
             InventoryWindow[] allWindows = Resources.FindObjectsOfTypeAll<InventoryWindow>();
 
             foreach (var window in allWindows)
-            {
-                // 씬에 있는 오브젝트만 선택 (Prefab 제외)
+            {  // 씬에 있는 오브젝트만 선택 (Prefab 제외)
+
                 if (window.gameObject.scene.IsValid())
                 {
                     inventoryWindow = window;

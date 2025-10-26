@@ -33,11 +33,11 @@ public class InventoryWindow : MonoBehaviour
     }
 
     /// <summary>
-    /// 인벤토리 모드 (스탯 표시)
+    /// 인벤토리 모드 일때는 스탯이 표시
     /// </summary>
     public void OpenInventoryMode()
     {
-        Debug.Log("[InventoryWindow] 인벤토리 모드 열기");
+
 
         gameObject.SetActive(true);
         isOpen = true;

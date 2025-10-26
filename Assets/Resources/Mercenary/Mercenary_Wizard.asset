@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9c191b1cd1a6fc43a6218d1c1acf023, type: 3}
+  m_Name: Mercenary_Wizard
+  m_EditorClassIdentifier: 
+  mercenaryID: wizard_001
+  mercenaryName: "\uC544\uD06C"
+  portrait: {fileID: 21300000, guid: 26962d7aaf16d0a42812fb0e9ff2c591, type: 3}
+  fullBodySprite: {fileID: 21300000, guid: 1b7b1ddd49be8e744be6594499599204, type: 2}
+  prefab: {fileID: 0}
+  recruitCost: 100
+  levelRange:
+    min: 1
+    max: 1
+  healthRange:
+    min: 80
+    max: 120
+  strengthRange:
+    min: 8
+    max: 15
+  dexterityRange:
+    min: 8
+    max: 15
+  wisdomRange:
+    min: 8
+    max: 15
+  intelligenceRange:
+    min: 8
+    max: 15
+  speedRange:
+    min: 3
+    max: 5

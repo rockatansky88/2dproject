@@ -25,7 +25,7 @@ public class ShopPanel : BasePanel
 
     private IEnumerator DelayedRefreshShop()
     {
-        yield return new WaitUntil(() => ShopManager.Instance != null);
+        yield return new WaitUntil(() => ShopManager.Instance != null); // ShopManager가 준비될 때까지 대기
         RefreshShop();
     }
 
@@ -90,9 +90,9 @@ public class ShopPanel : BasePanel
                 Destroy(slot.gameObject);
             }
         }
-        shopSlots.Clear();
+        shopSlots.Clear(); // 리스트 비우기 
 
-        if (ShopManager.Instance == null)
+        if (ShopManager.Instance == null) // ShopManager 확인
         {
             Debug.LogError("[ShopPanel] ❌ ShopManager.Instance가 null입니다!");
             return;
@@ -111,7 +111,7 @@ public class ShopPanel : BasePanel
         }
 
         // 상점 아이템 가져오기
-        List<ItemDataSO> items = ShopManager.Instance.GetShopItems();
+        List<ItemDataSO> items = ShopManager.Instance.GetShopItems(); // 아이템 목록 가져오기
         Debug.Log($"[ShopPanel] 생성할 아이템 개수: {items.Count}");
 
         if (items.Count == 0)

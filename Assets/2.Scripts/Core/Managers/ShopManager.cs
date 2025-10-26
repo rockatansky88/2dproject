@@ -7,9 +7,9 @@ public class ShopManager : MonoBehaviour
     public static ShopManager Instance { get; private set; }
 
     [Header("Shop Inventory")]
-    [SerializeField] private List<ItemDataSO> availableItems = new List<ItemDataSO>();
-    [SerializeField] private int shopItemCount = 10;
-    [SerializeField] private bool randomizeShop = true;
+    [SerializeField] private List<ItemDataSO> availableItems = new List<ItemDataSO>(); // 상점에서 판매 가능한 아이템 목록
+    [SerializeField] private int shopItemCount = 10; // 상점에 표시할 아이템 수
+    [SerializeField] private bool randomizeShop = true; // 상점 아이템을 랜덤으로 선택할지 여부
 
     private List<ItemDataSO> currentShopItems = new List<ItemDataSO>();
 
@@ -19,30 +19,29 @@ public class ShopManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
-            Debug.Log("[ShopManager] ✅ Instance 생성됨");
         }
         else
         {
-            Debug.Log("[ShopManager] 중복 Instance 제거");
             Destroy(gameObject);
         }
     }
 
     private void Start()
     {
-        RefreshShopInventory();
+        RefreshShopInventory();  // 게임 시작 시 상점 재고 초기화
     }
 
     public void RefreshShopInventory()
     {
-        currentShopItems.Clear();
+        currentShopItems.Clear(); // 기존 재고 초기화
 
         Debug.Log($"[ShopManager] 상점 재고 갱신 시작 - availableItems: {availableItems.Count}개");
 
-        if (randomizeShop && availableItems.Count > shopItemCount)
+        if (randomizeShop && availableItems.Count > shopItemCount) // 랜덤 선택, 충분한 아이템이 있을 때
+
         {
-            List<ItemDataSO> shuffled = availableItems.OrderBy(x => Random.value).ToList();
-            currentShopItems = shuffled.Take(shopItemCount).ToList();
+            List<ItemDataSO> shuffled = availableItems.OrderBy(x => Random.value).ToList(); // 아이템 섞기
+            currentShopItems = shuffled.Take(shopItemCount).ToList(); // 상점에 표시할 아이템 선택
             Debug.Log($"[ShopManager] 랜덤 선택: {currentShopItems.Count}개");
         }
         else
