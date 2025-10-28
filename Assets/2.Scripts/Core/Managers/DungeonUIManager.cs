@@ -101,7 +101,15 @@ public class DungeonUIManager : MonoBehaviour
             Debug.Log($"[DungeonUIManager] 통로 {index}번 버튼 리스너 등록");
         }
 
-        // DungeonManager 이벤트 구독
+        Debug.Log("[DungeonUIManager] ✅ Awake 완료");
+    }
+
+    // Start 메서드 추가
+    private void Start()
+    {
+        Debug.Log("[DungeonUIManager] ━━━ Start 시작 ━━━");
+
+        // DungeonManager 이벤트 구독 (Start에서 수행)
         if (DungeonManager.Instance != null)
         {
             DungeonManager.Instance.OnDungeonEntered += OnDungeonEntered;
@@ -109,7 +117,7 @@ public class DungeonUIManager : MonoBehaviour
             DungeonManager.Instance.OnRoomTypeSelected += OnRoomTypeSelected;
             DungeonManager.Instance.OnMonstersSpawned += OnMonstersSpawned;
             DungeonManager.Instance.OnEventTriggered += OnEventTriggered;
-            Debug.Log("[DungeonUIManager] DungeonManager 이벤트 구독 완료");
+            Debug.Log("[DungeonUIManager] ✅ DungeonManager 이벤트 구독 완료");
         }
 
         // CombatManager 이벤트 구독

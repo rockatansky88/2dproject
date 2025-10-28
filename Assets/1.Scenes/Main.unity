@@ -2278,7 +2278,10 @@ MonoBehaviour:
   backToTownButton: {fileID: 1760748136}
   corridorBackgroundImage: {fileID: 1555199950}
   roomProgressText: {fileID: 1683030538}
-  pathButtons: []
+  pathButtons:
+  - {fileID: 1038785247}
+  - {fileID: 427376892}
+  - {fileID: 651818403}
   eventBackgroundImage: {fileID: 1652000336}
   eventIllustrationImage: {fileID: 177396340}
   eventTitleText: {fileID: 659373941}
