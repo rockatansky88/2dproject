@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9c191b1cd1a6fc43a6218d1c1acf023, type: 3}
+  m_Name: Mercenary_Swordman
+  m_EditorClassIdentifier: 
+  mercenaryID: swordman_001
+  mercenaryName: "\uC0AC\uC774\uCE78"
+  portrait: {fileID: 21300000, guid: f9518154cf69886469742474cb299c5f, type: 3}
+  fullBodySprite: {fileID: 21300000, guid: 2a297c1dbd236824894d809ef47b21dc, type: 3}
+  prefab: {fileID: 0}
+  recruitCost: 100
+  levelRange:
+    min: 1
+    max: 1
+  healthRange:
+    min: 80
+    max: 120
+  strengthRange:
+    min: 8
+    max: 15
+  dexterityRange:
+    min: 8
+    max: 15
+  wisdomRange:
+    min: 8
+    max: 15
+  intelligenceRange:
+    min: 8
+    max: 15
+  speedRange:
+    min: 3
+    max: 5

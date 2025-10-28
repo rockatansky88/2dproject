@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df1816285ef45224d9f88417dbdf4f75, type: 3}
+  m_Name: Mp_Potion
+  m_EditorClassIdentifier: 
+  itemID: mp_1
+  itemName: "\uB9C8\uB098\uD68C\uBCF5 \uBB3C\uC57D1"
+  icon: {fileID: 21300000, guid: 4cf8f074693897f41b7bd81b8d13b4a9, type: 3}
+  itemType: 2
+  buyPrice: 150
+  sellPrice: 10
+  description: "\uB9C8\uB098\uB97C 40 \uD68C\uBCF5 \uD55C\uB2E4."
+  equipSlot: 0
+  statModifiers: []
+  healAmount: 0
