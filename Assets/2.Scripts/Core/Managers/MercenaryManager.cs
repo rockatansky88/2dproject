@@ -231,4 +231,11 @@ public class MercenaryManager : MonoBehaviour
             Debug.Log($"{i + 1}. {merc.mercenaryName} (Lv.{merc.level}) - HP:{merc.health} STR:{merc.strength}");
         }
     }
+
+    internal IEnumerable<object> GetPartyMembers()
+    {
+        throw new NotImplementedException();
+        // 파티 멤버 로직 반환 추가 필요
+
+    }
 }

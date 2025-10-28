@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f8707609e005b3245a37442319877e8e, type: 3}
+  m_Name: Dungeon_Ratman_01
+  m_EditorClassIdentifier: 
+  dungeonID: Dungeon_Ratman_01
+  dungeonName: "\uB7AB\uB9E8 \uB358\uC804"
+  entranceSprite: {fileID: 21300000, guid: 1b87cbbad2f438c4484286e6ab5e9e9d, type: 3}
+  corridorSprite: {fileID: 21300000, guid: 0af4ad4590360104db13404219494ff6, type: 3}
+  combatBackgroundSprite: {fileID: 21300000, guid: 77ab9102f21cb6045a6566daad25b545, type: 3}
+  bossBackgroundSprite: {fileID: 21300000, guid: aba99b3a92317474ebc770edbe88e0fd, type: 3}
+  eventBackgroundSprite: {fileID: 21300000, guid: aba99b3a92317474ebc770edbe88e0fd, type: 3}
+  normalMonsters:
+  - monsterStats: {fileID: 0}
+    monsterSprite: {fileID: 21300000, guid: 73bdedb82f3fa604c9a70fe73311bcd1, type: 3}
+    monsterName: Ratman
+    rarity: 0
+    spawnWeight: 50
+  - monsterStats: {fileID: 0}
+    monsterSprite: {fileID: 21300000, guid: f7df2aafde5faab41bb2cbb3c4018bcb, type: 3}
+    monsterName: Ratman Worrior
+    rarity: 1
+    spawnWeight: 30
+  bossMonsters:
+  - monsterStats: {fileID: 0}
+    monsterSprite: {fileID: 21300000, guid: 0c1f2b0629a6fb14fb8877790bc21f89, type: 3}
+    monsterName: Berserk_Skeleton
+    rarity: 3
+    spawnWeight: 0
+  possibleEvents:
+  - {fileID: 0}
+  recommendedLevel: 1
+  totalRooms: 5
