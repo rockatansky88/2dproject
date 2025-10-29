@@ -54,7 +54,7 @@ public class CombatManager : MonoBehaviour
             // - 보상 지급 (골드, 경험치)
             // - 다음 방으로 이동
 
-            if (DungeonUIManager.Instance != null)
+            if (GameSceneManager.Instance != null)
             {
                 // 던전 클리어 체크
                 if (DungeonManager.Instance.IsDungeonCleared())

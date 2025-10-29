@@ -160,7 +160,8 @@ public class InventoryWindow : MonoBehaviour
         if (mercenaryParty != null)
         {
             mercenaryParty.gameObject.SetActive(true);
-            Debug.Log("[InventoryWindow] MercenaryParty 표시");
+            mercenaryParty.Show(); // 🆕 추가: CanvasGroup.alpha = 1로 설정
+            Debug.Log("[InventoryWindow] MercenaryParty 표시 (Show 호출)");
         }
     }
 

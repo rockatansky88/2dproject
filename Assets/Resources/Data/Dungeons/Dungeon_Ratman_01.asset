@@ -16,7 +16,7 @@ MonoBehaviour:
   dungeonName: "\uB7AB\uB9E8 \uB358\uC804"
   entranceSprite: {fileID: 21300000, guid: 1b87cbbad2f438c4484286e6ab5e9e9d, type: 3}
   corridorSprite: {fileID: 21300000, guid: 0af4ad4590360104db13404219494ff6, type: 3}
-  combatBackgroundSprite: {fileID: 21300000, guid: 77ab9102f21cb6045a6566daad25b545, type: 3}
+  combatBackgroundSprite: {fileID: 21300000, guid: aba99b3a92317474ebc770edbe88e0fd, type: 3}
   bossBackgroundSprite: {fileID: 21300000, guid: aba99b3a92317474ebc770edbe88e0fd, type: 3}
   eventBackgroundSprite: {fileID: 21300000, guid: aba99b3a92317474ebc770edbe88e0fd, type: 3}
   normalMonsters:
@@ -32,7 +32,7 @@ MonoBehaviour:
     spawnWeight: 30
   bossMonsters:
   - monsterStats: {fileID: 11400000, guid: c0bae7cd76d602e4d8e48d8d34aa8ce2, type: 2}
-    monsterSprite: {fileID: 21300000, guid: 0c1f2b0629a6fb14fb8877790bc21f89, type: 3}
+    monsterSprite: {fileID: 786006113, guid: 0c1f2b0629a6fb14fb8877790bc21f89, type: 3}
     monsterName: Berserk_Skeleton
     rarity: 3
     spawnWeight: 0

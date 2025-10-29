@@ -100,13 +100,13 @@ public class DungeonEntrance : MonoBehaviour
             return;
         }
 
-        if (DungeonUIManager.Instance != null)
+        if (GameSceneManager.Instance != null)
         {
-            DungeonUIManager.Instance.ShowEntranceUI(dungeonData);
+            GameSceneManager.Instance.ShowEntranceUI(dungeonData);
         }
         else
         {
-            Debug.LogError("[DungeonEntrance] ❌ DungeonUIManager.Instance가 null입니다!");
+            Debug.LogError("[DungeonEntrance] ❌ GameSceneManager.Instance가 null입니다!");
         }
     }
 }

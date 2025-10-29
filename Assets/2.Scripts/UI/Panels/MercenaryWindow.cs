@@ -125,10 +125,22 @@ public class MercenaryWindow : MonoBehaviour
         // 상점 패널 갱신
         RefreshShopPanel();
 
-        // 골드 표시 갱신
-        if (GameManager.Instance != null)
+        //// 골드 표시 갱신
+        //if (GameManager.Instance != null)
+        //{
+        //    UpdateGoldDisplay(GameManager.Instance.Gold);
+        //}
+
+        // 🆕 추가: MercenaryParty 다시 표시
+        MercenaryParty mercenaryParty = FindObjectOfType<MercenaryParty>();
+        if (mercenaryParty != null)
         {
-            UpdateGoldDisplay(GameManager.Instance.Gold);
+            mercenaryParty.Show();
+            Debug.Log("[MercenaryWindow] 윈도우 닫힘 → MercenaryParty 다시 표시");
+        }
+        else
+        {
+            Debug.LogWarning("[MercenaryWindow] ⚠️ MercenaryParty를 찾을 수 없습니다!");
         }
 
         Debug.Log("[MercenaryWindow] ✅ 윈도우 열기 완료");
@@ -153,6 +165,18 @@ public class MercenaryWindow : MonoBehaviour
         if (detailPopup != null)
         {
             detailPopup.Close();
+        }
+
+        // 🆕 추가: MercenaryParty 다시 표시
+        MercenaryParty mercenaryParty = FindObjectOfType<MercenaryParty>();
+        if (mercenaryParty != null)
+        {
+            mercenaryParty.Show();
+            Debug.Log("[MercenaryWindow] 윈도우 닫힘 → MercenaryParty 다시 표시");
+        }
+        else
+        {
+            Debug.LogWarning("[MercenaryWindow] ⚠️ MercenaryParty를 찾을 수 없습니다!");
         }
     }
 

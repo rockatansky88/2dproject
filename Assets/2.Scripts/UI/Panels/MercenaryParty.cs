@@ -2,8 +2,9 @@ using UnityEngine;
 using System.Collections.Generic;
 
 /// <summary>
-/// 고용된 용병 파티 UI (항상 표시됨)
+/// 고용된 용병 파티 UI (상황에 따라 표시/숨김)
 /// 게임 시작 시 자동으로 초기화되며, MercenaryManager의 변경사항을 감지합니다.
+/// 던전 입구/통로: 숨김, 전투/이벤트: 표시
 /// </summary>
 public class MercenaryParty : MonoBehaviour
 {
@@ -15,15 +16,37 @@ public class MercenaryParty : MonoBehaviour
     [Header("Detail Popup")]
     [SerializeField] private MercenaryDetailPopup detailPopup; // Canvas에서 참조
 
+    [Header("Canvas Settings")]
+    [SerializeField] private Canvas canvas; // 이 UI의 Canvas
+    [SerializeField] private int combatSortOrder = 100; // 전투/이벤트 시 Sort Order
+
     // 슬롯 목록
     private List<MercenaryPartySlot> partySlots = new List<MercenaryPartySlot>();
+    private CanvasGroup canvasGroup;
 
     private void Awake()
     {
         Debug.Log("[MercenaryParty] Awake 시작");
 
+        // CanvasGroup 가져오기 또는 추가
+        canvasGroup = GetComponent<CanvasGroup>();
+        if (canvasGroup == null)
+        {
+            canvasGroup = gameObject.AddComponent<CanvasGroup>();
+            Debug.Log("[MercenaryParty] CanvasGroup 컴포넌트 추가됨");
+        }
+
+        // Canvas 가져오기
+        if (canvas == null)
+        {
+            canvas = GetComponent<Canvas>();
+        }
+
         // 파티 슬롯 초기화 (4개 고정)
         InitializePartySlots();
+
+        // 초기 상태: 숨김
+        Hide();
     }
 
     private void Start()
@@ -194,6 +217,49 @@ public class MercenaryParty : MonoBehaviour
             {
                 slot.SetCombatMode(isCombat);
             }
+        }
+
+        // 전투 모드일 때 자동으로 표시
+        if (isCombat)
+        {
+            Show();
+        }
+    }
+
+    /// <summary>
+    /// 파티 UI 표시
+    /// </summary>
+    public void Show()
+    {
+        Debug.Log("[MercenaryParty] 파티 UI 표시");
+
+        if (canvasGroup != null)
+        {
+            canvasGroup.alpha = 1f;
+            canvasGroup.interactable = true;
+            canvasGroup.blocksRaycasts = true;
+        }
+
+        if (canvas != null)
+        {
+            canvas.sortingOrder = combatSortOrder;
+        }
+
+        gameObject.SetActive(true);
+    }
+
+    /// <summary>
+    /// 파티 UI 숨김
+    /// </summary>
+    public void Hide()
+    {
+        Debug.Log("[MercenaryParty] 파티 UI 숨김");
+
+        if (canvasGroup != null)
+        {
+            canvasGroup.alpha = 0f;
+            canvasGroup.interactable = false;
+            canvasGroup.blocksRaycasts = false;
         }
     }
 }
