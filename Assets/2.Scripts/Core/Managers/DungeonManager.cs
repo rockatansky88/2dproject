@@ -1,68 +1,68 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 /// <summary>
-/// ´øÀü ÁøÇàÀ» °ü¸®ÇÏ´Â ¸Å´ÏÀú
-/// - ´øÀü ÀÔÀå/ÅğÀå, ¹æ ¼±ÅÃ, ¸ó½ºÅÍ ½ºÆù, ÀÌº¥Æ® Àû¿ë µîÀ» Ã³¸®ÇÕ´Ï´Ù.
+/// ë˜ì „ ì§„í–‰ì„ ê´€ë¦¬í•˜ëŠ” ë§¤ë‹ˆì €
+/// - ë˜ì „ ì…ì¥/í‡´ì¥, ë°© ì„ íƒ, ëª¬ìŠ¤í„° ìŠ¤í°, ì´ë²¤íŠ¸ ì ìš© ë“±ì„ ì²˜ë¦¬í•©ë‹ˆë‹¤.
 /// </summary>
 public class DungeonManager : MonoBehaviour
 {
     public static DungeonManager Instance { get; private set; }
 
-    [Header("ÇöÀç ´øÀü Á¤º¸")]
+    [Header("í˜„ì¬ ë˜ì „ ì •ë³´")]
     [SerializeField] private DungeonDataSO currentDungeon;
 
-    [Header("´øÀü ÁøÇà »óÅÂ")]
-    [SerializeField] private int currentRoomIndex = 0; // ÇöÀç ¹æ ¹øÈ£ (0~4)
-    [SerializeField] private int totalRooms = 5;       // ÃÑ ¹æ °³¼ö
+    [Header("ë˜ì „ ì§„í–‰ ìƒíƒœ")]
+    [SerializeField] private int currentRoomIndex = 0; // í˜„ì¬ ë°© ë²ˆí˜¸ (0~4)
+    [SerializeField] private int totalRooms = 5;       // ì´ ë°© ê°œìˆ˜
 
-    private DungeonRoomType currentRoomType;           // ÇöÀç ¹æ Å¸ÀÔ
-    private List<MonsterSpawnData> spawnedMonsters;    // ½ºÆùµÈ ¸ó½ºÅÍ ¸®½ºÆ®
-    private RoomEventDataSO currentEvent;              // ÇöÀç ÀÌº¥Æ®
+    private DungeonRoomType currentRoomType;           // í˜„ì¬ ë°© íƒ€ì…
+    private List<MonsterSpawnData> spawnedMonsters;    // ìŠ¤í°ëœ ëª¬ìŠ¤í„° ë¦¬ìŠ¤íŠ¸
+    private RoomEventDataSO currentEvent;              // í˜„ì¬ ì´ë²¤íŠ¸
 
-    // ´øÀü »óÅÂ ÀÌº¥Æ®
-    public event Action<DungeonDataSO> OnDungeonEntered;          // ´øÀü ÀÔÀå
-    public event Action OnDungeonExited;                           // ´øÀü ÅğÀå
-    public event Action<int, int> OnRoomProgressed;                // ¹æ ÁøÇà (ÇöÀç¹æ, ÃÑ¹æ¼ö)
-    public event Action<DungeonRoomType> OnRoomTypeSelected;       // ¹æ Å¸ÀÔ ¼±ÅÃ ¿Ï·á
-    public event Action<List<MonsterSpawnData>> OnMonstersSpawned; // ¸ó½ºÅÍ ½ºÆù
-    public event Action<RoomEventDataSO> OnEventTriggered;         // ÀÌº¥Æ® ¹ß»ı
+    // ë˜ì „ ìƒíƒœ ì´ë²¤íŠ¸
+    public event Action<DungeonDataSO> OnDungeonEntered;          // ë˜ì „ ì…ì¥
+    public event Action OnDungeonExited;                           // ë˜ì „ í‡´ì¥
+    public event Action<int, int> OnRoomProgressed;                // ë°© ì§„í–‰ (í˜„ì¬ë°©, ì´ë°©ìˆ˜)
+    public event Action<DungeonRoomType> OnRoomTypeSelected;       // ë°© íƒ€ì… ì„ íƒ ì™„ë£Œ
+    public event Action<List<MonsterSpawnData>> OnMonstersSpawned; // ëª¬ìŠ¤í„° ìŠ¤í°
+    public event Action<RoomEventDataSO> OnEventTriggered;         // ì´ë²¤íŠ¸ ë°œìƒ
 
     private void Awake()
     {
-        Debug.Log("[DungeonManager] ¦¬¦¬¦¬ Awake ½ÃÀÛ ¦¬¦¬¦¬");
+        Debug.Log("[DungeonManager] â”â”â” Awake ì‹œì‘ â”â”â”");
 
-        // ½Ì±ÛÅæ ¼³Á¤
+        // ì‹±ê¸€í†¤ ì„¤ì •
         if (Instance == null)
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
-            Debug.Log("[DungeonManager] ½Ì±ÛÅæ ÀÎ½ºÅÏ½º »ı¼ºµÊ");
+            Debug.Log("[DungeonManager] ì‹±ê¸€í†¤ ì¸ìŠ¤í„´ìŠ¤ ìƒì„±ë¨");
         }
         else
         {
-            Debug.LogWarning("[DungeonManager] Áßº¹ ÀÎ½ºÅÏ½º ÆÄ±«µÊ");
+            Debug.LogWarning("[DungeonManager] ì¤‘ë³µ ì¸ìŠ¤í„´ìŠ¤ íŒŒê´´ë¨");
             Destroy(gameObject);
             return;
         }
 
         spawnedMonsters = new List<MonsterSpawnData>();
 
-        Debug.Log("[DungeonManager] ? Awake ¿Ï·á");
+        Debug.Log("[DungeonManager] ? Awake ì™„ë£Œ");
     }
 
     /// <summary>
-    /// ´øÀü ÀÔÀå
+    /// ë˜ì „ ì…ì¥
     /// </summary>
     public void EnterDungeon(DungeonDataSO dungeon)
     {
-        Debug.Log($"[DungeonManager] ¦¬¦¬¦¬ ´øÀü ÀÔÀå: {dungeon.dungeonName} ¦¬¦¬¦¬");
+        Debug.Log($"[DungeonManager] â”â”â” ë˜ì „ ì…ì¥: {dungeon.dungeonName} â”â”â”");
 
         if (dungeon == null)
         {
-            Debug.LogError("[DungeonManager] ? dungeonÀÌ nullÀÔ´Ï´Ù!");
+            Debug.LogError("[DungeonManager] ? dungeonì´ nullì…ë‹ˆë‹¤!");
             return;
         }
 
@@ -70,19 +70,19 @@ public class DungeonManager : MonoBehaviour
         currentRoomIndex = 0;
         totalRooms = dungeon.totalRooms;
 
-        Debug.Log($"[DungeonManager] ´øÀü µ¥ÀÌÅÍ ·Îµå ¿Ï·á - ÃÑ ¹æ: {totalRooms}°³");
+        Debug.Log($"[DungeonManager] ë˜ì „ ë°ì´í„° ë¡œë“œ ì™„ë£Œ - ì´ ë°©: {totalRooms}ê°œ");
 
         OnDungeonEntered?.Invoke(currentDungeon);
 
-        Debug.Log($"[DungeonManager] ? OnDungeonEntered ÀÌº¥Æ® ¹ß»ı");
+        Debug.Log($"[DungeonManager] ? OnDungeonEntered ì´ë²¤íŠ¸ ë°œìƒ");
     }
 
     /// <summary>
-    /// ´øÀü ÅğÀå (Å¬¸®¾î ¶Ç´Â ÆĞ¹è)
+    /// ë˜ì „ í‡´ì¥ (í´ë¦¬ì–´ ë˜ëŠ” íŒ¨ë°°)
     /// </summary>
     public void ExitDungeon()
     {
-        Debug.Log("[DungeonManager] ¦¬¦¬¦¬ ´øÀü ÅğÀå ¦¬¦¬¦¬");
+        Debug.Log("[DungeonManager] â”â”â” ë˜ì „ í‡´ì¥ â”â”â”");
 
         currentDungeon = null;
         currentRoomIndex = 0;
@@ -91,256 +91,256 @@ public class DungeonManager : MonoBehaviour
 
         OnDungeonExited?.Invoke();
 
-        Debug.Log("[DungeonManager] ? ´øÀü µ¥ÀÌÅÍ ÃÊ±âÈ­ ¿Ï·á");
+        Debug.Log("[DungeonManager] ? ë˜ì „ ë°ì´í„° ì´ˆê¸°í™” ì™„ë£Œ");
     }
 
     /// <summary>
-    /// ¹æ ¼±ÅÃ (3°¥·¡ Áß ÇÏ³ª ¼±ÅÃ)
+    /// ë°© ì„ íƒ (3ê°ˆë˜ ì¤‘ í•˜ë‚˜ ì„ íƒ)
     /// </summary>
     public void SelectPath(int pathIndex)
     {
-        Debug.Log($"[DungeonManager] ¦¬¦¬¦¬ Åë·Î ¼±ÅÃ: {pathIndex}¹ø (0~2) ¦¬¦¬¦¬");
+        Debug.Log($"[DungeonManager] â”â”â” í†µë¡œ ì„ íƒ: {pathIndex}ë²ˆ (0~2) â”â”â”");
 
         if (currentDungeon == null)
         {
-            Debug.LogError("[DungeonManager] ? currentDungeonÀÌ nullÀÔ´Ï´Ù!");
+            Debug.LogError("[DungeonManager] ? currentDungeonì´ nullì…ë‹ˆë‹¤!");
             return;
         }
 
-        // ¹æ Å¸ÀÔ ·£´ı °áÁ¤
+        // ë°© íƒ€ì… ëœë¤ ê²°ì •
         currentRoomType = DecideRoomType();
 
-        Debug.Log($"[DungeonManager] °áÁ¤µÈ ¹æ Å¸ÀÔ: {currentRoomType}");
+        Debug.Log($"[DungeonManager] ê²°ì •ëœ ë°© íƒ€ì…: {currentRoomType}");
 
-        // ¹æ ¹øÈ£ Áõ°¡
+        // ë°© ë²ˆí˜¸ ì¦ê°€
         currentRoomIndex++;
 
-        Debug.Log($"[DungeonManager] ÇöÀç ¹æ ÁøÇàµµ: {currentRoomIndex}/{totalRooms}");
+        Debug.Log($"[DungeonManager] í˜„ì¬ ë°© ì§„í–‰ë„: {currentRoomIndex}/{totalRooms}");
 
         OnRoomProgressed?.Invoke(currentRoomIndex, totalRooms);
         OnRoomTypeSelected?.Invoke(currentRoomType);
 
-        // ¹æ Å¸ÀÔ¿¡ µû¶ó Ã³¸®
+        // ë°© íƒ€ì…ì— ë”°ë¼ ì²˜ë¦¬
         ProcessRoom();
 
-        Debug.Log($"[DungeonManager] ? ¹æ ¼±ÅÃ ¿Ï·á");
+        Debug.Log($"[DungeonManager] ? ë°© ì„ íƒ ì™„ë£Œ");
     }
 
     /// <summary>
-    /// ¹æ Å¸ÀÔ ·£´ı °áÁ¤
+    /// ë°© íƒ€ì… ëœë¤ ê²°ì •
     /// </summary>
     private DungeonRoomType DecideRoomType()
     {
-        Debug.Log("[DungeonManager] ¹æ Å¸ÀÔ ·£´ı °áÁ¤ Áß...");
+        Debug.Log("[DungeonManager] ë°© íƒ€ì… ëœë¤ ê²°ì • ì¤‘...");
 
-        // ¸¶Áö¸· ¹æÀº ¹«Á¶°Ç º¸½º
+        // ë§ˆì§€ë§‰ ë°©ì€ ë¬´ì¡°ê±´ ë³´ìŠ¤
         if (currentRoomIndex >= totalRooms - 1)
         {
-            Debug.Log("[DungeonManager] ¸¶Áö¸· ¹æ ¡æ º¸½º¹æ È®Á¤");
+            Debug.Log("[DungeonManager] ë§ˆì§€ë§‰ ë°© â†’ ë³´ìŠ¤ë°© í™•ì •");
             return DungeonRoomType.Boss;
         }
 
-        // È®·ü: ÀÌº¥Æ® 20%, ÀÏ¹İÀüÅõ 60%, º¸½º 20%
+        // í™•ë¥ : ì´ë²¤íŠ¸ 20%, ì¼ë°˜ì „íˆ¬ 60%, ë³´ìŠ¤ 20%
         int randomValue = UnityEngine.Random.Range(0, 100);
 
         if (randomValue < 20)
         {
-            Debug.Log("[DungeonManager] ·£´ı °á°ú ¡æ ÀÌº¥Æ®¹æ (20%)");
+            Debug.Log("[DungeonManager] ëœë¤ ê²°ê³¼ â†’ ì´ë²¤íŠ¸ë°© (20%)");
             return DungeonRoomType.Event;
         }
         else if (randomValue < 80)
         {
-            Debug.Log("[DungeonManager] ·£´ı °á°ú ¡æ ÀÏ¹İÀüÅõ (60%)");
+            Debug.Log("[DungeonManager] ëœë¤ ê²°ê³¼ â†’ ì¼ë°˜ì „íˆ¬ (60%)");
             return DungeonRoomType.Combat;
         }
         else
         {
-            Debug.Log("[DungeonManager] ·£´ı °á°ú ¡æ º¸½º¹æ (20%)");
+            Debug.Log("[DungeonManager] ëœë¤ ê²°ê³¼ â†’ ë³´ìŠ¤ë°© (20%)");
             return DungeonRoomType.Boss;
         }
     }
 
     /// <summary>
-    /// ¹æ Å¸ÀÔ¿¡ µû¸¥ Ã³¸®
+    /// ë°© íƒ€ì…ì— ë”°ë¥¸ ì²˜ë¦¬
     /// </summary>
     private void ProcessRoom()
     {
-        Debug.Log($"[DungeonManager] ¦¬¦¬¦¬ ¹æ Ã³¸® ½ÃÀÛ: {currentRoomType} ¦¬¦¬¦¬");
+        Debug.Log($"[DungeonManager] â”â”â” ë°© ì²˜ë¦¬ ì‹œì‘: {currentRoomType} â”â”â”");
 
         switch (currentRoomType)
         {
             case DungeonRoomType.Event:
-                Debug.Log("[DungeonManager] ÀÌº¥Æ® ¹ß»ı Ã³¸®...");
+                Debug.Log("[DungeonManager] ì´ë²¤íŠ¸ ë°œìƒ ì²˜ë¦¬...");
                 TriggerRandomEvent();
                 break;
 
             case DungeonRoomType.Combat:
-                Debug.Log("[DungeonManager] ÀÏ¹İ ¸ó½ºÅÍ ½ºÆù Ã³¸®...");
+                Debug.Log("[DungeonManager] ì¼ë°˜ ëª¬ìŠ¤í„° ìŠ¤í° ì²˜ë¦¬...");
                 SpawnNormalMonsters();
                 break;
 
             case DungeonRoomType.Boss:
-                Debug.Log("[DungeonManager] º¸½º ¸ó½ºÅÍ ½ºÆù Ã³¸®...");
+                Debug.Log("[DungeonManager] ë³´ìŠ¤ ëª¬ìŠ¤í„° ìŠ¤í° ì²˜ë¦¬...");
                 SpawnBossMonster();
                 break;
         }
 
-        Debug.Log("[DungeonManager] ? ¹æ Ã³¸® ¿Ï·á");
+        Debug.Log("[DungeonManager] ? ë°© ì²˜ë¦¬ ì™„ë£Œ");
     }
 
     /// <summary>
-    /// ·£´ı ÀÌº¥Æ® ¹ß»ı
+    /// ëœë¤ ì´ë²¤íŠ¸ ë°œìƒ
     /// </summary>
     private void TriggerRandomEvent()
     {
-        Debug.Log("[DungeonManager] ¦¬¦¬¦¬ ·£´ı ÀÌº¥Æ® ¼±ÅÃ Áß... ¦¬¦¬¦¬");
+        Debug.Log("[DungeonManager] â”â”â” ëœë¤ ì´ë²¤íŠ¸ ì„ íƒ ì¤‘... â”â”â”");
 
         if (currentDungeon.possibleEvents == null || currentDungeon.possibleEvents.Length == 0)
         {
-            Debug.LogWarning("[DungeonManager] ? ÀÌº¥Æ® ¸®½ºÆ®°¡ ºñ¾îÀÖ½À´Ï´Ù!");
+            Debug.LogWarning("[DungeonManager] ? ì´ë²¤íŠ¸ ë¦¬ìŠ¤íŠ¸ê°€ ë¹„ì–´ìˆìŠµë‹ˆë‹¤!");
             return;
         }
 
-        // ·£´ıÀ¸·Î ÀÌº¥Æ® ¼±ÅÃ
+        // ëœë¤ìœ¼ë¡œ ì´ë²¤íŠ¸ ì„ íƒ
         int randomIndex = UnityEngine.Random.Range(0, currentDungeon.possibleEvents.Length);
         currentEvent = currentDungeon.possibleEvents[randomIndex];
 
-        Debug.Log($"[DungeonManager] ¼±ÅÃµÈ ÀÌº¥Æ®: {currentEvent.eventName} (ID: {currentEvent.eventID})");
+        Debug.Log($"[DungeonManager] ì„ íƒëœ ì´ë²¤íŠ¸: {currentEvent.eventName} (ID: {currentEvent.eventID})");
 
         OnEventTriggered?.Invoke(currentEvent);
 
-        Debug.Log("[DungeonManager] ? OnEventTriggered ÀÌº¥Æ® ¹ß»ı");
+        Debug.Log("[DungeonManager] ? OnEventTriggered ì´ë²¤íŠ¸ ë°œìƒ");
     }
 
     /// <summary>
-    /// ÀÏ¹İ ¸ó½ºÅÍ ½ºÆù (1~3¸¶¸® ·£´ı)
+    /// ì¼ë°˜ ëª¬ìŠ¤í„° ìŠ¤í° (1~3ë§ˆë¦¬ ëœë¤)
     /// </summary>
     private void SpawnNormalMonsters()
     {
-        Debug.Log("[DungeonManager] ¦¬¦¬¦¬ ÀÏ¹İ ¸ó½ºÅÍ ½ºÆù ½ÃÀÛ ¦¬¦¬¦¬");
+        Debug.Log("[DungeonManager] â”â”â” ì¼ë°˜ ëª¬ìŠ¤í„° ìŠ¤í° ì‹œì‘ â”â”â”");
 
         spawnedMonsters.Clear();
 
         if (currentDungeon.normalMonsters == null || currentDungeon.normalMonsters.Length == 0)
         {
-            Debug.LogError("[DungeonManager] ? normalMonsters ¸®½ºÆ®°¡ ºñ¾îÀÖ½À´Ï´Ù!");
+            Debug.LogError("[DungeonManager] ? normalMonsters ë¦¬ìŠ¤íŠ¸ê°€ ë¹„ì–´ìˆìŠµë‹ˆë‹¤!");
             return;
         }
 
-        // ÀÏ¹İ~¿¡ÇÈ µî±Ş¸¸ ÇÊÅÍ¸µ
+        // ì¼ë°˜~ì—í”½ ë“±ê¸‰ë§Œ í•„í„°ë§
         var validMonsters = currentDungeon.normalMonsters
             .Where(m => m.rarity != MonsterRarity.Boss)
             .ToList();
 
         if (validMonsters.Count == 0)
         {
-            Debug.LogError("[DungeonManager] ? ½ºÆù °¡´ÉÇÑ ÀÏ¹İ ¸ó½ºÅÍ°¡ ¾ø½À´Ï´Ù!");
+            Debug.LogError("[DungeonManager] ? ìŠ¤í° ê°€ëŠ¥í•œ ì¼ë°˜ ëª¬ìŠ¤í„°ê°€ ì—†ìŠµë‹ˆë‹¤!");
             return;
         }
 
-        Debug.Log($"[DungeonManager] ½ºÆù °¡´ÉÇÑ ¸ó½ºÅÍ Á¾·ù: {validMonsters.Count}°³");
+        Debug.Log($"[DungeonManager] ìŠ¤í° ê°€ëŠ¥í•œ ëª¬ìŠ¤í„° ì¢…ë¥˜: {validMonsters.Count}ê°œ");
 
-        // 1~3¸¶¸® ·£´ı °áÁ¤
+        // 1~3ë§ˆë¦¬ ëœë¤ ê²°ì •
         int monsterCount = UnityEngine.Random.Range(1, 4);
-        Debug.Log($"[DungeonManager] ½ºÆùÇÒ ¸ó½ºÅÍ ¼ö: {monsterCount}¸¶¸®");
+        Debug.Log($"[DungeonManager] ìŠ¤í°í•  ëª¬ìŠ¤í„° ìˆ˜: {monsterCount}ë§ˆë¦¬");
 
         for (int i = 0; i < monsterCount; i++)
         {
-            // °¡ÁßÄ¡ ±â¹İ ·£´ı ¼±ÅÃ
+            // ê°€ì¤‘ì¹˜ ê¸°ë°˜ ëœë¤ ì„ íƒ
             MonsterSpawnData selectedMonster = GetWeightedRandomMonster(validMonsters);
 
             if (selectedMonster != null)
             {
                 spawnedMonsters.Add(selectedMonster);
-                Debug.Log($"[DungeonManager] ¸ó½ºÅÍ {i + 1} ½ºÆù: {selectedMonster.monsterName} (µî±Ş: {selectedMonster.rarity})");
+                Debug.Log($"[DungeonManager] ëª¬ìŠ¤í„° {i + 1} ìŠ¤í°: {selectedMonster.monsterName} (ë“±ê¸‰: {selectedMonster.rarity})");
             }
         }
 
         OnMonstersSpawned?.Invoke(spawnedMonsters);
 
-        Debug.Log($"[DungeonManager] ? ÃÑ {spawnedMonsters.Count}¸¶¸® ½ºÆù ¿Ï·á");
+        Debug.Log($"[DungeonManager] ? ì´ {spawnedMonsters.Count}ë§ˆë¦¬ ìŠ¤í° ì™„ë£Œ");
     }
 
     /// <summary>
-    /// º¸½º ¸ó½ºÅÍ ½ºÆù (1¸¶¸®)
+    /// ë³´ìŠ¤ ëª¬ìŠ¤í„° ìŠ¤í° (1ë§ˆë¦¬)
     /// </summary>
     private void SpawnBossMonster()
     {
-        Debug.Log("[DungeonManager] ¦¬¦¬¦¬ º¸½º ¸ó½ºÅÍ ½ºÆù ½ÃÀÛ ¦¬¦¬¦¬");
+        Debug.Log("[DungeonManager] â”â”â” ë³´ìŠ¤ ëª¬ìŠ¤í„° ìŠ¤í° ì‹œì‘ â”â”â”");
 
         spawnedMonsters.Clear();
 
         if (currentDungeon.bossMonsters == null || currentDungeon.bossMonsters.Length == 0)
         {
-            Debug.LogError("[DungeonManager] ? bossMonsters ¸®½ºÆ®°¡ ºñ¾îÀÖ½À´Ï´Ù!");
+            Debug.LogError("[DungeonManager] ? bossMonsters ë¦¬ìŠ¤íŠ¸ê°€ ë¹„ì–´ìˆìŠµë‹ˆë‹¤!");
             return;
         }
 
-        // ·£´ıÀ¸·Î º¸½º 1¸¶¸® ¼±ÅÃ
+        // ëœë¤ìœ¼ë¡œ ë³´ìŠ¤ 1ë§ˆë¦¬ ì„ íƒ
         int randomIndex = UnityEngine.Random.Range(0, currentDungeon.bossMonsters.Length);
         MonsterSpawnData selectedBoss = currentDungeon.bossMonsters[randomIndex];
 
         spawnedMonsters.Add(selectedBoss);
 
-        Debug.Log($"[DungeonManager] º¸½º ½ºÆù: {selectedBoss.monsterName}");
+        Debug.Log($"[DungeonManager] ë³´ìŠ¤ ìŠ¤í°: {selectedBoss.monsterName}");
 
         OnMonstersSpawned?.Invoke(spawnedMonsters);
 
-        Debug.Log("[DungeonManager] ? º¸½º ½ºÆù ¿Ï·á");
+        Debug.Log("[DungeonManager] ? ë³´ìŠ¤ ìŠ¤í° ì™„ë£Œ");
     }
 
     /// <summary>
-    /// °¡ÁßÄ¡ ±â¹İ ·£´ı ¸ó½ºÅÍ ¼±ÅÃ
+    /// ê°€ì¤‘ì¹˜ ê¸°ë°˜ ëœë¤ ëª¬ìŠ¤í„° ì„ íƒ
     /// </summary>
     private MonsterSpawnData GetWeightedRandomMonster(List<MonsterSpawnData> monsters)
     {
-        Debug.Log("[DungeonManager] °¡ÁßÄ¡ ±â¹İ ¸ó½ºÅÍ ¼±ÅÃ Áß...");
+        Debug.Log("[DungeonManager] ê°€ì¤‘ì¹˜ ê¸°ë°˜ ëª¬ìŠ¤í„° ì„ íƒ ì¤‘...");
 
-        // ÃÑ °¡ÁßÄ¡ °è»ê
+        // ì´ ê°€ì¤‘ì¹˜ ê³„ì‚°
         int totalWeight = 0;
         foreach (var monster in monsters)
         {
             totalWeight += monster.spawnWeight;
         }
 
-        Debug.Log($"[DungeonManager] ÃÑ °¡ÁßÄ¡: {totalWeight}");
+        Debug.Log($"[DungeonManager] ì´ ê°€ì¤‘ì¹˜: {totalWeight}");
 
-        // ·£´ı °ª »ı¼º
+        // ëœë¤ ê°’ ìƒì„±
         int randomValue = UnityEngine.Random.Range(0, totalWeight);
-        Debug.Log($"[DungeonManager] ·£´ı °ª: {randomValue}");
+        Debug.Log($"[DungeonManager] ëœë¤ ê°’: {randomValue}");
 
-        // °¡ÁßÄ¡ ¹üÀ§ È®ÀÎ
+        // ê°€ì¤‘ì¹˜ ë²”ìœ„ í™•ì¸
         int cumulativeWeight = 0;
         foreach (var monster in monsters)
         {
             cumulativeWeight += monster.spawnWeight;
             if (randomValue < cumulativeWeight)
             {
-                Debug.Log($"[DungeonManager] ¼±ÅÃµÈ ¸ó½ºÅÍ: {monster.monsterName} (°¡ÁßÄ¡: {monster.spawnWeight})");
+                Debug.Log($"[DungeonManager] ì„ íƒëœ ëª¬ìŠ¤í„°: {monster.monsterName} (ê°€ì¤‘ì¹˜: {monster.spawnWeight})");
                 return monster;
             }
         }
 
-        Debug.LogWarning("[DungeonManager] ?? ¸ó½ºÅÍ ¼±ÅÃ ½ÇÆĞ, Ã¹ ¹øÂ° ¸ó½ºÅÍ ¹İÈ¯");
+        Debug.LogWarning("[DungeonManager] ?? ëª¬ìŠ¤í„° ì„ íƒ ì‹¤íŒ¨, ì²« ë²ˆì§¸ ëª¬ìŠ¤í„° ë°˜í™˜");
         return monsters[0];
     }
 
     /// <summary>
-    /// ÀÌº¥Æ® È¿°ú Àû¿ë
+    /// ì´ë²¤íŠ¸ íš¨ê³¼ ì ìš©
     /// </summary>
     public void ApplyEventEffects()
     {
-        Debug.Log("[DungeonManager] ¦¬¦¬¦¬ ÀÌº¥Æ® È¿°ú Àû¿ë ½ÃÀÛ ¦¬¦¬¦¬");
+        Debug.Log("[DungeonManager] â”â”â” ì´ë²¤íŠ¸ íš¨ê³¼ ì ìš© ì‹œì‘ â”â”â”");
 
         if (currentEvent == null)
         {
-            Debug.LogError("[DungeonManager] ? currentEvent°¡ nullÀÔ´Ï´Ù!");
+            Debug.LogError("[DungeonManager] ? currentEventê°€ nullì…ë‹ˆë‹¤!");
             return;
         }
 
         foreach (var effect in currentEvent.effects)
         {
-            Debug.Log($"[DungeonManager] È¿°ú Àû¿ë: {effect.effectType}, °ª: {effect.value}");
+            Debug.Log($"[DungeonManager] íš¨ê³¼ ì ìš©: {effect.effectType}, ê°’: {effect.value}");
 
             switch (effect.effectType)
             {
@@ -370,115 +370,115 @@ public class DungeonManager : MonoBehaviour
             }
         }
 
-        Debug.Log("[DungeonManager] ? ÀÌº¥Æ® È¿°ú Àû¿ë ¿Ï·á");
+        Debug.Log("[DungeonManager] ? ì´ë²¤íŠ¸ íš¨ê³¼ ì ìš© ì™„ë£Œ");
     }
 
     /// <summary>
-    /// ÆÄÆ¼¿¡ ¹öÇÁ Àû¿ë
+    /// íŒŒí‹°ì— ë²„í”„ ì ìš©
     /// </summary>
     private void ApplyBuffToParty(EventEffect effect)
     {
-        Debug.Log($"[DungeonManager] ÆÄÆ¼ ¹öÇÁ Àû¿ë: {effect.targetStat} +{effect.value} (Áö¼Ó: {effect.duration}ÅÏ)");
+        Debug.Log($"[DungeonManager] íŒŒí‹° ë²„í”„ ì ìš©: {effect.targetStat} +{effect.value} (ì§€ì†: {effect.duration}í„´)");
 
-        // TODO: MercenaryManager¿Í ¿¬µ¿ÇÏ¿© ÆÄÆ¼ ÀüÃ¼¿¡ ¹öÇÁ Àû¿ë
+        // TODO: MercenaryManagerì™€ ì—°ë™í•˜ì—¬ íŒŒí‹° ì „ì²´ì— ë²„í”„ ì ìš©
         if (MercenaryManager.Instance == null)
         {
-            Debug.LogError("[DungeonManager] ? MercenaryManager.Instance°¡ nullÀÔ´Ï´Ù!");
+            Debug.LogError("[DungeonManager] ? MercenaryManager.Instanceê°€ nullì…ë‹ˆë‹¤!");
             return;
         }
 
         //var party = MercenaryManager.Instance.GetPartyMembers();
         //foreach (var mercenary in party)
         //{
-        //    Debug.Log($"[DungeonManager] {mercenary.mercenaryName}¿¡°Ô ¹öÇÁ Àû¿ë");
-        //    // ½ÇÁ¦ ½ºÅÈ Àû¿ë ·ÎÁ÷ (¿¹: mercenary.strength += effect.value)
+        //    Debug.Log($"[DungeonManager] {mercenary.mercenaryName}ì—ê²Œ ë²„í”„ ì ìš©");
+        //    // ì‹¤ì œ ìŠ¤íƒ¯ ì ìš© ë¡œì§ (ì˜ˆ: mercenary.strength += effect.value)
         //}
     }
 
     /// <summary>
-    /// ÆÄÆ¼¿¡ µğ¹öÇÁ Àû¿ë
+    /// íŒŒí‹°ì— ë””ë²„í”„ ì ìš©
     /// </summary>
     private void ApplyDebuffToParty(EventEffect effect)
     {
-        Debug.Log($"[DungeonManager] ÆÄÆ¼ µğ¹öÇÁ Àû¿ë: {effect.targetStat} -{effect.value} (Áö¼Ó: {effect.duration}ÅÏ)");
+        Debug.Log($"[DungeonManager] íŒŒí‹° ë””ë²„í”„ ì ìš©: {effect.targetStat} -{effect.value} (ì§€ì†: {effect.duration}í„´)");
 
-        // TODO: ¹öÇÁ¿Í µ¿ÀÏÇÑ ¹æ½ÄÀ¸·Î µğ¹öÇÁ Àû¿ë
+        // TODO: ë²„í”„ì™€ ë™ì¼í•œ ë°©ì‹ìœ¼ë¡œ ë””ë²„í”„ ì ìš©
     }
 
     /// <summary>
-    /// ÆÄÆ¼ Ã¼·Â È¸º¹
+    /// íŒŒí‹° ì²´ë ¥ íšŒë³µ
     /// </summary>
     private void HealParty(int amount)
     {
-        Debug.Log($"[DungeonManager] ÆÄÆ¼ ÀüÃ¼ Ã¼·Â È¸º¹: +{amount}");
+        Debug.Log($"[DungeonManager] íŒŒí‹° ì „ì²´ ì²´ë ¥ íšŒë³µ: +{amount}");
 
-        // TODO: ÆÄÆ¼ ÀüÃ¼ HP Áõ°¡
+        // TODO: íŒŒí‹° ì „ì²´ HP ì¦ê°€
     }
 
     /// <summary>
-    /// ÆÄÆ¼ Ã¼·Â °¨¼Ò
+    /// íŒŒí‹° ì²´ë ¥ ê°ì†Œ
     /// </summary>
     private void DamageParty(int amount)
     {
-        Debug.Log($"[DungeonManager] ÆÄÆ¼ ÀüÃ¼ ÇÇÇØ: -{amount}");
+        Debug.Log($"[DungeonManager] íŒŒí‹° ì „ì²´ í”¼í•´: -{amount}");
 
-        // TODO: ÆÄÆ¼ ÀüÃ¼ HP °¨¼Ò
+        // TODO: íŒŒí‹° ì „ì²´ HP ê°ì†Œ
     }
 
     /// <summary>
-    /// °ñµå º¸»ó
+    /// ê³¨ë“œ ë³´ìƒ
     /// </summary>
     private void RewardGold(int amount)
     {
-        Debug.Log($"[DungeonManager] °ñµå º¸»ó: +{amount}");
+        Debug.Log($"[DungeonManager] ê³¨ë“œ ë³´ìƒ: +{amount}");
 
         if (GameManager.Instance != null)
         {
             GameManager.Instance.AddGold(amount);
-            Debug.Log("[DungeonManager] ? °ñµå Áö±Ş ¿Ï·á");
+            Debug.Log("[DungeonManager] ? ê³¨ë“œ ì§€ê¸‰ ì™„ë£Œ");
         }
         else
         {
-            Debug.LogError("[DungeonManager] ? GameManager.Instance°¡ nullÀÔ´Ï´Ù!");
+            Debug.LogError("[DungeonManager] ? GameManager.Instanceê°€ nullì…ë‹ˆë‹¤!");
         }
     }
 
     /// <summary>
-    /// ¾ÆÀÌÅÛ º¸»ó
+    /// ì•„ì´í…œ ë³´ìƒ
     /// </summary>
     private void RewardItem(ItemDataSO item, int amount)
     {
-        Debug.Log($"[DungeonManager] ¾ÆÀÌÅÛ º¸»ó: {item?.itemName ?? "null"} x{amount}");
+        Debug.Log($"[DungeonManager] ì•„ì´í…œ ë³´ìƒ: {item?.itemName ?? "null"} x{amount}");
 
         if (item == null)
         {
-            Debug.LogError("[DungeonManager] ? rewardItemÀÌ nullÀÔ´Ï´Ù!");
+            Debug.LogError("[DungeonManager] ? rewardItemì´ nullì…ë‹ˆë‹¤!");
             return;
         }
 
         if (InventoryManager.Instance != null)
         {
             //InventoryManager.Instance.AddItem(item.itemID, amount);
-            Debug.Log("[DungeonManager] ? ¾ÆÀÌÅÛ Áö±Ş ¿Ï·á");
+            Debug.Log("[DungeonManager] ? ì•„ì´í…œ ì§€ê¸‰ ì™„ë£Œ");
         }
         else
         {
-            Debug.LogError("[DungeonManager] ? InventoryManager.Instance°¡ nullÀÔ´Ï´Ù!");
+            Debug.LogError("[DungeonManager] ? InventoryManager.Instanceê°€ nullì…ë‹ˆë‹¤!");
         }
     }
 
     /// <summary>
-    /// ´øÀü Å¬¸®¾î Ã¼Å©
+    /// ë˜ì „ í´ë¦¬ì–´ ì²´í¬
     /// </summary>
     public bool IsDungeonCleared()
     {
         bool isCleared = currentRoomIndex >= totalRooms;
-        Debug.Log($"[DungeonManager] ´øÀü Å¬¸®¾î ¿©ºÎ: {isCleared} ({currentRoomIndex}/{totalRooms})");
+        Debug.Log($"[DungeonManager] ë˜ì „ í´ë¦¬ì–´ ì—¬ë¶€: {isCleared} ({currentRoomIndex}/{totalRooms})");
         return isCleared;
     }
 
     /// <summary>
-    /// ÇöÀç ¹æ Å¸ÀÔ °¡Á®¿À±â
+    /// í˜„ì¬ ë°© íƒ€ì… ê°€ì ¸ì˜¤ê¸°
     /// </summary>
     public DungeonRoomType GetCurrentRoomType()
     {
@@ -486,7 +486,7 @@ public class DungeonManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ½ºÆùµÈ ¸ó½ºÅÍ ¸®½ºÆ® °¡Á®¿À±â
+    /// ìŠ¤í°ëœ ëª¬ìŠ¤í„° ë¦¬ìŠ¤íŠ¸ ê°€ì ¸ì˜¤ê¸°
     /// </summary>
     public List<MonsterSpawnData> GetSpawnedMonsters()
     {
@@ -494,20 +494,80 @@ public class DungeonManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ÇöÀç ´øÀü µ¥ÀÌÅÍ °¡Á®¿À±â
+    /// í˜„ì¬ ë˜ì „ ë°ì´í„° ê°€ì ¸ì˜¤ê¸°
     /// </summary>
     public DungeonDataSO GetCurrentDungeon()
     {
         return currentDungeon;
     }
+
+    /// <summary>
+    /// ë˜ì „ ì™„ì „ í´ë¦¬ì–´ ì²˜ë¦¬
+    /// </summary>
+    public void CompleteDungeon()
+    {
+        Debug.Log("[DungeonManager] â”â”â” ë˜ì „ ì™„ì „ í´ë¦¬ì–´! â”â”â”");
+
+        // í´ë¦¬ì–´ ë³´ìƒ ì§€ê¸‰
+        RewardDungeonClear();
+
+        // âœ… ë˜ì „ í‡´ì¥ â†’ OnDungeonExited ì´ë²¤íŠ¸ ë°œìƒ
+        //    â†’ GameSceneManagerê°€ ìë™ìœ¼ë¡œ ShowTownUI() í˜¸ì¶œ
+        ExitDungeon();
+
+        Debug.Log("[DungeonManager] âœ… ë˜ì „ í‡´ì¥ ì™„ë£Œ (ì´ë²¤íŠ¸ ë°œìƒ)");
+    }
+
+    /// <summary>
+    /// ë‹¤ìŒ ë°©ìœ¼ë¡œ ì´ë™
+    /// </summary>
+    public void MoveToNextRoom()
+    {
+        Debug.Log("[DungeonManager] â”â”â” ë‹¤ìŒ ë°©ìœ¼ë¡œ ì´ë™ â”â”â”");
+
+        // âœ… ì•„ë¬´ê²ƒë„ í˜¸ì¶œí•˜ì§€ ì•ŠìŒ
+        //    â†’ CombatManager.EndCombat()ì—ì„œ ì´ë¯¸ GameSceneManager.OnCombatEnded() í˜¸ì¶œ
+        //    â†’ GameSceneManagerê°€ ìë™ìœ¼ë¡œ ShowCorridorUI() í˜¸ì¶œ
+
+        Debug.Log("[DungeonManager] âœ… ë‹¤ìŒ ë°© ëŒ€ê¸° (GameSceneManagerê°€ ì²˜ë¦¬)");
+    }
+
+    /// <summary>
+    /// ë˜ì „ í´ë¦¬ì–´ ë³´ìƒ ì§€ê¸‰
+    /// </summary>
+    private void RewardDungeonClear()
+    {
+        Debug.Log("[DungeonManager] ë˜ì „ í´ë¦¬ì–´ ë³´ìƒ ê³„ì‚° ì¤‘...");
+
+        if (currentDungeon == null)
+        {
+            Debug.LogWarning("[DungeonManager] âš ï¸ currentDungeonì´ nullì…ë‹ˆë‹¤!");
+            return;
+        }
+
+        // í´ë¦¬ì–´ ë³´ìƒ (ê³¨ë“œ + ê²½í—˜ì¹˜)
+        int goldReward = UnityEngine.Random.Range(100, 500); // 100~500 ê³¨ë“œ
+        int expReward = UnityEngine.Random.Range(200, 1000); // 200~1000 ê²½í—˜ì¹˜
+
+        Debug.Log($"[DungeonManager] í´ë¦¬ì–´ ë³´ìƒ - ê³¨ë“œ: {goldReward}, ê²½í—˜ì¹˜: {expReward}");
+
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.AddGold(goldReward);
+            Debug.Log($"[DungeonManager] âœ… ê³¨ë“œ {goldReward} ì§€ê¸‰");
+        }
+
+        // TODO: ê²½í—˜ì¹˜ ì‹œìŠ¤í…œ êµ¬í˜„ ì‹œ ì¶”ê°€
+        Debug.Log($"[DungeonManager] âœ… ê²½í—˜ì¹˜ {expReward} ì§€ê¸‰ (ë¯¸êµ¬í˜„)");
+    }
 }
 
 /// <summary>
-/// ´øÀü ¹æ Å¸ÀÔ
+/// ë˜ì „ ë°© íƒ€ì…
 /// </summary>
 public enum DungeonRoomType
 {
-    Event,   // ÀÌº¥Æ®
-    Combat,  // ÀÏ¹İ ÀüÅõ
-    Boss     // º¸½º ÀüÅõ
+    Event,   // ì´ë²¤íŠ¸
+    Combat,  // ì¼ë°˜ ì „íˆ¬
+    Boss     // ë³´ìŠ¤ ì „íˆ¬
 }

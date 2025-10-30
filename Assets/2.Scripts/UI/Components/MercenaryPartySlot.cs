@@ -21,6 +21,9 @@ public class MercenaryPartySlot : MonoBehaviour
     [SerializeField] private Slider hpSlider;          // HP 슬라이더 (옵션)
     [SerializeField] private Slider mpSlider;          // MP 슬라이더 (옵션)
 
+    [Header("Turn Indicator - 현재 턴 표시")]
+    [SerializeField] private Image turnBorder;         // 빨간색 테두리 이미지
+
     private MercenaryInstance mercenaryData;
     private bool isCombatScene = false;
 
@@ -37,6 +40,12 @@ public class MercenaryPartySlot : MonoBehaviour
 
         // 초기 상태: 전투 스탯 UI 숨김
         SetCombatStatsVisible(false);
+
+        // 턴 테두리 숨김
+        if (turnBorder != null)
+        {
+            turnBorder.gameObject.SetActive(false);
+        }
     }
 
     /// <summary>
@@ -101,6 +110,9 @@ public class MercenaryPartySlot : MonoBehaviour
 
         // 전투 스탯 UI 숨김
         SetCombatStatsVisible(false);
+
+        // 턴 테두리 숨김
+        SetTurnActive(false);
     }
 
     /// <summary>
@@ -168,6 +180,18 @@ public class MercenaryPartySlot : MonoBehaviour
     }
 
     /// <summary>
+    /// 현재 턴 표시 (빨간색 테두리)
+    /// </summary>
+    public void SetTurnActive(bool active)
+    {
+        if (turnBorder != null)
+        {
+            turnBorder.gameObject.SetActive(active);
+            Debug.Log($"[MercenaryPartySlot] {mercenaryData?.mercenaryName} 턴 표시: {active}");
+        }
+    }
+
+    /// <summary>
     /// 슬롯 클릭 핸들러
     /// </summary>
     private void OnClicked()
@@ -183,6 +207,14 @@ public class MercenaryPartySlot : MonoBehaviour
 
         Debug.Log($"[MercenaryPartySlot] OnSlotClicked 이벤트 발생");
         OnSlotClicked?.Invoke(mercenaryData);
+    }
+
+    /// <summary>
+    /// 용병 데이터 반환
+    /// </summary>
+    public MercenaryInstance GetMercenary()
+    {
+        return mercenaryData;
     }
 
     private void OnDestroy()

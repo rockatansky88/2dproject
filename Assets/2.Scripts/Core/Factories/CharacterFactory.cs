@@ -1,8 +1,8 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using System.Collections.Generic;
 
 /// <summary>
-/// ¿ëº´°ú ¸ó½ºÅÍ¸¦ ·£´ı ½ºÅÈÀ¸·Î »ı¼ºÇÏ´Â ÆÑÅä¸®
+/// ìš©ë³‘ê³¼ ëª¬ìŠ¤í„°ë¥¼ ëœë¤ ìŠ¤íƒ¯ìœ¼ë¡œ ìƒì„±í•˜ëŠ” íŒ©í† ë¦¬
 /// </summary>
 public class CharacterFactory : MonoBehaviour
 {
@@ -11,7 +11,7 @@ public class CharacterFactory : MonoBehaviour
     [SerializeField] private List<MonsterStatsSO> monsterTemplates;
 
     [Header("Stat Variation")]
-    [SerializeField, Range(0f, 0.3f)] private float statVariation = 0.1f; // ¡¾10% º¯µ¿
+    [SerializeField, Range(0f, 0.3f)] private float statVariation = 0.1f; // Â±10% ë³€ë™
 
     private static CharacterFactory instance;
     public static CharacterFactory Instance => instance;
@@ -30,81 +30,90 @@ public class CharacterFactory : MonoBehaviour
     }
 
     /// <summary>
-    /// ·£´ı ¿ëº´ »ı¼º
+    /// ëœë¤ ìš©ë³‘ ìƒì„±
     /// </summary>
     public CharacterStatsSO CreateRandomMercenary()
     {
         if (mercenaryTemplates == null || mercenaryTemplates.Count == 0)
         {
-            Debug.LogError("[CharacterFactory] ? ¿ëº´ ÅÛÇÃ¸´ÀÌ ¾ø½À´Ï´Ù!");
+            Debug.LogError("[CharacterFactory] ? ìš©ë³‘ í…œí”Œë¦¿ì´ ì—†ìŠµë‹ˆë‹¤!");
             return null;
         }
 
         CharacterStatsSO template = mercenaryTemplates[Random.Range(0, mercenaryTemplates.Count)];
         CharacterStatsSO instance = template.CreateRandomInstance();
 
-        Debug.Log($"[CharacterFactory] ? ·£´ı ¿ëº´ »ı¼º: {instance.name} (Lv.{instance.Level})");
+        Debug.Log($"[CharacterFactory] ? ëœë¤ ìš©ë³‘ ìƒì„±: {instance.name} (Lv.{instance.Level})");
         return instance;
     }
 
     /// <summary>
-    /// ·£´ı ¸ó½ºÅÍ »ı¼º
+    /// ëœë¤ ëª¬ìŠ¤í„° ìƒì„±
     /// </summary>
     public MonsterStatsSO CreateRandomMonster()
     {
         if (monsterTemplates == null || monsterTemplates.Count == 0)
         {
-            Debug.LogError("[CharacterFactory] ? ¸ó½ºÅÍ ÅÛÇÃ¸´ÀÌ ¾ø½À´Ï´Ù!");
+            Debug.LogError("[CharacterFactory] ? ëª¬ìŠ¤í„° í…œí”Œë¦¿ì´ ì—†ìŠµë‹ˆë‹¤!");
             return null;
         }
 
         MonsterStatsSO template = monsterTemplates[Random.Range(0, monsterTemplates.Count)];
         MonsterStatsSO instance = template.CreateRandomInstance();
 
-        Debug.Log($"[CharacterFactory] ? ·£´ı ¸ó½ºÅÍ »ı¼º: {instance.name}");
+        Debug.Log($"[CharacterFactory] ? ëœë¤ ëª¬ìŠ¤í„° ìƒì„±: {instance.name}");
         return instance;
     }
 
     /// <summary>
-    /// Æ¯Á¤ ÅÛÇÃ¸´À¸·Î ·£´ı ¿ëº´ »ı¼º
+    /// íŠ¹ì • í…œí”Œë¦¿ìœ¼ë¡œ ëœë¤ ìš©ë³‘ ìƒì„±
     /// </summary>
     public CharacterStatsSO CreateMercenary(CharacterStatsSO template)
     {
         if (template == null)
         {
-            Debug.LogError("[CharacterFactory] ? ÅÛÇÃ¸´ÀÌ nullÀÔ´Ï´Ù!");
+            Debug.LogError("[CharacterFactory] ? í…œí”Œë¦¿ì´ nullì…ë‹ˆë‹¤!");
             return null;
         }
 
         CharacterStatsSO instance = template.CreateRandomInstance();
-        Debug.Log($"[CharacterFactory] ? ¿ëº´ »ı¼º: {instance.name} (ÅÛÇÃ¸´: {template.name})");
+        Debug.Log($"[CharacterFactory] ? ìš©ë³‘ ìƒì„±: {instance.name} (í…œí”Œë¦¿: {template.name})");
         return instance;
     }
 
     /// <summary>
-    /// Æ¯Á¤ ÅÛÇÃ¸´À¸·Î ·£´ı ¸ó½ºÅÍ »ı¼º
+    /// íŠ¹ì • í…œí”Œë¦¿ìœ¼ë¡œ ëœë¤ ëª¬ìŠ¤í„° ìƒì„±
     /// </summary>
     public MonsterStatsSO CreateMonster(MonsterStatsSO template)
     {
         if (template == null)
         {
-            Debug.LogError("[CharacterFactory] ? ÅÛÇÃ¸´ÀÌ nullÀÔ´Ï´Ù!");
+            Debug.LogError("[CharacterFactory] ? í…œí”Œë¦¿ì´ nullì…ë‹ˆë‹¤!");
             return null;
         }
 
         MonsterStatsSO instance = template.CreateRandomInstance();
-        Debug.Log($"[CharacterFactory] ? ¸ó½ºÅÍ »ı¼º: {instance.name} (ÅÛÇÃ¸´: {template.name})");
+        Debug.Log($"[CharacterFactory] ? ëª¬ìŠ¤í„° ìƒì„±: {instance.name} (í…œí”Œë¦¿: {template.name})");
         return instance;
     }
 
     /// <summary>
-    /// ·¹º§¿¡ µû¸¥ ½ºÅÈ º¸Á¤ (¿É¼Ç)
+    /// ì „íˆ¬ìš© Character ì˜¤ë¸Œì íŠ¸ ìƒì„± (ì‚¬ìš© ì•ˆ í•¨ - CombatManagerì—ì„œ ì§ì ‘ ìƒì„±)
+    /// </summary>
+    /*public static Character CreateCharacter(MercenaryInstance mercenaryData, Transform parent)
+    {
+        // ì‚¬ìš©í•˜ì§€ ì•ŠìŒ
+        Debug.LogWarning("[CharacterFactory] CreateCharacterëŠ” ë” ì´ìƒ ì‚¬ìš©í•˜ì§€ ì•ŠìŠµë‹ˆë‹¤!");
+        return null;
+    }*/
+    /// <summary>
+    /// ë ˆë²¨ì— ë”°ë¥¸ ìŠ¤íƒ¯ ë³´ì • (ì˜µì…˜)
     /// </summary>
     public void ApplyLevelScaling(CharacterStatsSO stats, int targetLevel)
     {
         if (targetLevel <= 1) return;
 
-        float multiplier = 1f + (targetLevel - 1) * 0.1f; // ·¹º§´ç 10% Áõ°¡
+        float multiplier = 1f + (targetLevel - 1) * 0.1f; // ë ˆë²¨ë‹¹ 10% ì¦ê°€
 
         stats.Strength = Mathf.RoundToInt(stats.Strength * multiplier);
         stats.Dexterity = Mathf.RoundToInt(stats.Dexterity * multiplier);
@@ -114,6 +123,6 @@ public class CharacterFactory : MonoBehaviour
         stats.Speed = Mathf.RoundToInt(stats.Speed * multiplier);
         stats.Level = targetLevel;
 
-        Debug.Log($"[CharacterFactory] ·¹º§ ½ºÄÉÀÏ¸µ Àû¿ë: Lv.{targetLevel} (¹èÀ²: {multiplier:F2}x)");
+        Debug.Log($"[CharacterFactory] ë ˆë²¨ ìŠ¤ì¼€ì¼ë§ ì ìš©: Lv.{targetLevel} (ë°°ìœ¨: {multiplier:F2}x)");
     }
 }

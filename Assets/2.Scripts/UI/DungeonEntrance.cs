@@ -17,18 +17,18 @@ public class DungeonEntrance : MonoBehaviour
     [SerializeField] private Color outlineColor = Color.yellow;
     [SerializeField] private float outlineThickness = 0.1f;
 
-    private SpriteRenderer spriteRenderer;
+    //private SpriteRenderer spriteRenderer;
     private GameObject outlineObject;
-    private SpriteRenderer outlineRenderer;
+    //private SpriteRenderer outlineRenderer;
 
     private void Awake()
     {
         Debug.Log("[DungeonEntrance] Awake 시작");
 
-        spriteRenderer = GetComponent<SpriteRenderer>();
+        //spriteRenderer = GetComponent<SpriteRenderer>();
 
         // 테두리 생성
-        CreateOutline();
+        //CreateOutline();
         SetOutlineActive(false);
 
         Debug.Log("[DungeonEntrance] ✅ Awake 완료");
@@ -37,23 +37,23 @@ public class DungeonEntrance : MonoBehaviour
     /// <summary>
     /// 테두리 오브젝트 생성
     /// </summary>
-    private void CreateOutline()
-    {
-        outlineObject = new GameObject("Outline");
-        outlineObject.transform.SetParent(transform);
-        outlineObject.transform.localPosition = Vector3.zero;
-        outlineObject.transform.localRotation = Quaternion.identity;
+    //private void CreateOutline()
+    //{
+    //    outlineObject = new GameObject("Outline");
+    //    outlineObject.transform.SetParent(transform);
+    //    outlineObject.transform.localPosition = Vector3.zero;
+    //    outlineObject.transform.localRotation = Quaternion.identity;
 
-        outlineRenderer = outlineObject.AddComponent<SpriteRenderer>();
-        outlineRenderer.sprite = spriteRenderer.sprite;
-        outlineRenderer.color = outlineColor;
-        outlineRenderer.sortingLayerName = spriteRenderer.sortingLayerName;
-        outlineRenderer.sortingOrder = spriteRenderer.sortingOrder - 1;
+    //    outlineRenderer = outlineObject.AddComponent<SpriteRenderer>();
+    //    outlineRenderer.sprite = spriteRenderer.sprite;
+    //    outlineRenderer.color = outlineColor;
+    //    outlineRenderer.sortingLayerName = spriteRenderer.sortingLayerName;
+    //    outlineRenderer.sortingOrder = spriteRenderer.sortingOrder - 1;
 
-        outlineObject.transform.localScale = Vector3.one * (1f + outlineThickness);
+    //    outlineObject.transform.localScale = Vector3.one * (1f + outlineThickness);
 
-        Debug.Log($"[DungeonEntrance] 테두리 생성 완료 (색상: {outlineColor})");
-    }
+    //    Debug.Log($"[DungeonEntrance] 테두리 생성 완료 (색상: {outlineColor})");
+    //}
 
     /// <summary>
     /// 테두리 표시/숨김

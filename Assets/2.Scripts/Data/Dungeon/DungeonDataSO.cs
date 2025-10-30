@@ -1,83 +1,86 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 /// <summary>
-/// ´øÀü ±âº» Á¤º¸¸¦ ´ã´Â ScriptableObject
-/// - ´øÀüº° ¹è°æ ÀÌ¹ÌÁö, Ãâ¸ô ¸ó½ºÅÍ ¸®½ºÆ®, ÀÌº¥Æ® ¸®½ºÆ®¸¦ °ü¸®ÇÕ´Ï´Ù.
+/// ë˜ì „ ê¸°ë³¸ ì •ë³´ë¥¼ ë‹´ëŠ” ScriptableObject
+/// - ë˜ì „ë³„ ë°°ê²½ ì´ë¯¸ì§€, ì¶œëª° ëª¬ìŠ¤í„° ë¦¬ìŠ¤íŠ¸, ì´ë²¤íŠ¸ ë¦¬ìŠ¤íŠ¸ë¥¼ ê´€ë¦¬í•©ë‹ˆë‹¤.
 /// </summary>
 [CreateAssetMenu(fileName = "New Dungeon", menuName = "Game/Dungeon/Dungeon Data")]
 public class DungeonDataSO : ScriptableObject
 {
-    [Header("´øÀü ±âº» Á¤º¸")]
-    [Tooltip("´øÀü °íÀ¯ ID (¿¹: dungeon_forest_01)")]
+    [Header("ë˜ì „ ê¸°ë³¸ ì •ë³´")]
+    [Tooltip("ë˜ì „ ê³ ìœ  ID (ì˜ˆ: dungeon_forest_01)")]
     public string dungeonID;
 
-    [Tooltip("´øÀü ÀÌ¸§ (¿¹: ¾îµÒÀÇ ½£)")]
+    [Tooltip("ë˜ì „ ì´ë¦„ (ì˜ˆ: ì–´ë‘ ì˜ ìˆ²)")]
     public string dungeonName;
 
-    [Tooltip("´øÀü ÀÔ±¸ ¹è°æ ÀÌ¹ÌÁö")]
+    [Tooltip("ë˜ì „ ì…êµ¬ ë°°ê²½ ì´ë¯¸ì§€")]
     public Sprite entranceSprite;
 
-    [Tooltip("´øÀü ³»ºÎ Åë·Î ¹è°æ ÀÌ¹ÌÁö (3°¥·¡ ¼±ÅÃ È­¸é)")]
+    [Tooltip("ë˜ì „ ë‚´ë¶€ í†µë¡œ ë°°ê²½ ì´ë¯¸ì§€ (3ê°ˆë˜ ì„ íƒ í™”ë©´)")]
     public Sprite corridorSprite;
 
-    [Tooltip("ÀÏ¹İ ÀüÅõ ¹è°æ ÀÌ¹ÌÁö")]
+    [Tooltip("ì¼ë°˜ ì „íˆ¬ ë°°ê²½ ì´ë¯¸ì§€")]
     public Sprite combatBackgroundSprite;
 
-    [Tooltip("º¸½º ÀüÅõ ¹è°æ ÀÌ¹ÌÁö")]
+    [Tooltip("ë³´ìŠ¤ ì „íˆ¬ ë°°ê²½ ì´ë¯¸ì§€")]
     public Sprite bossBackgroundSprite;
 
-    [Tooltip("ÀÌº¥Æ® ¸Ê ¹è°æ ÀÌ¹ÌÁö")]
+    [Tooltip("ì´ë²¤íŠ¸ ë§µ ë°°ê²½ ì´ë¯¸ì§€")]
     public Sprite eventBackgroundSprite;
 
-    [Header("¸ó½ºÅÍ ½ºÆù ¼³Á¤")]
-    [Tooltip("ÀÏ¹İ ÀüÅõ¿¡¼­ µîÀå °¡´ÉÇÑ ¸ó½ºÅÍ ¸®½ºÆ® (ÀÏ¹İ~¿¡ÇÈ)")]
+    [Header("ëª¬ìŠ¤í„° ìŠ¤í° ì„¤ì •")]
+    [Tooltip("ì¼ë°˜ ì „íˆ¬ì—ì„œ ë“±ì¥ ê°€ëŠ¥í•œ ëª¬ìŠ¤í„° ë¦¬ìŠ¤íŠ¸ (ì¼ë°˜~ì—í”½)")]
     public MonsterSpawnData[] normalMonsters;
 
-    [Tooltip("º¸½º ÀüÅõ¿¡¼­ µîÀå °¡´ÉÇÑ º¸½º ¸®½ºÆ®")]
+    [Tooltip("ë³´ìŠ¤ ì „íˆ¬ì—ì„œ ë“±ì¥ ê°€ëŠ¥í•œ ë³´ìŠ¤ ë¦¬ìŠ¤íŠ¸")]
     public MonsterSpawnData[] bossMonsters;
 
-    [Header("ÀÌº¥Æ® ¼³Á¤")]
-    [Tooltip("ÀÌ ´øÀü¿¡¼­ µîÀå °¡´ÉÇÑ ÀÌº¥Æ® ¸®½ºÆ®")]
+    [Header("ì´ë²¤íŠ¸ ì„¤ì •")]
+    [Tooltip("ì´ ë˜ì „ì—ì„œ ë“±ì¥ ê°€ëŠ¥í•œ ì´ë²¤íŠ¸ ë¦¬ìŠ¤íŠ¸")]
     public RoomEventDataSO[] possibleEvents;
 
-    [Header("´øÀü ³­ÀÌµµ")]
-    [Tooltip("±ÇÀå ·¹º§")]
+    [Header("ë˜ì „ ë‚œì´ë„")]
+    [Tooltip("ê¶Œì¥ ë ˆë²¨")]
     public int recommendedLevel = 1;
 
-    [Tooltip("ÃÑ ¹æ °³¼ö (±âº»°ª: 5)")]
+    [Tooltip("ì´ ë°© ê°œìˆ˜ (ê¸°ë³¸ê°’: 5)")]
     public int totalRooms = 5;
 }
 
 /// <summary>
-/// ¸ó½ºÅÍ ½ºÆù Á¤º¸
+/// ëª¬ìŠ¤í„° ìŠ¤í° ì •ë³´
 /// </summary>
 [System.Serializable]
 public class MonsterSpawnData
 {
-    [Tooltip("¸ó½ºÅÍ ½ºÅÈ µ¥ÀÌÅÍ")]
+    [Tooltip("ëª¬ìŠ¤í„° ìŠ¤íƒ¯ ë°ì´í„°")]
     public MonsterStatsSO monsterStats;
 
-    [Tooltip("¸ó½ºÅÍ ½ºÇÁ¶óÀÌÆ® (ÀüÅõ¿¡¼­ Ç¥½Ã)")]
+    [Tooltip("ëª¬ìŠ¤í„° ìŠ¤í”„ë¼ì´íŠ¸ (ì „íˆ¬í™”ë©´ í‘œì‹œ)")]
     public Sprite monsterSprite;
 
-    [Tooltip("¸ó½ºÅÍ ÀÌ¸§")]
+    [Tooltip("ëª¬ìŠ¤í„° ì´ë¦„")]
     public string monsterName;
 
-    [Tooltip("¸ó½ºÅÍ µî±Ş (Normal, Rare, Epic, Boss)")]
+    [Tooltip("ëª¬ìŠ¤í„° ë“±ê¸‰ (Normal, Rare, Epic, Boss)")]
     public MonsterRarity rarity;
 
-    [Tooltip("½ºÆù °¡ÁßÄ¡ (³ôÀ»¼ö·Ï ÀÚÁÖ µîÀå)")]
+    [Tooltip("ëª¬ìŠ¤í„° ë‚œì´ë„ (TPE ë¯¸ë‹ˆê²Œì„ìš©)")]
+    public MonsterDifficulty difficulty = MonsterDifficulty.Normal; // âœ… ì¶”ê°€
+
+    [Tooltip("ìŠ¤í° ê°€ì¤‘ì¹˜ (í™•ë¥ ì—ì„œ ë¹„ì¤‘ ì—­í• )")]
     [Range(1, 100)]
     public int spawnWeight = 10;
 }
 
 /// <summary>
-/// ¸ó½ºÅÍ µî±Ş
+/// ëª¬ìŠ¤í„° ë“±ê¸‰
 /// </summary>
 public enum MonsterRarity
 {
-    Normal,  // ÀÏ¹İ
-    Rare,    // Èñ±Í
-    Epic,    // ¿¡ÇÈ
-    Boss     // º¸½º
+    Normal,  // ì¼ë°˜
+    Rare,    // í¬ê·€
+    Epic,    // ì—í”½
+    Boss     // ë³´ìŠ¤
 }

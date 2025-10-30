@@ -11,7 +11,6 @@ using System.Collections.Generic;
 public class GameSceneManager : MonoBehaviour
 {
     public static GameSceneManager Instance { get; private set; }
-
     [Header("Camera")]
     [SerializeField] private Camera mainCamera;
     [SerializeField] private float cameraMoveDuration = 1f; // 카메라 이동 시간
@@ -211,7 +210,7 @@ public class GameSceneManager : MonoBehaviour
         // 설명
         if (entranceDescriptionText != null)
         {
-            entranceDescriptionText.text = $"권장 레벨: {dungeon.recommendedLevel}\n총 {dungeon.totalRooms}개의 방을 돌파하세요!";
+            entranceDescriptionText.text = $"권장 레벨: {dungeon.recommendedLevel}\n 총 {dungeon.totalRooms}개의 방을 돌파하세요!";
         }
 
         // 파티 UI 숨김
