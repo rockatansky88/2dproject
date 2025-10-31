@@ -1,12 +1,14 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System;
+using System.Collections;
 
 /// <summary>
 /// 몬스터 UI 슬롯
 /// - HP 바 표시
 /// - 몬스터 스프라이트
 /// - 클릭 이벤트 (타겟 선택)
+/// - 몬스터 턴 표시 (빨간색 외곽선 깜빡임)
 /// </summary>
 public class MonsterUISlot : MonoBehaviour
 {
@@ -23,6 +25,12 @@ public class MonsterUISlot : MonoBehaviour
 
     [Header("버튼")]
     [SerializeField] private Button selectButton;
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 🆕 수정: Image의 Outline 컴포넌트 사용
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    private Outline turnOutline; // 몬스터 이미지의 Outline 컴포넌트
+    private Coroutine turnBlinkCoroutine; // 깜빡임 코루틴 참조
 
     private Monster monster;
 
@@ -59,21 +67,41 @@ public class MonsterUISlot : MonoBehaviour
         if (monsterImage != null && monster.spawnData != null && monster.spawnData.monsterSprite != null)
         {
             monsterImage.sprite = monster.spawnData.monsterSprite;
-
-            // 🆕 추가: Preserve Aspect 강제 활성화
             monsterImage.preserveAspect = true;
-
-            // 🆕 추가: 이미지 색상 초기화 (투명도 문제 방지)
             monsterImage.color = Color.white;
 
-            Debug.Log($"[MonsterUISlot] ✅ 스프라이트 설정: {monster.spawnData.monsterSprite.name} (크기: {monster.spawnData.monsterSprite.rect.size})");
+            Debug.Log($"[MonsterUISlot] ✅ 스프라이트 설정: {monster.spawnData.monsterSprite.name}");
         }
         else
         {
-            Debug.LogWarning($"[MonsterUISlot] ⚠️ 스프라이트 설정 실패:\n" +
-                           $"  - monsterImage null: {monsterImage == null}\n" +
-                           $"  - spawnData null: {monster.spawnData == null}\n" +
-                           $"  - sprite null: {(monster.spawnData != null ? (monster.spawnData.monsterSprite == null).ToString() : "N/A")}");
+            Debug.LogWarning($"[MonsterUISlot] ⚠️ 스프라이트 설정 실패");
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // 🆕 추가: Outline 컴포넌트 자동 생성 또는 가져오기
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        if (monsterImage != null)
+        {
+            // 기존 Outline 컴포넌트가 있는지 확인
+            turnOutline = monsterImage.GetComponent<Outline>();
+
+            // 없으면 새로 추가
+            if (turnOutline == null)
+            {
+                turnOutline = monsterImage.gameObject.AddComponent<Outline>();
+                Debug.Log($"[MonsterUISlot] ✅ Outline 컴포넌트 자동 생성");
+            }
+
+            // 초기 설정: 빨간색, 두께 5, 비활성화
+            turnOutline.effectColor = new Color(1f, 0f, 0f, 1f); // 빨간색
+            turnOutline.effectDistance = new Vector2(5f, 5f); // 외곽선 두께
+            turnOutline.enabled = false; // 초기엔 비활성화
+
+            Debug.Log($"[MonsterUISlot] ✅ Outline 초기화 완료 (빨간색, 두께 5)");
+        }
+        else
+        {
+            Debug.LogWarning($"[MonsterUISlot] ⚠️ monsterImage가 null이어서 Outline을 생성할 수 없습니다!");
         }
 
         // 🔧 3. 스탯 변화 이벤트 구독
@@ -90,28 +118,19 @@ public class MonsterUISlot : MonoBehaviour
         // 🔧 4. 초기 HP 바 업데이트
         UpdateHPBar(monster.Stats.CurrentHP, monster.Stats.MaxHP);
 
-        // 🔧 5. 선택 표시 숨김 (null 체크 강화)
+        // 🔧 5. 선택 표시 숨김
         if (selectionIndicator != null)
         {
             selectionIndicator.SetActive(false);
             Debug.Log("[MonsterUISlot] ✅ 선택 표시 초기화 (비활성)");
         }
-        else
-        {
-            Debug.LogWarning($"[MonsterUISlot] ⚠️ selectionIndicator가 null입니다! (오브젝트: {gameObject.name})");
-        }
 
         // 🔧 6. 버튼 이벤트 연결
         if (selectButton != null)
         {
-            // 기존 리스너 제거 후 재등록 (중복 방지)
             selectButton.onClick.RemoveAllListeners();
             selectButton.onClick.AddListener(OnButtonClicked);
             Debug.Log("[MonsterUISlot] ✅ 버튼 클릭 이벤트 연결 완료");
-        }
-        else
-        {
-            Debug.LogWarning($"[MonsterUISlot] ⚠️ selectButton이 null입니다! (오브젝트: {gameObject.name})");
         }
 
         Debug.Log($"[MonsterUISlot] ✅ {monster.Name} UI 슬롯 초기화 완료");
@@ -162,6 +181,9 @@ public class MonsterUISlot : MonoBehaviour
             color.a = 0.5f;
             monsterImage.color = color;
         }
+
+        // 🆕 추가: 턴 외곽선 비활성화
+        SetTurnActive(false);
     }
 
     /// <summary>
@@ -169,17 +191,91 @@ public class MonsterUISlot : MonoBehaviour
     /// </summary>
     public void SetSelected(bool selected)
     {
-        // 🔧 null 체크 강화
         if (selectionIndicator != null)
         {
             selectionIndicator.SetActive(selected);
             Debug.Log($"[MonsterUISlot] {(monster != null ? monster.Name : "Unknown")} 선택 표시: {selected}");
         }
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 🆕 수정: Outline 사용 방식으로 변경
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    /// <summary>
+    /// 몬스터 턴 표시 활성화/비활성화
+    /// 몬스터 이미지의 Outline 컴포넌트를 사용하여 빨간색 외곽선 깜빡임
+    /// </summary>
+    public void SetTurnActive(bool active)
+    {
+        // 🔧 수정: Outline null 체크
+        if (turnOutline == null)
+        {
+            Debug.LogWarning($"[MonsterUISlot] ⚠️ {gameObject.name}: Outline 컴포넌트가 없습니다!\n" +
+                           $"  - Monster: {(monster != null ? monster.Name : "null")}\n" +
+                           $"  - SetTurnActive({active}) 호출 무시\n" +
+                           $"  - Outline은 Initialize()에서 자동 생성됩니다");
+            return;
+        }
+
+        // 기존 깜빡임 코루틴 중지
+        if (turnBlinkCoroutine != null)
+        {
+            StopCoroutine(turnBlinkCoroutine);
+            turnBlinkCoroutine = null;
+        }
+
+        if (active)
+        {
+            // 턴 표시 활성화 및 깜빡임 시작
+            turnOutline.enabled = true;
+            turnBlinkCoroutine = StartCoroutine(BlinkTurnOutline());
+            Debug.Log($"[MonsterUISlot] ✅ {monster.Name} 턴 표시 활성화 (빨간색 외곽선 깜빡임 시작)");
+        }
         else
         {
-            Debug.LogWarning($"[MonsterUISlot] ⚠️ selectionIndicator가 null입니다! SetSelected({selected}) 호출 무시\n" +
-                           $"  - 오브젝트: {gameObject.name}\n" +
-                           $"  - Monster: {(monster != null ? monster.Name : "null")}");
+            // 턴 표시 비활성화
+            turnOutline.enabled = false;
+            Debug.Log($"[MonsterUISlot] {(monster != null ? monster.Name : "Unknown")} 턴 표시 비활성화");
+        }
+    }
+
+    /// <summary>
+    /// 빨간색 외곽선 깜빡임 효과
+    /// Outline의 알파값을 0.5 ~ 1.0 사이에서 반복
+    /// </summary>
+    private IEnumerator BlinkTurnOutline()
+    {
+        float blinkSpeed = 2f; // 깜빡임 속도
+        bool fadingOut = true;
+
+        while (true)
+        {
+            Color color = turnOutline.effectColor;
+
+            if (fadingOut)
+            {
+                // 투명하게
+                color.a -= Time.deltaTime * blinkSpeed;
+                if (color.a <= 0.5f)
+                {
+                    color.a = 0.5f;
+                    fadingOut = false;
+                }
+            }
+            else
+            {
+                // 불투명하게
+                color.a += Time.deltaTime * blinkSpeed;
+                if (color.a >= 1f)
+                {
+                    color.a = 1f;
+                    fadingOut = true;
+                }
+            }
+
+            turnOutline.effectColor = color;
+            yield return null;
         }
     }
 
@@ -217,6 +313,13 @@ public class MonsterUISlot : MonoBehaviour
         if (selectButton != null)
         {
             selectButton.onClick.RemoveListener(OnButtonClicked);
+        }
+
+        // 🆕 추가: 코루틴 정리
+        if (turnBlinkCoroutine != null)
+        {
+            StopCoroutine(turnBlinkCoroutine);
+            turnBlinkCoroutine = null;
         }
     }
 }

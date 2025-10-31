@@ -372,8 +372,18 @@ public class CombatUI : MonoBehaviour
     {
         Debug.Log($"[CombatUI] 현재 턴 표시: {combatant.Name}");
 
-        // 모든 파티 슬롯 턴 표시 제거
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // 🔧 수정: 모든 턴 표시 초기화 (용병 + 몬스터)
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        // 1. 모든 파티 슬롯 턴 표시 제거
         foreach (var slot in partySlots)
+        {
+            if (slot != null) slot.SetTurnActive(false);
+        }
+
+        // 🆕 추가: 모든 몬스터 슬롯 턴 표시 제거
+        foreach (var slot in monsterSlots)
         {
             if (slot != null) slot.SetTurnActive(false);
         }
@@ -381,8 +391,13 @@ public class CombatUI : MonoBehaviour
         // 스킬 선택 초기화
         selectedSkill = null;
 
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // 🔧 수정: 턴에 따른 UI 업데이트 (플레이어 vs 몬스터)
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
         if (combatant.IsPlayer)
         {
+            // 용병 턴 처리
             Character character = combatant as Character;
             if (character != null)
             {
@@ -393,7 +408,7 @@ public class CombatUI : MonoBehaviour
                 if (targetSlot != null)
                 {
                     targetSlot.SetTurnActive(true);
-                    Debug.Log($"[CombatUI] {character.Name} 턴 표시");
+                    Debug.Log($"[CombatUI] ✅ {character.Name} 턴 표시 (용병)");
 
                     // 🆕 추가: SkillContainer를 해당 용병 위로 이동
                     MoveSkillContainerToMercenary(targetSlot);
@@ -408,6 +423,25 @@ public class CombatUI : MonoBehaviour
         }
         else
         {
+            // 🆕 추가: 몬스터 턴 처리
+            Monster monster = combatant as Monster;
+            if (monster != null)
+            {
+                // 해당 몬스터 슬롯 찾기
+                MonsterUISlot targetSlot = monsterSlots.FirstOrDefault(s =>
+                    s != null && s.GetMonster() != null && s.GetMonster() == monster);
+
+                if (targetSlot != null)
+                {
+                    targetSlot.SetTurnActive(true);
+                    Debug.Log($"[CombatUI] ✅ {monster.Name} 턴 표시 (몬스터)");
+                }
+                else
+                {
+                    Debug.LogWarning($"[CombatUI] ⚠️ {monster.Name}의 슬롯을 찾을 수 없습니다!");
+                }
+            }
+
             // 몬스터 턴이면 스킬 슬롯 숨김
             if (skillSlotParent != null)
             {

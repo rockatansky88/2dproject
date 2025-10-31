@@ -706,15 +706,25 @@ public class CombatManager : MonoBehaviour
 
     /// <summary>
     /// AI 공격 실행
+    /// 몬스터가 용병을 공격할 때 호출되는 메서드
+    /// 스킬의 CalculateDamage를 사용하여 데미지를 계산하고 패링 미니게임 시작
     /// </summary>
     public void ExecuteAIAttack(Monster monster, SkillDataSO skill, Character target)
     {
         Debug.Log($"[CombatManager] 🤖 AI 공격: {monster.Name} -> {target.Name} (스킬: {skill.skillName})");
 
-        // 데미지 계산
-        int damage = CalculateDamage(monster, skill, target);
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // 🔧 수정: SkillDataSO의 CalculateDamage 메서드 사용
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-        Debug.Log($"[CombatManager] 계산된 데미지: {damage}");
+        // 크리티컬 판정
+        bool isCritical = monster.Stats.RollCritical();
+        Debug.Log($"[CombatManager] 크리티컬 판정: {(isCritical ? "크리티컬!" : "일반 공격")}");
+
+        // 스킬의 CalculateDamage 메서드를 직접 사용
+        int damage = skill.CalculateDamage(monster.Stats, isCritical);
+
+        Debug.Log($"[CombatManager] 계산된 데미지: {damage} (스킬: {skill.skillName}, 크리티컬: {isCritical})");
 
         // 패링 미니게임 표시
         pendingDamage = damage;
@@ -733,19 +743,28 @@ public class CombatManager : MonoBehaviour
         }
     }
 
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 🆕 추가: AI 타겟 화살표 표시 (TurnController에서 호출)
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     /// <summary>
-    /// 데미지 계산 (임시)
+    /// AI 공격 시 타겟 화살표 표시 (용병 위에 표시)
     /// </summary>
-    private int CalculateDamage(Monster attacker, SkillDataSO skill, Character defender)
+    public void ShowTargetArrowForAI(Character target)
     {
-        // 크리티컬 판정
-        bool isCritical = attacker.Stats.RollCritical();
+        if (combatUI == null)
+        {
+            Debug.LogError("[CombatManager] ❌ CombatUI가 null입니다!");
+            return;
+        }
 
-        // 스킬 데미지 계산
-        int damage = skill.CalculateDamage(attacker.Stats, isCritical);
+        if (target == null)
+        {
+            Debug.LogError("[CombatManager] ❌ 타겟이 null입니다!");
+            return;
+        }
 
-        Debug.Log($"[CombatManager] 데미지 계산: {damage} (크리티컬: {isCritical})");
-
-        return damage;
+        Debug.Log($"[CombatManager] 🎯 AI 타겟 화살표 표시: {target.Name}");
+        combatUI.ShowTargetArrow(target);
     }
 }

@@ -146,6 +146,16 @@ public class TurnController : MonoBehaviour
 
         Debug.Log($"[TurnController] 🎯 AI {monster.Name}이(가) {target.Name}을(를) 타겟으로 {skill.skillName} 사용");
 
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // 🆕 추가: 타겟 화살표 표시 (용병 위에 화살표 표시)
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        if (CombatManager.Instance != null)
+        {
+            // CombatUI를 통해 타겟 화살표 표시
+            CombatManager.Instance.ShowTargetArrowForAI(target);
+            Debug.Log($"[TurnController] ✅ {target.Name} 위에 타겟 화살표 표시");
+        }
+
         yield return new WaitForSeconds(0.5f); // 애니메이션 대기
 
         // CombatManager에게 AI 공격 요청
