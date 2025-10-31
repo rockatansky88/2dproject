@@ -382,7 +382,7 @@ public class CombatUI : MonoBehaviour
             if (slot != null) slot.SetTurnActive(false);
         }
 
-        // 🆕 추가: 모든 몬스터 슬롯 턴 표시 제거
+        // 2. 모든 몬스터 슬롯 턴 표시 제거
         foreach (var slot in monsterSlots)
         {
             if (slot != null) slot.SetTurnActive(false);
@@ -410,7 +410,7 @@ public class CombatUI : MonoBehaviour
                     targetSlot.SetTurnActive(true);
                     Debug.Log($"[CombatUI] ✅ {character.Name} 턴 표시 (용병)");
 
-                    // 🆕 추가: SkillContainer를 해당 용병 위로 이동
+                    // SkillContainer를 해당 용병 위로 이동
                     MoveSkillContainerToMercenary(targetSlot);
                 }
 
@@ -419,11 +419,16 @@ public class CombatUI : MonoBehaviour
                 {
                     skillSlotParent.gameObject.SetActive(true);
                 }
+
+                // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                // 🆕 추가: 용병 턴 시작 시 첫 번째 몬스터 자동 선택
+                // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                SelectFirstAliveMonster();
             }
         }
         else
         {
-            // 🆕 추가: 몬스터 턴 처리
+            // 몬스터 턴 처리
             Monster monster = combatant as Monster;
             if (monster != null)
             {
@@ -447,6 +452,35 @@ public class CombatUI : MonoBehaviour
             {
                 skillSlotParent.gameObject.SetActive(false);
             }
+        }
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 🆕 추가: 첫 번째 살아있는 몬스터 자동 선택
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    /// <summary>
+    /// 용병 턴 시작 시 첫 번째 살아있는 몬스터를 자동으로 타겟 지정
+    /// </summary>
+    public void SelectFirstAliveMonster()
+    {
+        Debug.Log("[CombatUI] 첫 번째 살아있는 몬스터 자동 선택 시도");
+
+        // 살아있는 몬스터 슬롯 찾기
+        MonsterUISlot firstAliveSlot = monsterSlots.FirstOrDefault(s =>
+            s != null && s.GetMonster() != null && s.GetMonster().IsAlive);
+
+        if (firstAliveSlot != null)
+        {
+            Monster firstMonster = firstAliveSlot.GetMonster();
+            Debug.Log($"[CombatUI] ✅ 첫 번째 몬스터 자동 선택: {firstMonster.Name}");
+
+            // 몬스터 클릭 핸들러 호출 (수동 선택과 동일한 로직)
+            OnMonsterSlotClicked(firstMonster);
+        }
+        else
+        {
+            Debug.LogWarning("[CombatUI] ⚠️ 살아있는 몬스터가 없습니다!");
         }
     }
 

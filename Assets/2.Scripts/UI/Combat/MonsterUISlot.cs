@@ -130,7 +130,16 @@ public class MonsterUISlot : MonoBehaviour
         {
             selectButton.onClick.RemoveAllListeners();
             selectButton.onClick.AddListener(OnButtonClicked);
-            Debug.Log("[MonsterUISlot] ✅ 버튼 클릭 이벤트 연결 완료");
+
+            // 🆕 추가: 버튼 상태 확인
+            Debug.Log($"[MonsterUISlot] ✅ 버튼 클릭 이벤트 연결 완료\n" +
+                     $"  - Interactable: {selectButton.interactable}\n" +
+                     $"  - Raycast Target: {(selectButton.GetComponent<Image>()?.raycastTarget ?? false)}\n" +
+                     $"  - RectTransform Size: {selectButton.GetComponent<RectTransform>()?.rect.size}");
+        }
+        else
+        {
+            Debug.LogWarning($"[MonsterUISlot] ⚠️ selectButton이 null입니다! (오브젝트: {gameObject.name})");
         }
 
         Debug.Log($"[MonsterUISlot] ✅ {monster.Name} UI 슬롯 초기화 완료");
@@ -284,13 +293,21 @@ public class MonsterUISlot : MonoBehaviour
     /// </summary>
     private void OnButtonClicked()
     {
-        if (monster == null || !monster.IsAlive)
+        Debug.Log($"[MonsterUISlot] 🖱️ 버튼 클릭 감지! (Monster: {(monster != null ? monster.Name : "null")})");
+
+        if (monster == null)
         {
-            Debug.LogWarning("[MonsterUISlot] 사망한 몬스터는 선택할 수 없습니다!");
+            Debug.LogWarning("[MonsterUISlot] ⚠️ monster가 null입니다!");
             return;
         }
 
-        Debug.Log($"[MonsterUISlot] 몬스터 클릭: {monster.Name}");
+        if (!monster.IsAlive)
+        {
+            Debug.LogWarning("[MonsterUISlot] ⚠️ 사망한 몬스터는 선택할 수 없습니다!");
+            return;
+        }
+
+        Debug.Log($"[MonsterUISlot] ✅ 몬스터 클릭 이벤트 발생: {monster.Name}");
         OnMonsterClicked?.Invoke(monster);
     }
 
