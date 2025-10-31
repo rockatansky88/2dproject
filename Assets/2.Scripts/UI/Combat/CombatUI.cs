@@ -148,36 +148,109 @@ public class CombatUI : MonoBehaviour
         }
     }
 
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 🔧 수정: InitializeMonsterUI - 몬스터 클릭 이벤트 연결 및 타겟 선택 구현
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     /// <summary>
     /// 몬스터 슬롯 찾기 및 클릭 이벤트 연결
+    /// 기능:
+    /// 1. MonsterSpawnParent 밑의 모든 MonsterUISlot 찾기
+    /// 2. 각 슬롯의 OnMonsterClicked 이벤트에 타겟 선택 핸들러 연결
+    /// 3. 타겟 선택 시 화살표 표시 및 다른 슬롯 선택 해제
     /// </summary>
     public void InitializeMonsterUI(List<Monster> monsters)
     {
-        Debug.Log($"[CombatUI] 몬스터 UI 초기화: {monsters.Count}마리");
+        Debug.Log($"[CombatUI] ━━━ 몬스터 UI 초기화: {monsters.Count}마리 ━━━");
 
-        // 몬스터 슬롯 찾기
+        // 🔧 수정: 몬스터 슬롯 새로 찾기 (이전 참조 제거)
         monsterSlots.Clear();
+
         if (monsterSpawnParent != null)
         {
             monsterSlots.AddRange(monsterSpawnParent.GetComponentsInChildren<MonsterUISlot>(true));
             Debug.Log($"[CombatUI] 몬스터 슬롯 {monsterSlots.Count}개 발견");
         }
-
-        // 클릭 이벤트 연결
-        for (int i = 0; i < monsterSlots.Count && i < monsters.Count; i++)
+        else
         {
-            int index = i; // 클로저 문제 방지
-            Monster monster = monsters[index];
-
-            // 이미 Initialize는 CombatManager에서 호출됨
-            // 여기서는 클릭 이벤트만 추가 등록
-            monsterSlots[index].OnMonsterClicked += (m) =>
-            {
-                ShowTargetArrow(m);
-            };
-
-            Debug.Log($"[CombatUI] 몬스터 슬롯 {index}: {monster.Name} 클릭 이벤트 등록");
+            Debug.LogError("[CombatUI] ❌ monsterSpawnParent가 null입니다!");
+            return;
         }
+
+        // 🆕 클릭 이벤트 연결
+        for (int i = 0; i < monsterSlots.Count; i++)
+        {
+            MonsterUISlot slot = monsterSlots[i];
+
+            if (slot == null)
+            {
+                Debug.LogWarning($"[CombatUI] ⚠️ 몬스터 슬롯 {i}가 null입니다!");
+                continue;
+            }
+
+            Monster monster = slot.GetMonster();
+
+            if (monster == null)
+            {
+                Debug.LogWarning($"[CombatUI] ⚠️ 슬롯 {i}에 Monster 데이터가 없습니다!");
+                continue;
+            }
+
+            // 🔧 이벤트 중복 등록 방지
+            slot.OnMonsterClicked -= OnMonsterSlotClicked;
+            slot.OnMonsterClicked += OnMonsterSlotClicked;
+
+            Debug.Log($"[CombatUI] ✅ 몬스터 슬롯 {i}: {monster.Name} 클릭 이벤트 등록");
+        }
+
+        Debug.Log("[CombatUI] ✅ 몬스터 UI 초기화 완료");
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 🆕 추가: 몬스터 클릭 핸들러
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    /// <summary>
+    /// 몬스터 슬롯 클릭 핸들러
+    /// 기능:
+    /// 1. 현재 타겟으로 설정
+    /// 2. 타겟 화살표 표시
+    /// 3. 다른 몬스터 슬롯 선택 해제
+    /// 4. 클릭한 슬롯만 선택 표시
+    /// </summary>
+    private void OnMonsterSlotClicked(Monster monster)
+    {
+        if (monster == null || !monster.IsAlive)
+        {
+            Debug.LogWarning("[CombatUI] ⚠️ 죽은 몬스터는 타겟으로 선택할 수 없습니다!");
+            return;
+        }
+
+        Debug.Log($"[CombatUI] 🎯 몬스터 클릭: {monster.Name} - 타겟으로 설정");
+
+        // 🔧 1. 모든 몬스터 슬롯 선택 해제
+        foreach (var slot in monsterSlots)
+        {
+            if (slot != null)
+            {
+                slot.SetSelected(false);
+            }
+        }
+
+        // 🔧 2. 클릭한 슬롯만 선택 표시
+        MonsterUISlot clickedSlot = monsterSlots.FirstOrDefault(s => s != null && s.GetMonster() == monster);
+
+        if (clickedSlot != null)
+        {
+            clickedSlot.SetSelected(true);
+            Debug.Log($"[CombatUI] ✅ {monster.Name} 선택 표시 활성화");
+        }
+
+        // 🔧 3. 타겟 화살표 표시
+        ShowTargetArrow(monster);
+
+        // 🔧 4. 현재 타겟으로 설정
+        currentTarget = monster;
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

@@ -1,36 +1,36 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
 using System;
 
 /// <summary>
-/// ¸ó½ºÅÍ UI ½½·Ô
-/// - HP ¹Ù Ç¥½Ã
-/// - ¸ó½ºÅÍ ½ºÇÁ¶óÀÌÆ®
-/// - Å¬¸¯ ÀÌº¥Æ® (Å¸°Ù ¼±ÅÃ)
+/// ëª¬ìŠ¤í„° UI ìŠ¬ë¡¯
+/// - HP ë°” í‘œì‹œ
+/// - ëª¬ìŠ¤í„° ìŠ¤í”„ë¼ì´íŠ¸
+/// - í´ë¦­ ì´ë²¤íŠ¸ (íƒ€ê²Ÿ ì„ íƒ)
 /// </summary>
 public class MonsterUISlot : MonoBehaviour
 {
-    [Header("UI ÂüÁ¶")]
+    [Header("UI ì°¸ì¡°")]
     [SerializeField] private Image monsterImage;
     [SerializeField] private Text nameText;
 
-    [Header("HP ¹Ù")]
+    [Header("HP ë°”")]
     [SerializeField] private Image hpFillImage;
     [SerializeField] private Text hpText;
 
-    [Header("¼±ÅÃ Ç¥½Ã")]
+    [Header("ì„ íƒ í‘œì‹œ")]
     [SerializeField] private GameObject selectionIndicator;
 
-    [Header("¹öÆ°")]
+    [Header("ë²„íŠ¼")]
     [SerializeField] private Button selectButton;
 
     private Monster monster;
 
-    // Å¬¸¯ ÀÌº¥Æ®
+    // í´ë¦­ ì´ë²¤íŠ¸
     public event Action<Monster> OnMonsterClicked;
 
     /// <summary>
-    /// ÃÊ±âÈ­
+    /// ì´ˆê¸°í™”
     /// </summary>
     public void Initialize(Monster target)
     {
@@ -38,44 +38,80 @@ public class MonsterUISlot : MonoBehaviour
 
         if (monster == null)
         {
-            Debug.LogError("[MonsterUISlot] monster°¡ nullÀÔ´Ï´Ù!");
+            Debug.LogError("[MonsterUISlot] monsterê°€ nullì…ë‹ˆë‹¤!");
             return;
         }
 
-        // ±âº» Á¤º¸ ¼³Á¤
+        Debug.Log($"[MonsterUISlot] â”â”â” {monster.Name} UI ìŠ¬ë¡¯ ì´ˆê¸°í™” ì‹œì‘ â”â”â”");
+
+        // ğŸ”§ 1. ê¸°ë³¸ ì •ë³´ ì„¤ì • - ëª¬ìŠ¤í„° ì´ë¦„
         if (nameText != null)
         {
             nameText.text = monster.Name;
+            Debug.Log($"[MonsterUISlot] âœ… ì´ë¦„ ì„¤ì •: {monster.Name}");
+        }
+        else
+        {
+            Debug.LogWarning("[MonsterUISlot] âš ï¸ nameTextê°€ nullì…ë‹ˆë‹¤!");
         }
 
-        if (monsterImage != null && monster.spawnData != null)
+        // ğŸ”§ 2. ëª¬ìŠ¤í„° ìŠ¤í”„ë¼ì´íŠ¸ ì„¤ì •
+        if (monsterImage != null && monster.spawnData != null && monster.spawnData.monsterSprite != null)
         {
             monsterImage.sprite = monster.spawnData.monsterSprite;
+            Debug.Log($"[MonsterUISlot] âœ… ìŠ¤í”„ë¼ì´íŠ¸ ì„¤ì •: {monster.spawnData.monsterSprite.name}");
+        }
+        else
+        {
+            Debug.LogWarning($"[MonsterUISlot] âš ï¸ ìŠ¤í”„ë¼ì´íŠ¸ ì„¤ì • ì‹¤íŒ¨:\n" +
+                           $"  - monsterImage null: {monsterImage == null}\n" +
+                           $"  - spawnData null: {monster.spawnData == null}\n" +
+                           $"  - sprite null: {(monster.spawnData != null ? (monster.spawnData.monsterSprite == null).ToString() : "N/A")}");
         }
 
-        // ½ºÅÈ º¯È­ ÀÌº¥Æ® ±¸µ¶
-        monster.Stats.OnHPChanged += UpdateHPBar;
+        // ğŸ”§ 3. ìŠ¤íƒ¯ ë³€í™” ì´ë²¤íŠ¸ êµ¬ë…
+        if (monster.Stats != null)
+        {
+            monster.Stats.OnHPChanged += UpdateHPBar;
+            Debug.Log("[MonsterUISlot] âœ… HP ë³€ê²½ ì´ë²¤íŠ¸ êµ¬ë… ì™„ë£Œ");
+        }
+        else
+        {
+            Debug.LogError("[MonsterUISlot] âŒ monster.Statsê°€ nullì…ë‹ˆë‹¤!");
+        }
 
-        // ÃÊ±â HP ¹Ù ¾÷µ¥ÀÌÆ®
+        // ğŸ”§ 4. ì´ˆê¸° HP ë°” ì—…ë°ì´íŠ¸
         UpdateHPBar(monster.Stats.CurrentHP, monster.Stats.MaxHP);
 
-        // ¼±ÅÃ Ç¥½Ã ¼û±è
+        // ğŸ”§ 5. ì„ íƒ í‘œì‹œ ìˆ¨ê¹€ (null ì²´í¬ ê°•í™”)
         if (selectionIndicator != null)
         {
             selectionIndicator.SetActive(false);
+            Debug.Log("[MonsterUISlot] âœ… ì„ íƒ í‘œì‹œ ì´ˆê¸°í™” (ë¹„í™œì„±)");
+        }
+        else
+        {
+            Debug.LogWarning($"[MonsterUISlot] âš ï¸ selectionIndicatorê°€ nullì…ë‹ˆë‹¤! (ì˜¤ë¸Œì íŠ¸: {gameObject.name})");
         }
 
-        // ¹öÆ° ÀÌº¥Æ® ¿¬°á
+        // ğŸ”§ 6. ë²„íŠ¼ ì´ë²¤íŠ¸ ì—°ê²°
         if (selectButton != null)
         {
+            // ê¸°ì¡´ ë¦¬ìŠ¤ë„ˆ ì œê±° í›„ ì¬ë“±ë¡ (ì¤‘ë³µ ë°©ì§€)
+            selectButton.onClick.RemoveAllListeners();
             selectButton.onClick.AddListener(OnButtonClicked);
+            Debug.Log("[MonsterUISlot] âœ… ë²„íŠ¼ í´ë¦­ ì´ë²¤íŠ¸ ì—°ê²° ì™„ë£Œ");
+        }
+        else
+        {
+            Debug.LogWarning($"[MonsterUISlot] âš ï¸ selectButtonì´ nullì…ë‹ˆë‹¤! (ì˜¤ë¸Œì íŠ¸: {gameObject.name})");
         }
 
-        Debug.Log($"[MonsterUISlot] {monster.Name} UI ½½·Ô ÃÊ±âÈ­ ¿Ï·á");
+        Debug.Log($"[MonsterUISlot] âœ… {monster.Name} UI ìŠ¬ë¡¯ ì´ˆê¸°í™” ì™„ë£Œ");
     }
 
     /// <summary>
-    /// HP ¹Ù ¾÷µ¥ÀÌÆ®
+    /// HP ë°” ì—…ë°ì´íŠ¸
     /// </summary>
     private void UpdateHPBar(int currentHP, int maxHP)
     {
@@ -84,7 +120,7 @@ public class MonsterUISlot : MonoBehaviour
             float fillAmount = maxHP > 0 ? (float)currentHP / maxHP : 0f;
             hpFillImage.fillAmount = fillAmount;
 
-            Debug.Log($"[MonsterUISlot] {monster.Name} HP ¹Ù ¾÷µ¥ÀÌÆ®: {currentHP}/{maxHP} ({fillAmount:P0})");
+            Debug.Log($"[MonsterUISlot] {monster.Name} HP ë°” ì—…ë°ì´íŠ¸: {currentHP}/{maxHP} ({fillAmount:P0})");
         }
 
         if (hpText != null)
@@ -92,7 +128,7 @@ public class MonsterUISlot : MonoBehaviour
             hpText.text = $"{currentHP}/{maxHP}";
         }
 
-        // »ç¸Á ½Ã ºñÈ°¼ºÈ­
+        // ì‚¬ë§ ì‹œ ë¹„í™œì„±í™”
         if (currentHP <= 0)
         {
             OnMonsterDeath();
@@ -100,19 +136,19 @@ public class MonsterUISlot : MonoBehaviour
     }
 
     /// <summary>
-    /// ¸ó½ºÅÍ »ç¸Á Ã³¸®
+    /// ëª¬ìŠ¤í„° ì‚¬ë§ ì²˜ë¦¬
     /// </summary>
     private void OnMonsterDeath()
     {
-        Debug.Log($"[MonsterUISlot] {monster.Name} »ç¸Á - UI ºñÈ°¼ºÈ­");
+        Debug.Log($"[MonsterUISlot] {monster.Name} ì‚¬ë§ - UI ë¹„í™œì„±í™”");
 
-        // ¹öÆ° ºñÈ°¼ºÈ­
+        // ë²„íŠ¼ ë¹„í™œì„±í™”
         if (selectButton != null)
         {
             selectButton.interactable = false;
         }
 
-        // ÀÌ¹ÌÁö ¹İÅõ¸í Ã³¸®
+        // ì´ë¯¸ì§€ ë°˜íˆ¬ëª… ì²˜ë¦¬
         if (monsterImage != null)
         {
             Color color = monsterImage.color;
@@ -122,34 +158,41 @@ public class MonsterUISlot : MonoBehaviour
     }
 
     /// <summary>
-    /// ¼±ÅÃ Ç¥½Ã
+    /// ì„ íƒ í‘œì‹œ
     /// </summary>
     public void SetSelected(bool selected)
     {
+        // ğŸ”§ null ì²´í¬ ê°•í™”
         if (selectionIndicator != null)
         {
             selectionIndicator.SetActive(selected);
-            Debug.Log($"[MonsterUISlot] {monster.Name} ¼±ÅÃ Ç¥½Ã: {selected}");
+            Debug.Log($"[MonsterUISlot] {(monster != null ? monster.Name : "Unknown")} ì„ íƒ í‘œì‹œ: {selected}");
+        }
+        else
+        {
+            Debug.LogWarning($"[MonsterUISlot] âš ï¸ selectionIndicatorê°€ nullì…ë‹ˆë‹¤! SetSelected({selected}) í˜¸ì¶œ ë¬´ì‹œ\n" +
+                           $"  - ì˜¤ë¸Œì íŠ¸: {gameObject.name}\n" +
+                           $"  - Monster: {(monster != null ? monster.Name : "null")}");
         }
     }
 
     /// <summary>
-    /// ¹öÆ° Å¬¸¯ ÀÌº¥Æ®
+    /// ë²„íŠ¼ í´ë¦­ ì´ë²¤íŠ¸
     /// </summary>
     private void OnButtonClicked()
     {
         if (monster == null || !monster.IsAlive)
         {
-            Debug.LogWarning("[MonsterUISlot] »ç¸ÁÇÑ ¸ó½ºÅÍ´Â ¼±ÅÃÇÒ ¼ö ¾ø½À´Ï´Ù!");
+            Debug.LogWarning("[MonsterUISlot] ì‚¬ë§í•œ ëª¬ìŠ¤í„°ëŠ” ì„ íƒí•  ìˆ˜ ì—†ìŠµë‹ˆë‹¤!");
             return;
         }
 
-        Debug.Log($"[MonsterUISlot] ¸ó½ºÅÍ Å¬¸¯: {monster.Name}");
+        Debug.Log($"[MonsterUISlot] ëª¬ìŠ¤í„° í´ë¦­: {monster.Name}");
         OnMonsterClicked?.Invoke(monster);
     }
 
     /// <summary>
-    /// ¸ó½ºÅÍ ÂüÁ¶ ¹İÈ¯
+    /// ëª¬ìŠ¤í„° ì°¸ì¡° ë°˜í™˜
     /// </summary>
     public Monster GetMonster()
     {
@@ -158,7 +201,7 @@ public class MonsterUISlot : MonoBehaviour
 
     private void OnDestroy()
     {
-        // ÀÌº¥Æ® ±¸µ¶ ÇØÁ¦
+        // ì´ë²¤íŠ¸ êµ¬ë… í•´ì œ
         if (monster != null && monster.Stats != null)
         {
             monster.Stats.OnHPChanged -= UpdateHPBar;

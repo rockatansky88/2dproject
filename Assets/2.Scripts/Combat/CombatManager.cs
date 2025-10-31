@@ -21,6 +21,9 @@ public class CombatManager : MonoBehaviour
     [SerializeField] private Transform monsterSpawnParent;  // 몬스터 생성 위치
     [SerializeField] private GameObject characterPrefab;     // 캐릭터 프리팹
 
+    // 🆕 추가: MonsterUISlot 프리팹 참조 (Inspector에서 할당)
+    [SerializeField] private GameObject monsterUISlotPrefab; // MonsterUISlot 프리팹
+
     [Header("컴포넌트 참조")]
     [SerializeField] private CombatUI combatUI;
     [SerializeField] private TurnController turnController;
@@ -181,11 +184,18 @@ public class CombatManager : MonoBehaviour
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🔧 수정: SpawnMonsters - 기존 MonsterUISlot 재활용
+    // 🔧 수정: SpawnMonsters - 기존 빈 슬롯 제거 후 생성
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
     /// <summary>
-    /// 몬스터 생성 (기존 MonsterUISlot과 연결)
+    /// 몬스터 생성 (MonsterUISlot과 Monster 데이터 통합)
+    /// 로직:
+    /// 0. MonsterSpawnParent 밑의 기존 자식 오브젝트 모두 제거 (빈 슬롯 정리)
+    /// 1. MonsterUISlot 프리팹을 MonsterSpawnParent 밑에 생성
+    /// 2. Monster 데이터 오브젝트를 MonsterUISlot 밑에 생성
+    /// 3. Monster.Initialize()에서 UI 슬롯과 연결
+    /// 4. MonsterUISlot.Initialize()에서 Monster 데이터 연결
+    /// 5. DungeonSO의 스프라이트와 스탯을 MonsterUISlot에 자동 반영
     /// </summary>
     private void SpawnMonsters(List<MonsterSpawnData> monsterDataList)
     {
@@ -199,30 +209,82 @@ public class CombatManager : MonoBehaviour
             return;
         }
 
+        // 🔧 수정: Inspector에서 할당된 프리팹 사용
+        if (monsterUISlotPrefab == null)
+        {
+            Debug.LogError("[CombatManager] ❌ MonsterUISlot 프리팹이 할당되지 않았습니다! Inspector에서 할당해주세요.");
+            return;
+        }
+
+        // 🆕 0단계: MonsterSpawnParent 밑의 기존 자식 오브젝트 모두 제거 (빈 슬롯 정리)
+        if (monsterSpawnParent != null)
+        {
+            int childCount = monsterSpawnParent.childCount;
+            Debug.Log($"[CombatManager] 🧹 기존 몬스터 슬롯 {childCount}개 정리 중...");
+
+            for (int i = childCount - 1; i >= 0; i--)
+            {
+                Transform child = monsterSpawnParent.GetChild(i);
+                Debug.Log($"[CombatManager] 제거: {child.name}");
+                Destroy(child.gameObject);
+            }
+
+            Debug.Log("[CombatManager] ✅ 기존 몬스터 슬롯 정리 완료");
+        }
+
         for (int i = 0; i < monsterDataList.Count; i++)
         {
             MonsterSpawnData data = monsterDataList[i];
 
-            Debug.Log($"[CombatManager] 몬스터 {i + 1}/{monsterDataList.Count}: {data.monsterName}");
+            Debug.Log($"[CombatManager] 몬스터 {i + 1}/{monsterDataList.Count}: {data.monsterName} 생성 중...");
+            Debug.Log($"[CombatManager] 📊 몬스터 데이터 확인:\n" +
+                     $"  - 이름: {data.monsterName}\n" +
+                     $"  - 스프라이트: {(data.monsterSprite != null ? data.monsterSprite.name : "null")}\n" +
+                     $"  - 스탯SO: {(data.monsterStats != null ? data.monsterStats.name : "null")}\n" +
+                     $"  - 난이도: {data.difficulty}");
 
-            // 🆕 GameObject를 생성하지 않고, 데이터만 담는 경량 오브젝트 생성
+            // 🆕 1단계: MonsterUISlot 생성 (MonsterSpawnParent 밑에)
+            GameObject monsterUIObj = Instantiate(monsterUISlotPrefab, monsterSpawnParent);
+            monsterUIObj.name = $"MonsterUISlot_{data.monsterName}_{i}"; // 이름 정리
+            MonsterUISlot uiSlot = monsterUIObj.GetComponent<MonsterUISlot>();
+
+            if (uiSlot == null)
+            {
+                Debug.LogError($"[CombatManager] ❌ MonsterUISlot 컴포넌트를 찾을 수 없습니다! (오브젝트: {monsterUIObj.name})");
+                Destroy(monsterUIObj);
+                continue;
+            }
+
+            // 🆕 2단계: Monster 데이터 오브젝트 생성 (MonsterUISlot 밑에 숨김)
             GameObject monsterDataObj = new GameObject($"MonsterData_{data.monsterName}_{i}");
-            monsterDataObj.transform.SetParent(monsterSpawnParent);
+            monsterDataObj.transform.SetParent(monsterUIObj.transform); // UI 슬롯 밑에 배치
             monsterDataObj.transform.localPosition = Vector3.zero;
 
             Monster monster = monsterDataObj.AddComponent<Monster>();
 
-            // 스킬 로드
+            // 🆕 3단계: 스킬 로드
             List<SkillDataSO> monsterSkills = LoadMonsterSkills(data);
 
-            // 🆕 UI 슬롯과 함께 초기화
-            MonsterUISlot uiSlot = combatUI.GetMonsterSlot(i); // 기존 몬스터 슬롯 가져오기
+            // 🆕 4단계: Monster 초기화 (UI 슬롯 연결)
+            // DungeonSO의 스프라이트와 스탯이 MonsterSpawnData에 포함되어 있으므로
+            // Monster.Initialize()에서 자동으로 처리됨
             monster.Initialize(data, monsterSkills, uiSlot);
+
+            // 🆕 5단계: MonsterUISlot 초기화 (Monster 데이터 연결)
+            // 이 단계에서 MonsterUISlot이 Monster의 스프라이트와 스탯을 받아서 UI에 표시
+            uiSlot.Initialize(monster);
 
             currentMonsters.Add(monster);
 
-            Debug.Log($"[CombatManager] ✅ {data.monsterName} 생성 완료 (UI 슬롯 {i} 연결, HP: {monster.Stats.CurrentHP}/{monster.Stats.MaxHP})");
+            Debug.Log($"[CombatManager] ✅ {data.monsterName} 생성 완료\n" +
+                     $"  - UI 슬롯: {uiSlot.name}\n" +
+                     $"  - 데이터: {monster.name}\n" +
+                     $"  - HP: {monster.Stats.CurrentHP}/{monster.Stats.MaxHP}\n" +
+                     $"  - 스프라이트 연결: {(data.monsterSprite != null ? "O" : "X")}");
         }
+
+        // 🆕 6단계: CombatUI에 몬스터 슬롯 연결 및 클릭 이벤트 등록
+        combatUI.InitializeMonsterUI(currentMonsters);
 
         Debug.Log($"[CombatManager] ✅ 몬스터 생성 완료 - 총 {currentMonsters.Count}마리");
     }
