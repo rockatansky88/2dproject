@@ -330,7 +330,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &5610711138568684734
 RectTransform:
   m_ObjectHideFlags: 0
@@ -399,6 +399,8 @@ GameObject:
   - component: {fileID: 1829834669429332784}
   - component: {fileID: 1391507158148009510}
   - component: {fileID: 8723118070806177697}
+  - component: {fileID: 809279561998402406}
+  - component: {fileID: 128884099046603957}
   m_Layer: 5
   m_Name: MonsterUI
   m_TagString: Untagged
@@ -466,6 +468,36 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &809279561998402406
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5363944204763165848}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e3116274ff8bf294b9aa237e4bddc0b6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  monsterImage: {fileID: 0}
+  nameText: {fileID: 0}
+  hpFillImage: {fileID: 6449344081925358431}
+  hpText: {fileID: 8064204035756091808}
+  selectionIndicator: {fileID: 4222760647903649068}
+  selectButton: {fileID: 5331811976786286642}
+--- !u!225 &128884099046603957
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5363944204763165848}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &5429957252864319165
 GameObject:
   m_ObjectHideFlags: 0

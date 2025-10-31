@@ -54,33 +54,41 @@ public class DungeonDataSO : ScriptableObject
 [System.Serializable]
 public class MonsterSpawnData
 {
-    [Tooltip("몬스터 스탯 데이터")]
-    public MonsterStatsSO monsterStats;
-
-    [Tooltip("몬스터 스프라이트 (전투화면 표시)")]
-    public Sprite monsterSprite;
-
     [Tooltip("몬스터 이름")]
     public string monsterName;
 
-    [Tooltip("몬스터 등급 (Normal, Rare, Epic, Boss)")]
-    public MonsterRarity rarity;
+    [Tooltip("몬스터 스프라이트")]
+    public Sprite monsterSprite;
 
-    [Tooltip("몬스터 난이도 (TPE 미니게임용)")]
-    public MonsterDifficulty difficulty = MonsterDifficulty.Normal; // ✅ 추가
+    [Tooltip("몬스터 스탯 템플릿")]
+    public MonsterStatsSO monsterStats;
+
+    [Tooltip("몬스터 난이도")]
+    public MonsterDifficulty difficulty = MonsterDifficulty.Normal;
+
+    // 🆕 추가: 몬스터 등급
+    [Tooltip("몬스터 등급 (일반~에픽: 일반 전투, 보스: 보스 전투)")]
+    public MonsterRarity rarity = MonsterRarity.Normal;
 
     [Tooltip("스폰 가중치 (확률에서 비중 역할)")]
     [Range(1, 100)]
     public int spawnWeight = 10;
+
+    // 🆕 추가: 몬스터 스킬 배열
+    [Header("스킬")]
+    [Tooltip("몬스터가 사용할 스킬 (첫 번째는 기본 공격)")]
+    public SkillDataSO[] skills = new SkillDataSO[0];
 }
 
+// 🆕 추가: MonsterRarity enum (클래스 밖으로 이동)
 /// <summary>
-/// 몬스터 등급
+/// 몬스터 등급 (일반 전투 vs 보스 전투 구분)
 /// </summary>
 public enum MonsterRarity
 {
-    Normal,  // 일반
-    Rare,    // 희귀
-    Epic,    // 에픽
-    Boss     // 보스
+    Normal,  // 일반 (흰색)
+    Rare,    // 레어 (파란색)
+    Epic,    // 에픽 (보라색)
+    Boss     // 보스 (빨간색)
 }
+

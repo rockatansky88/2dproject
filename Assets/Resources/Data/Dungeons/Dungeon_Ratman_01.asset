@@ -20,22 +20,31 @@ MonoBehaviour:
   bossBackgroundSprite: {fileID: 21300000, guid: aba99b3a92317474ebc770edbe88e0fd, type: 3}
   eventBackgroundSprite: {fileID: 21300000, guid: aba99b3a92317474ebc770edbe88e0fd, type: 3}
   normalMonsters:
-  - monsterStats: {fileID: 11400000, guid: c0bae7cd76d602e4d8e48d8d34aa8ce2, type: 2}
+  - monsterName: Ratman
     monsterSprite: {fileID: 21300000, guid: 73bdedb82f3fa604c9a70fe73311bcd1, type: 3}
-    monsterName: Ratman
+    monsterStats: {fileID: 11400000, guid: c0bae7cd76d602e4d8e48d8d34aa8ce2, type: 2}
+    difficulty: 0
     rarity: 0
     spawnWeight: 50
-  - monsterStats: {fileID: 11400000, guid: c0bae7cd76d602e4d8e48d8d34aa8ce2, type: 2}
+    skills:
+    - {fileID: 11400000, guid: 2e332f753a8f8184c8415b8f6c9c1aa2, type: 2}
+  - monsterName: Ratman Worrior
     monsterSprite: {fileID: 21300000, guid: f7df2aafde5faab41bb2cbb3c4018bcb, type: 3}
-    monsterName: Ratman Worrior
+    monsterStats: {fileID: 11400000, guid: c0bae7cd76d602e4d8e48d8d34aa8ce2, type: 2}
+    difficulty: 0
     rarity: 1
     spawnWeight: 30
+    skills:
+    - {fileID: 11400000, guid: 2e332f753a8f8184c8415b8f6c9c1aa2, type: 2}
   bossMonsters:
-  - monsterStats: {fileID: 11400000, guid: c0bae7cd76d602e4d8e48d8d34aa8ce2, type: 2}
+  - monsterName: Berserk_Skeleton
     monsterSprite: {fileID: 786006113, guid: 0c1f2b0629a6fb14fb8877790bc21f89, type: 3}
-    monsterName: Berserk_Skeleton
+    monsterStats: {fileID: 11400000, guid: c0bae7cd76d602e4d8e48d8d34aa8ce2, type: 2}
+    difficulty: 0
     rarity: 3
     spawnWeight: 0
+    skills:
+    - {fileID: 11400000, guid: 2e332f753a8f8184c8415b8f6c9c1aa2, type: 2}
   possibleEvents:
   - {fileID: 11400000, guid: cb952a83882dcd94c90296934e24cf65, type: 2}
   - {fileID: 11400000, guid: 8cb9e6893d85b2b428b4186f0489642e, type: 2}

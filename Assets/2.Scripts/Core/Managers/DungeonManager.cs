@@ -223,18 +223,18 @@ public class DungeonManager : MonoBehaviour
 
         if (currentDungeon.normalMonsters == null || currentDungeon.normalMonsters.Length == 0)
         {
-            Debug.LogError("[DungeonManager] ? normalMonsters 리스트가 비어있습니다!");
+            Debug.LogError("[DungeonManager] ❌ normalMonsters 리스트가 비어있습니다!");
             return;
         }
 
-        // 일반~에픽 등급만 필터링
+        // 일반~에픽 등급만 필터링 (보스 제외)
         var validMonsters = currentDungeon.normalMonsters
             .Where(m => m.rarity != MonsterRarity.Boss)
             .ToList();
 
         if (validMonsters.Count == 0)
         {
-            Debug.LogError("[DungeonManager] ? 스폰 가능한 일반 몬스터가 없습니다!");
+            Debug.LogError("[DungeonManager] ❌ 스폰 가능한 일반 몬스터가 없습니다!");
             return;
         }
 
@@ -258,7 +258,7 @@ public class DungeonManager : MonoBehaviour
 
         OnMonstersSpawned?.Invoke(spawnedMonsters);
 
-        Debug.Log($"[DungeonManager] ? 총 {spawnedMonsters.Count}마리 스폰 완료");
+        Debug.Log($"[DungeonManager] ✅ 총 {spawnedMonsters.Count}마리 스폰 완료");
     }
 
     /// <summary>
@@ -564,7 +564,7 @@ public class DungeonManager : MonoBehaviour
 
 /// <summary>
 /// 던전 방 타입
-/// </summary>
+/// </summary>  
 public enum DungeonRoomType
 {
     Event,   // 이벤트

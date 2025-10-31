@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System;
+using System.Collections;
 
 /// <summary>
 /// 고용된 용병을 표시하는 파티 슬롯 (최대 4명)
@@ -182,12 +183,59 @@ public class MercenaryPartySlot : MonoBehaviour
     /// <summary>
     /// 현재 턴 표시 (빨간색 테두리)
     /// </summary>
+    private Coroutine turnBlinkCoroutine;
+
     public void SetTurnActive(bool active)
     {
-        if (turnBorder != null)
+        if (turnBorder == null) return;
+
+        if (active)
         {
-            turnBorder.gameObject.SetActive(active);
-            Debug.Log($"[MercenaryPartySlot] {mercenaryData?.mercenaryName} 턴 표시: {active}");
+            turnBorder.gameObject.SetActive(true);
+
+            // 깜빡임 시작
+            if (turnBlinkCoroutine != null)
+            {
+                StopCoroutine(turnBlinkCoroutine);
+            }
+
+            turnBlinkCoroutine = StartCoroutine(BlinkTurnBorder());
+
+            Debug.Log($"[MercenaryPartySlot] ✨ {mercenaryData?.mercenaryName} 턴 표시 시작 (깜빡임)");
+        }
+        else
+        {
+            turnBorder.gameObject.SetActive(false);
+
+            // 깜빡임 중지
+            if (turnBlinkCoroutine != null)
+            {
+                StopCoroutine(turnBlinkCoroutine);
+                turnBlinkCoroutine = null;
+            }
+
+            Debug.Log($"[MercenaryPartySlot] {mercenaryData?.mercenaryName} 턴 표시 종료");
+        }
+    }
+
+    /// <summary>
+    /// 빨간색 테두리 깜빡임 효과
+    /// </summary>
+    private IEnumerator BlinkTurnBorder()
+    {
+        float minAlpha = 0.4f; // R값 40%
+        float maxAlpha = 0.65f; // R값 65%
+        float speed = 2f; // 깜빡임 속도
+
+        while (true)
+        {
+            // 알파값을 40% ~ 65% 사이로 반복
+            float alpha = Mathf.Lerp(minAlpha, maxAlpha, Mathf.PingPong(Time.time * speed, 1f));
+
+            // 빨간색으로 설정 (R=1, G=0, B=0, A=alpha)
+            turnBorder.color = new Color(1f, 0f, 0f, alpha);
+
+            yield return null;
         }
     }
 

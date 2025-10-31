@@ -39,3 +39,10 @@ MonoBehaviour:
   speedRange:
     min: 3
     max: 5
+  availableSkills:
+  - {fileID: 11400000, guid: 2e332f753a8f8184c8415b8f6c9c1aa2, type: 2}
+  - {fileID: 11400000, guid: d5e208fca91498042ac0b4a89d60594c, type: 2}
+  - {fileID: 11400000, guid: d11c0f7bb53c585418a92450b77ecd2c, type: 2}
+  manaRange:
+    min: 50
+    max: 100

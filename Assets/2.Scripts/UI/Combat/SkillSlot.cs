@@ -1,42 +1,42 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
 using System;
 
 /// <summary>
-/// ½ºÅ³ ½½·Ô UI
-/// - ½ºÅ³ ¾ÆÀÌÄÜ Ç¥½Ã
-/// - ¸¶³ª ¼Ò¸ğ·® Ç¥½Ã
-/// - ¼±ÅÃ Å×µÎ¸® Ç¥½Ã (»¡°£»ö)
-/// - Å¬¸¯ ÀÌº¥Æ®
+/// ìŠ¤í‚¬ ìŠ¬ë¡¯ UI
+/// - ìŠ¤í‚¬ ì•„ì´ì½˜ í‘œì‹œ
+/// - ë§ˆë‚˜ ì†Œëª¨ í‘œì‹œ
+/// - ì„ íƒ í…Œë‘ë¦¬ í‘œì‹œ (ë¹¨ê°„ìƒ‰)
+/// - í´ë¦­ ì´ë²¤íŠ¸
 /// </summary>
 public class SkillSlot : MonoBehaviour
 {
-    [Header("UI ÂüÁ¶")]
+    [Header("UI ìš”ì†Œ")]
     [SerializeField] private Image skillIconImage;
     [SerializeField] private Text skillNameText;
     [SerializeField] private Text manaCostText;
 
-    [Header("¼±ÅÃ Å×µÎ¸® - »¡°£»ö")]
+    [Header("ì„ íƒ í…Œë‘ë¦¬ - ë¹¨ê°„ìƒ‰")]
     [SerializeField] private Image selectionBorder;
 
-    [Header("Äğ´Ù¿î Ç¥½Ã (ÃßÈÄ È®Àå)")]
+    [Header("ì¿¨ë‹¤ìš´ í‘œì‹œ (ë‚˜ì¤‘ í™•ì¥)")]
     [SerializeField] private Image cooldownOverlay;
 
-    [Header("¹öÆ°")]
+    [Header("ë²„íŠ¼")]
     [SerializeField] private Button skillButton;
 
     private SkillDataSO skill;
 
-    // Å¬¸¯ ÀÌº¥Æ®
+    // í´ë¦­ ì´ë²¤íŠ¸
     public event Action<SkillDataSO> OnSkillClicked;
 
     /// <summary>
-    /// ½ºÅ³ ÂüÁ¶ ÇÁ·ÎÆÛÆ¼
+    /// ìŠ¤í‚¬ ë°ì´í„° í”„ë¡œí¼í‹°
     /// </summary>
     public SkillDataSO Skill => skill;
 
     /// <summary>
-    /// ÃÊ±âÈ­
+    /// ì´ˆê¸°í™”
     /// </summary>
     public void Initialize(SkillDataSO skillData)
     {
@@ -44,28 +44,28 @@ public class SkillSlot : MonoBehaviour
 
         if (skill == null)
         {
-            Debug.LogError("[SkillSlot] skillÀÌ nullÀÔ´Ï´Ù!");
+            Debug.LogError("[SkillSlot] skillì´ nullì…ë‹ˆë‹¤!");
             return;
         }
 
-        // ½ºÅ³ ¾ÆÀÌÄÜ ¼³Á¤
+        // ìŠ¤í‚¬ ì•„ì´ì½˜ ì„¤ì •
         if (skillIconImage != null && skill.skillIcon != null)
         {
             skillIconImage.sprite = skill.skillIcon;
         }
 
-        // ½ºÅ³ ÀÌ¸§ ¼³Á¤
+        // ìŠ¤í‚¬ ì´ë¦„ ì„¤ì •
         if (skillNameText != null)
         {
             skillNameText.text = skill.skillName;
         }
 
-        // ¸¶³ª ¼Ò¸ğ·® Ç¥½Ã
+        // ë§ˆë‚˜ ì†Œëª¨ í‘œì‹œ
         if (manaCostText != null)
         {
             if (skill.isBasicAttack || skill.manaCost == 0)
             {
-                manaCostText.text = "";  // ±âº» °ø°İÀº ¸¶³ª Ç¥½Ã ¾È ÇÔ
+                manaCostText.text = "";  // ê¸°ë³¸ ê³µê²©ì€ ë§ˆë‚˜ í‘œì‹œ ì•ˆ í•¨
             }
             else
             {
@@ -73,48 +73,61 @@ public class SkillSlot : MonoBehaviour
             }
         }
 
-        // ¼±ÅÃ Å×µÎ¸® ¼û±è
+        // ì„ íƒ í…Œë‘ë¦¬ ìˆ¨ê¹€
         if (selectionBorder != null)
         {
             selectionBorder.gameObject.SetActive(false);
         }
 
-        // Äğ´Ù¿î ¿À¹ö·¹ÀÌ ¼û±è (ÃßÈÄ È®Àå)
+        // ì¿¨ë‹¤ìš´ ì˜¤ë²„ë ˆì´ ìˆ¨ê¹€ (ë‚˜ì¤‘ í™•ì¥)
         if (cooldownOverlay != null)
         {
             cooldownOverlay.gameObject.SetActive(false);
         }
 
-        // ¹öÆ° ÀÌº¥Æ® ¿¬°á
+        // ë²„íŠ¼ ì´ë²¤íŠ¸ ë“±ë¡
         if (skillButton != null)
         {
+            skillButton.onClick.RemoveListener(OnButtonClicked); // ğŸ”§ ì¤‘ë³µ ë°©ì§€
             skillButton.onClick.AddListener(OnButtonClicked);
         }
 
-        Debug.Log($"[SkillSlot] {skill.skillName} ½½·Ô ÃÊ±âÈ­ ¿Ï·á");
+        Debug.Log($"[SkillSlot] {skill.skillName} ìŠ¬ë¡¯ ì´ˆê¸°í™” ì™„ë£Œ");
     }
 
+    // â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”
+    // ğŸ”§ ìˆ˜ì •: SetSelected - null ì²´í¬ ì¶”ê°€
+    // â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”
+
     /// <summary>
-    /// ¼±ÅÃ Å×µÎ¸® Ç¥½Ã/¼û±è (»¡°£»ö)
+    /// ì„ íƒ í…Œë‘ë¦¬ í‘œì‹œ/ìˆ¨ê¹€ (ë¹¨ê°„ìƒ‰)
     /// </summary>
     public void SetSelected(bool selected)
     {
-        if (selectionBorder != null)
+        // ğŸ†• ì¶”ê°€: selectionBorder null ì²´í¬
+        if (selectionBorder == null)
         {
-            selectionBorder.gameObject.SetActive(selected);
+            Debug.LogWarning("[SkillSlot] âš ï¸ selectionBorderê°€ nullì…ë‹ˆë‹¤!");
+            return;
+        }
 
-            // »¡°£»öÀ¸·Î ¼³Á¤
-            if (selected)
-            {
-                selectionBorder.color = Color.red;
-            }
+        selectionBorder.gameObject.SetActive(selected);
 
-            Debug.Log($"[SkillSlot] {skill.skillName} ¼±ÅÃ »óÅÂ: {selected}");
+        // ë¹¨ê°„ìƒ‰ìœ¼ë¡œ ì„¤ì •
+        if (selected)
+        {
+            selectionBorder.color = Color.red;
+        }
+
+        // ğŸ”§ ìˆ˜ì •: skillì´ nullì´ë©´ ë¡œê·¸ ì—†ì´ ì¢…ë£Œ
+        if (skill != null)
+        {
+            Debug.Log($"[SkillSlot] {skill.skillName} ì„ íƒ ìƒíƒœ: {selected}");
         }
     }
 
     /// <summary>
-    /// ½ºÅ³ »ç¿ë °¡´É ¿©ºÎ ¼³Á¤
+    /// ìŠ¤í‚¬ ì‚¬ìš© ê°€ëŠ¥ ì—¬ë¶€ ì„¤ì •
     /// </summary>
     public void SetInteractable(bool interactable)
     {
@@ -123,7 +136,7 @@ public class SkillSlot : MonoBehaviour
             skillButton.interactable = interactable;
         }
 
-        // ¸¶³ª ºÎÁ· ½Ã ¹İÅõ¸í Ã³¸®
+        // ì‚¬ìš© ë¶ˆê°€ ì‹œ ë°˜íˆ¬ëª… ì²˜ë¦¬
         if (!interactable && skillIconImage != null)
         {
             Color color = skillIconImage.color;
@@ -139,39 +152,38 @@ public class SkillSlot : MonoBehaviour
     }
 
     /// <summary>
-    /// ¸¶³ª Ã¼Å© ÈÄ ¹öÆ° »óÅÂ ¾÷µ¥ÀÌÆ®
+    /// ë§ˆë‚˜ ì²´í¬ ë° ë²„íŠ¼ ìƒíƒœ ì—…ë°ì´íŠ¸
     /// </summary>
     public void UpdateManaCost(int currentMP)
     {
         if (skill == null) return;
 
-        // ±âº» °ø°İÀÌ¸é Ç×»ó »ç¿ë °¡´É
+        // ê¸°ë³¸ ê³µê²©ì´ë©´ í•­ìƒ ì‚¬ìš© ê°€ëŠ¥
         if (skill.isBasicAttack)
         {
             SetInteractable(true);
             return;
         }
 
-        // ¸¶³ª ºÎÁ· ½Ã ºñÈ°¼ºÈ­
+        // ë§ˆë‚˜ ë¶€ì¡± ì‹œ ë¹„í™œì„±í™”
         bool canUse = currentMP >= skill.manaCost;
         SetInteractable(canUse);
 
-        Debug.Log($"[SkillSlot] {skill.skillName} »ç¿ë °¡´É: {canUse} (ÇöÀç MP: {currentMP}, ÇÊ¿ä MP: {skill.manaCost})");
+        Debug.Log($"[SkillSlot] {skill.skillName} ì‚¬ìš© ê°€ëŠ¥: {canUse} (í˜„ì¬ MP: {currentMP}, í•„ìš” MP: {skill.manaCost})");
     }
 
     /// <summary>
-    /// ¹öÆ° Å¬¸¯ ÀÌº¥Æ®
+    /// ë²„íŠ¼ í´ë¦­ ì´ë²¤íŠ¸
     /// </summary>
     private void OnButtonClicked()
     {
         if (skill == null)
         {
-            Debug.LogError("[SkillSlot] skillÀÌ nullÀÔ´Ï´Ù!");
+            Debug.LogError("[SkillSlot] skillì´ nullì…ë‹ˆë‹¤!");
             return;
         }
 
-        Debug.Log($"[SkillSlot] ½ºÅ³ Å¬¸¯: {skill.skillName}")
-;
+        Debug.Log($"[SkillSlot] ìŠ¤í‚¬ í´ë¦­: {skill.skillName}");
         OnSkillClicked?.Invoke(skill);
     }
 

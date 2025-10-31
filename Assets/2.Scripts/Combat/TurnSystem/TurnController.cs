@@ -120,22 +120,55 @@ public class TurnController : MonoBehaviour
     /// </summary>
     private IEnumerator ProcessAITurn(Monster monster)
     {
-        Debug.Log($"[TurnController] AI {monster.Name} 행동 결정 중...");
+        Debug.Log($"[TurnController] 🤖 AI {monster.Name} 행동 결정 중...");
 
         yield return new WaitForSeconds(1f); // AI 사고 시간
 
         // AI가 스킬 선택
         SkillDataSO skill = monster.DecideAction();
 
-        // TODO: 타겟 선택 (임시로 첫 번째 플레이어)
-        // ICombatant target = FindAlivePlayer();
-        // monster.UseSkill(skill, target);
+        if (skill == null)
+        {
+            Debug.LogWarning($"[TurnController] ⚠️ {monster.Name}의 스킬이 없어 턴 스킵");
+            EndCurrentTurn();
+            yield break;
+        }
 
-        Debug.Log($"[TurnController] AI {monster.Name}이(가) {skill.skillName} 사용 예정");
+        // 타겟 선택 (살아있는 플레이어 중 랜덤)
+        Character target = SelectRandomAlivePlayer();
+
+        if (target == null)
+        {
+            Debug.LogWarning($"[TurnController] ⚠️ 살아있는 플레이어가 없어 턴 스킵");
+            EndCurrentTurn();
+            yield break;
+        }
+
+        Debug.Log($"[TurnController] 🎯 AI {monster.Name}이(가) {target.Name}을(를) 타겟으로 {skill.skillName} 사용");
 
         yield return new WaitForSeconds(0.5f); // 애니메이션 대기
 
-        EndTurn();
+        // CombatManager에게 AI 공격 요청
+        if (CombatManager.Instance != null)
+        {
+            CombatManager.Instance.ExecuteAIAttack(monster, skill, target);
+        }
+    }
+
+    /// <summary>
+    /// 살아있는 플레이어 중 랜덤 선택
+    /// </summary>
+    private Character SelectRandomAlivePlayer()
+    {
+        List<Character> alivePlayers = party.Where(c => c.IsAlive).ToList();
+
+        if (alivePlayers.Count == 0)
+        {
+            return null;
+        }
+
+        int randomIndex = UnityEngine.Random.Range(0, alivePlayers.Count);
+        return alivePlayers[randomIndex];
     }
 
     /// <summary>
@@ -178,7 +211,7 @@ public class TurnController : MonoBehaviour
     /// <summary>
     /// 턴 종료
     /// </summary>
-    private void EndTurn()
+    public void EndTurn()
     {
         Debug.Log($"[TurnController] {currentCombatant.Name}의 턴 종료");
 
@@ -239,5 +272,19 @@ public class TurnController : MonoBehaviour
     public ICombatant GetCurrentCombatant()
     {
         return currentCombatant;
+    }
+
+    /// <summary>
+    /// 현재 턴 강제 종료 (public)
+    /// </summary>
+    public void EndCurrentTurn()
+    {
+        if (!isProcessingTurn)
+        {
+            Debug.LogWarning("[TurnController] 처리 중인 턴이 없습니다.");
+            return;
+        }
+
+        EndTurn();
     }
 }

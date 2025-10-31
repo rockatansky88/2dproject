@@ -37,6 +37,15 @@ public class CombatManager : MonoBehaviour
     private int totalGoldReward = 0;
     private int totalExpReward = 0;
 
+    // TPE 미니게임 관련 변수
+    private bool tpeSuccess = false;
+    private SkillDataSO pendingSkill = null;
+    private ICombatant pendingTarget = null;
+
+    // 패링 미니게임 관련 변수
+    private int pendingDamage = 0;
+    private Character pendingDefender = null;
+
     // 이벤트
     public event Action<bool> OnCombatEnded; // true: 승리, false: 패배
 
@@ -113,11 +122,11 @@ public class CombatManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 파티 생성 (MercenaryManager에서 현재 파티 가져오기)
+    /// 파티 생성 (MercenaryManager의 파티를 Character로 변환하고 UI에 연결)
     /// </summary>
     private void SpawnParty()
     {
-        Debug.Log("[CombatManager] 파티 생성 시작");
+        Debug.Log("[CombatManager] ━━━ 파티 생성 시작 ━━━");
 
         currentParty.Clear();
 
@@ -135,31 +144,60 @@ public class CombatManager : MonoBehaviour
             return;
         }
 
-        //for (int i = 0; i < party.Count; i++)
-        //{
-        //    MercenaryInstance mercData = party[i];
+        // 🔧 기존 파티 슬롯 UI 가져오기
+        if (combatUI == null)
+        {
+            Debug.LogError("[CombatManager] ❌ CombatUI가 null입니다!");
+            return;
+        }
 
-        //    // CharacterFactory를 통해 생성
-        //    Character character = CharacterFactory.CreateCharacter(mercData, partySpawnParent);
+        // 파티 멤버 수만큼 Character 데이터 생성
+        for (int i = 0; i < party.Count; i++)
+        {
+            MercenaryInstance mercData = party[i];
 
-        //    if (character != null)
-        //    {
-        //        currentParty.Add(character);
-        //        Debug.Log($"[CombatManager] ✅ {mercData.mercenaryName} 파티 배치 완료");
-        //    }
-        //}
+            Debug.Log($"[CombatManager] 파티 멤버 {i + 1}/{party.Count}: {mercData.mercenaryName}");
 
-        Debug.Log($"[CombatManager] 파티 생성 완료 - 총 {currentParty.Count}명");
+            // 🆕 GameObject를 생성하지 않고, 데이터만 담는 경량 오브젝트 생성
+            GameObject charDataObj = new GameObject($"CharacterData_{mercData.mercenaryName}");
+            charDataObj.transform.SetParent(partySpawnParent);
+            charDataObj.transform.localPosition = Vector3.zero;
+
+            Character character = charDataObj.AddComponent<Character>();
+
+            // 스킬은 MercenaryInstance에서 가져옴
+            List<SkillDataSO> skills = new List<SkillDataSO>(mercData.skills);
+
+            // 🆕 UI 슬롯과 함께 초기화
+            MercenaryPartySlot uiSlot = combatUI.GetPartySlot(i); // 기존 파티 슬롯 가져오기
+            character.Initialize(mercData, skills, uiSlot);
+
+            currentParty.Add(character);
+
+            Debug.Log($"[CombatManager] ✅ {mercData.mercenaryName} 파티 배치 완료 (UI 슬롯 {i} 연결)");
+        }
+
+        Debug.Log($"[CombatManager] ✅ 파티 생성 완료 - 총 {currentParty.Count}명");
     }
 
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 🔧 수정: SpawnMonsters - 기존 MonsterUISlot 재활용
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     /// <summary>
-    /// 몬스터 생성 (씬에 배치)
+    /// 몬스터 생성 (기존 MonsterUISlot과 연결)
     /// </summary>
     private void SpawnMonsters(List<MonsterSpawnData> monsterDataList)
     {
-        Debug.Log("[CombatManager] ━━━ 몬스터 생성 시작 ━━━");
+        Debug.Log("[CombatManager] ━━━ 몬스터 생성 시작 ━━━━━");
 
         currentMonsters.Clear();
+
+        if (combatUI == null)
+        {
+            Debug.LogError("[CombatManager] ❌ CombatUI가 null입니다!");
+            return;
+        }
 
         for (int i = 0; i < monsterDataList.Count; i++)
         {
@@ -167,71 +205,30 @@ public class CombatManager : MonoBehaviour
 
             Debug.Log($"[CombatManager] 몬스터 {i + 1}/{monsterDataList.Count}: {data.monsterName}");
 
-            // 몬스터 GameObject 생성
-            GameObject monsterObj = new GameObject($"Monster_{data.monsterName}_{i}");
-            monsterObj.transform.SetParent(monsterSpawnParent);
-            monsterObj.transform.localPosition = new Vector3(i * 150f, 0f, 0f); // 간격 배치
+            // 🆕 GameObject를 생성하지 않고, 데이터만 담는 경량 오브젝트 생성
+            GameObject monsterDataObj = new GameObject($"MonsterData_{data.monsterName}_{i}");
+            monsterDataObj.transform.SetParent(monsterSpawnParent);
+            monsterDataObj.transform.localPosition = Vector3.zero;
 
-            Debug.Log($"[CombatManager] GameObject 생성: {monsterObj.name}, 위치: {monsterObj.transform.localPosition}");
+            Monster monster = monsterDataObj.AddComponent<Monster>();
 
-            // SpriteRenderer 추가 (몬스터 이미지 표시)
-            SpriteRenderer spriteRenderer = monsterObj.AddComponent<SpriteRenderer>();
-            spriteRenderer.sprite = data.monsterSprite;
-            spriteRenderer.sortingOrder = 10;
-
-            Debug.Log($"[CombatManager] SpriteRenderer 추가 완료");
-
-            // Canvas + HealthBar UI 추가 (몬스터 위에 HP 바 표시)
-            GameObject canvasObj = new GameObject("MonsterCanvas");
-            canvasObj.transform.SetParent(monsterObj.transform);
-            canvasObj.transform.localPosition = new Vector3(0f, 100f, 0f); // 몬스터 위쪽
-
-            Canvas canvas = canvasObj.AddComponent<Canvas>();
-            canvas.renderMode = RenderMode.WorldSpace;
-            canvas.sortingOrder = 20;
-
-            RectTransform canvasRect = canvasObj.GetComponent<RectTransform>();
-            canvasRect.sizeDelta = new Vector2(100f, 20f);
-
-            // HP 바 이미지
-            GameObject hpBarObj = new GameObject("HealthBar");
-            hpBarObj.transform.SetParent(canvasObj.transform);
-
-            UnityEngine.UI.Image hpBarImage = hpBarObj.AddComponent<UnityEngine.UI.Image>();
-            hpBarImage.color = Color.red;
-            hpBarImage.type = UnityEngine.UI.Image.Type.Filled;
-            hpBarImage.fillMethod = UnityEngine.UI.Image.FillMethod.Horizontal;
-
-            RectTransform hpBarRect = hpBarObj.GetComponent<RectTransform>();
-            hpBarRect.anchorMin = Vector2.zero;
-            hpBarRect.anchorMax = Vector2.one;
-            hpBarRect.sizeDelta = Vector2.zero;
-
-            // HealthBar 컴포넌트 추가
-            HealthBar healthBar = hpBarObj.AddComponent<HealthBar>();
-            // healthBar.Initialize() 필요 시 여기서 호출
-
-            Debug.Log($"[CombatManager] HealthBar UI 생성 완료");
-
-            // Monster 컴포넌트 추가
-            Monster monster = monsterObj.AddComponent<Monster>();
-            monster.UIAnchor = canvasObj.transform;
-
-            // 스킬 로드 (임시)
+            // 스킬 로드
             List<SkillDataSO> monsterSkills = LoadMonsterSkills(data);
 
-            // Monster 초기화
-            monster.Initialize(data, monsterSkills);
+            // 🆕 UI 슬롯과 함께 초기화
+            MonsterUISlot uiSlot = combatUI.GetMonsterSlot(i); // 기존 몬스터 슬롯 가져오기
+            monster.Initialize(data, monsterSkills, uiSlot);
+
             currentMonsters.Add(monster);
 
-            Debug.Log($"[CombatManager] ✅ {data.monsterName} 생성 완료 (HP: {monster.Stats.CurrentHP}/{monster.Stats.MaxHP})");
+            Debug.Log($"[CombatManager] ✅ {data.monsterName} 생성 완료 (UI 슬롯 {i} 연결, HP: {monster.Stats.CurrentHP}/{monster.Stats.MaxHP})");
         }
 
         Debug.Log($"[CombatManager] ✅ 몬스터 생성 완료 - 총 {currentMonsters.Count}마리");
     }
 
     /// <summary>
-    /// 몬스터 스킬 로드 (임시)
+    /// 몬스터 스킬 로드   (임시)
     /// </summary>
     private List<SkillDataSO> LoadMonsterSkills(MonsterSpawnData data)
     {
@@ -239,10 +236,37 @@ public class CombatManager : MonoBehaviour
 
         List<SkillDataSO> skills = new List<SkillDataSO>();
 
-        // TODO: Resources 폴더에서 몬스터 스킬 로드
-        Debug.LogWarning("[CombatManager] ⚠️ 몬스터 스킬 로드 미구현 - 빈 스킬 리스트 반환");
-
+        // MonsterSpawnData에서 스킬 배열 가져오기
+        if (data.skills != null && data.skills.Length > 0)
+        {
+            skills.AddRange(data.skills);
+            Debug.Log($"[CombatManager] ✅ {data.monsterName} 스킬 {skills.Count}개 로드됨");
+        }
+        else
+        {
+            Debug.LogWarning($"[CombatManager] ⚠️ {data.monsterName}에 스킬이 없습니다! 기본 공격 생성 중...");
+        }
         return skills;
+    }
+
+    /// <summary>
+    /// 기본 공격 스킬 생성 (임시)
+    /// </summary>
+    private SkillDataSO CreateDefaultBasicAttack()
+    {
+        SkillDataSO basicAttack = ScriptableObject.CreateInstance<SkillDataSO>();
+        basicAttack.skillName = "기본 공격";
+        basicAttack.baseDamageMin = 5;
+        basicAttack.baseDamageMax = 10;
+        basicAttack.manaCost = 0;
+        basicAttack.isBasicAttack = true;
+        basicAttack.damageType = SkillDamageType.Physical;
+        basicAttack.targetType = SkillTargetType.Single;
+        basicAttack.statScaling = 0.5f;
+
+        Debug.Log("[CombatManager] 기본 공격 스킬 임시 생성");
+
+        return basicAttack;
     }
 
     /// <summary>
@@ -269,7 +293,7 @@ public class CombatManager : MonoBehaviour
     /// </summary>
     private void OnTurnStarted(ICombatant combatant)
     {
-        Debug.Log($"[CombatManager] ━━━ {combatant.Name}의 턴 시작 ━━━");
+        Debug.Log($"[CombatManager] ━━━ {combatant.Name}의 턴 시작 ━━━━━");
 
         // UI 업데이트
         combatUI.UpdateCurrentTurn(combatant);
@@ -311,20 +335,56 @@ public class CombatManager : MonoBehaviour
     /// </summary>
     private void OnTPEComplete(bool success)
     {
-        Debug.Log($"[CombatManager] TPE 미니게임 결과: {(success ? "성공" : "실패")}");
+        Debug.Log($"[CombatManager] 🎯 TPE 미니게임 결과: {(success ? "성공 (크리티컬 +30%)" : "실패")}");
 
-        // 크리티컬 보너스 적용
-        float critBonus = success ? 30f : 0f;
+        tpeSuccess = success;
 
-        // TODO: 크리티컬 보너스를 스킬 데미지에 반영
-        // 현재 턴 캐릭터의 행동 실행
-        ICombatant currentCombatant = turnController.GetCurrentCombatant();
-
-        if (currentCombatant is Character character)
+        // UI 숨김
+        if (combatUI != null)
         {
-            // TODO: 선택된 스킬과 타겟으로 공격 실행
-            Debug.Log($"[CombatManager] {character.Name} 공격 실행 (크리티컬 보너스: +{critBonus}%)");
+            combatUI.HideTPEMinigame();
         }
+
+        // 실제 공격 실행
+        ExecutePlayerAttack();
+    }
+
+    /// <summary>
+    /// 플레이어 공격 실행 (TPE 후)
+    /// </summary>
+    private void ExecutePlayerAttack()
+    {
+        if (pendingSkill == null || pendingTarget == null)
+        {
+            Debug.LogError("[CombatManager] ❌ 대기 중인 스킬 또는 타겟이 없습니다!");
+            return;
+        }
+
+        Character player = turnController.GetCurrentCombatant() as Character;
+
+        if (player == null)
+        {
+            Debug.LogError("[CombatManager] ❌ 현재 턴이 플레이어가 아닙니다!");
+            return;
+        }
+
+        Debug.Log($"[CombatManager] ⚔️ {player.Name}이(가) {pendingTarget.Name}에게 {pendingSkill.skillName} 사용!");
+
+        // 크리티컬 판정 (TPE 성공 시 +30% 보너스)
+        float critBonus = tpeSuccess ? 30f : 0f;
+        bool isCritical = player.Stats.RollCritical(critBonus);
+
+        Debug.Log($"[CombatManager] 크리티컬 판정: {(isCritical ? "크리티컬!" : "일반 공격")} (보너스: +{critBonus}%)");
+
+        // 스킬 사용
+        player.UseSkill(pendingSkill, pendingTarget, isCritical);
+
+        // 턴 종료
+        turnController.EndCurrentTurn();
+
+        // 초기화
+        pendingSkill = null;
+        pendingTarget = null;
     }
 
     /// <summary>
@@ -332,18 +392,32 @@ public class CombatManager : MonoBehaviour
     /// </summary>
     private void OnParryComplete(bool success)
     {
-        Debug.Log($"[CombatManager] 패링 미니게임 결과: {(success ? "성공" : "실패")}");
+        Debug.Log($"[CombatManager] 🛡️ 패링 미니게임 결과: {(success ? "성공 (데미지 0)" : "실패 (일반 데미지)")}");
+
+        // UI 숨김
+        if (combatUI != null)
+        {
+            combatUI.HideParryMinigame();
+        }
 
         if (success)
         {
-            // 데미지 50% 감소 + 반격 데미지 50%
-            Debug.Log("[CombatManager] ✅ 패링 성공! 데미지 감소 + 반격!");
+            // 패링 성공: 데미지 0
+            Debug.Log($"[CombatManager] ✅ {pendingDefender.Name} 패링 성공! 데미지 0");
         }
         else
         {
-            // 일반 데미지 적용
-            Debug.Log("[CombatManager] ❌ 패링 실패! 일반 데미지 적용");
+            // 패링 실패: 일반 데미지 적용
+            Debug.Log($"[CombatManager] ❌ {pendingDefender.Name} 패링 실패! 데미지 {pendingDamage} 적용");
+            pendingDefender.TakeDamage(pendingDamage);
         }
+
+        // 턴 종료
+        turnController.EndCurrentTurn();
+
+        // 초기화
+        pendingDamage = 0;
+        pendingDefender = null;
     }
 
     /// <summary>
@@ -528,5 +602,88 @@ public class CombatManager : MonoBehaviour
         {
             parryMinigame.OnParryComplete -= OnParryComplete;
         }
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 🆕 추가: 플레이어 행동 요청 (CombatUI에서 호출)
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    /// <summary>
+    /// 플레이어 행동 요청 (스킬 + 타겟 선택 완료 시)
+    /// </summary>
+    public void RequestPlayerAction(SkillDataSO skill, ICombatant target)
+    {
+        Debug.Log($"[CombatManager] 🎯 플레이어 행동 요청: {skill.skillName} -> {target.Name}");
+
+        pendingSkill = skill;
+        pendingTarget = target;
+
+        // TPE 미니게임 시작
+        if (tpeMinigame != null)
+        {
+            MonsterDifficulty difficulty = MonsterDifficulty.Normal;
+
+            if (target is Monster monster)
+            {
+                difficulty = monster.GetDifficulty();
+            }
+
+            combatUI.ShowTPEMinigame();
+            tpeMinigame.StartMinigame(difficulty);
+        }
+        else
+        {
+            Debug.LogWarning("[CombatManager] ⚠️ TPEMinigame가 없어서 바로 공격 실행");
+            ExecutePlayerAttack();
+        }
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 🆕 추가: AI 공격 실행 (TurnController에서 호출)
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    /// <summary>
+    /// AI 공격 실행
+    /// </summary>
+    public void ExecuteAIAttack(Monster monster, SkillDataSO skill, Character target)
+    {
+        Debug.Log($"[CombatManager] 🤖 AI 공격: {monster.Name} -> {target.Name} (스킬: {skill.skillName})");
+
+        // 데미지 계산
+        int damage = CalculateDamage(monster, skill, target);
+
+        Debug.Log($"[CombatManager] 계산된 데미지: {damage}");
+
+        // 패링 미니게임 표시
+        pendingDamage = damage;
+        pendingDefender = target;
+
+        if (parryMinigame != null)
+        {
+            combatUI.ShowParryMinigame();
+            parryMinigame.StartMinigame();
+        }
+        else
+        {
+            Debug.LogWarning("[CombatManager] ⚠️ ParryMinigame가 없어서 바로 데미지 적용");
+            target.TakeDamage(damage);
+            turnController.EndCurrentTurn();
+        }
+    }
+
+    /// <summary>
+    /// 데미지 계산 (임시)
+    /// </summary>
+    private int CalculateDamage(Monster attacker, SkillDataSO skill, Character defender)
+    {
+        // 크리티컬 판정
+        bool isCritical = attacker.Stats.RollCritical();
+
+        // 스킬 데미지 계산
+        int damage = skill.CalculateDamage(attacker.Stats, isCritical);
+
+        Debug.Log($"[CombatManager] 데미지 계산: {damage} (크리티컬: {isCritical})");
+
+        return damage;
     }
 }

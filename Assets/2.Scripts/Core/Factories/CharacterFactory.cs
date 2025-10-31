@@ -98,14 +98,73 @@ public class CharacterFactory : MonoBehaviour
     }
 
     /// <summary>
-    /// 전투용 Character 오브젝트 생성 (사용 안 함 - CombatManager에서 직접 생성)
+    /// 전투용 Character 오브젝트 생성
     /// </summary>
-    /*public static Character CreateCharacter(MercenaryInstance mercenaryData, Transform parent)
+    public static Character CreateCharacter(MercenaryInstance mercenaryData, Transform parent)
     {
-        // 사용하지 않음
-        Debug.LogWarning("[CharacterFactory] CreateCharacter는 더 이상 사용하지 않습니다!");
-        return null;
-    }*/
+        if (mercenaryData == null)
+        {
+            Debug.LogError("[CharacterFactory] ❌ mercenaryData가 null입니다!");
+            return null;
+        }
+
+        Debug.Log($"[CharacterFactory] Character 생성 시작: {mercenaryData.mercenaryName}");
+
+        // GameObject 생성
+        GameObject charObj = new GameObject($"Character_{mercenaryData.mercenaryName}");
+        charObj.transform.SetParent(parent);
+        charObj.transform.localPosition = Vector3.zero;
+
+        // Character 컴포넌트 추가
+        Character character = charObj.AddComponent<Character>();
+
+        // MercenaryInstance → Character 초기화
+        CharacterStatsSO characterStats = ScriptableObject.CreateInstance<CharacterStatsSO>();
+        characterStats.Strength = mercenaryData.strength;
+        characterStats.Dexterity = mercenaryData.dexterity;
+        characterStats.Wisdom = mercenaryData.wisdom;
+        characterStats.Intelligence = mercenaryData.intelligence;
+        characterStats.Health = mercenaryData.health;
+        characterStats.Speed = mercenaryData.speed;
+        characterStats.Level = mercenaryData.level;
+
+        // 스킬 로드
+        List<SkillDataSO> skills = LoadMercenarySkills(mercenaryData);
+
+        // Character 초기화
+        character.Initialize(characterStats, skills);
+
+        Debug.Log($"[CharacterFactory] ✅ {mercenaryData.mercenaryName} 생성 완료");
+
+        return character;
+    }
+
+    /// <summary>
+    /// 용병 스킬 로드
+    /// </summary>
+    private static List<SkillDataSO> LoadMercenarySkills(MercenaryInstance mercenary)
+    {
+        List<SkillDataSO> skills = new List<SkillDataSO>();
+
+        // TODO: Resources 폴더에서 스킬 로드
+        // 임시로 기본 공격 스킬만 추가
+        SkillDataSO basicAttack = ScriptableObject.CreateInstance<SkillDataSO>();
+        basicAttack.skillName = "기본 공격";
+        basicAttack.baseDamageMin = 5;      // ✅ 수정
+        basicAttack.baseDamageMax = 10;     // ✅ 수정
+        basicAttack.manaCost = 0;
+        basicAttack.isBasicAttack = true;
+        basicAttack.damageType = SkillDamageType.Physical;
+        basicAttack.targetType = SkillTargetType.Single;
+        basicAttack.statScaling = 0.5f;
+
+        skills.Add(basicAttack);
+
+        Debug.Log($"[CharacterFactory] {mercenary.mercenaryName} 스킬 로드: {skills.Count}개");
+
+        return skills;
+    }
+
     /// <summary>
     /// 레벨에 따른 스탯 보정 (옵션)
     /// </summary>
