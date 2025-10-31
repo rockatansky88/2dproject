@@ -176,7 +176,6 @@ MonoBehaviour:
   skillIconImage: {fileID: 8265700966637971310}
   skillNameText: {fileID: 172364262506625760}
   manaCostText: {fileID: 3332675553236886620}
-  selectionBorder: {fileID: 5484302818513251353}
   cooldownOverlay: {fileID: 0}
   skillButton: {fileID: 7794806364871577659}
 --- !u!114 &3696784637823266278
@@ -296,7 +295,6 @@ MonoBehaviour:
   skillIconImage: {fileID: 5028346545677289501}
   skillNameText: {fileID: 3976047067358165842}
   manaCostText: {fileID: 34057114786385790}
-  selectionBorder: {fileID: 1277884907376275535}
   cooldownOverlay: {fileID: 0}
   skillButton: {fileID: 1948091093082724001}
 --- !u!114 &9136523465141513035
@@ -886,7 +884,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &3226827878898197721
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1670,7 +1668,6 @@ MonoBehaviour:
   skillIconImage: {fileID: 5554019523223376259}
   skillNameText: {fileID: 8258639745650191337}
   manaCostText: {fileID: 4362352558360532638}
-  selectionBorder: {fileID: 1597430416367692436}
   cooldownOverlay: {fileID: 0}
   skillButton: {fileID: 6379357717474458179}
 --- !u!114 &4467288866485025253
@@ -2105,7 +2102,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &2588222805242517713
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2255,7 +2252,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &4407787108998515494
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2330,7 +2327,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &6954180232763824690
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2800,7 +2797,6 @@ MonoBehaviour:
   skillIconImage: {fileID: 3632735640696865107}
   skillNameText: {fileID: 3253984716848589825}
   manaCostText: {fileID: 9058959891141186846}
-  selectionBorder: {fileID: 4880540318934508773}
   cooldownOverlay: {fileID: 0}
   skillButton: {fileID: 8008671382635462710}
 --- !u!114 &3677205155960036003
@@ -2840,7 +2836,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &3682160653547860731
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3141,7 +3137,6 @@ MonoBehaviour:
   skillIconImage: {fileID: 4661810845576485704}
   skillNameText: {fileID: 4630269153592202853}
   manaCostText: {fileID: 9018965771203899779}
-  selectionBorder: {fileID: 2333053607005411856}
   cooldownOverlay: {fileID: 0}
   skillButton: {fileID: 8183357732560749603}
 --- !u!114 &6354976497006367304
