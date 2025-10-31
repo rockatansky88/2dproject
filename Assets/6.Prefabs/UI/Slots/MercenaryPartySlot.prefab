@@ -186,7 +186,7 @@ MonoBehaviour:
   mpText: {fileID: 0}
   hpSlider: {fileID: 0}
   mpSlider: {fileID: 0}
-  turnBorder: {fileID: 0}
+  turnBorder: {fileID: 8824353406635042222}
 --- !u!114 &7826932024019849829
 MonoBehaviour:
   m_ObjectHideFlags: 0

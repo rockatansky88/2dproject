@@ -59,7 +59,14 @@ public class MonsterUISlot : MonoBehaviour
         if (monsterImage != null && monster.spawnData != null && monster.spawnData.monsterSprite != null)
         {
             monsterImage.sprite = monster.spawnData.monsterSprite;
-            Debug.Log($"[MonsterUISlot] ✅ 스프라이트 설정: {monster.spawnData.monsterSprite.name}");
+
+            // 🆕 추가: Preserve Aspect 강제 활성화
+            monsterImage.preserveAspect = true;
+
+            // 🆕 추가: 이미지 색상 초기화 (투명도 문제 방지)
+            monsterImage.color = Color.white;
+
+            Debug.Log($"[MonsterUISlot] ✅ 스프라이트 설정: {monster.spawnData.monsterSprite.name} (크기: {monster.spawnData.monsterSprite.rect.size})");
         }
         else
         {

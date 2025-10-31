@@ -23,7 +23,7 @@ public class CombatUI : MonoBehaviour
     [Header("스킬 슬롯")]
     [SerializeField] private Transform skillSlotParent; // SkillSlotParent (빈 컨테이너)
     [SerializeField] private GameObject skillContainerPrefab; // 🆕 SkillContainer 프리팹
-    [SerializeField] private float skillContainerOffsetY = 80f; // 용병 위로 올라갈 Y 오프셋
+    [SerializeField] private float skillContainerOffsetY = 60f; // 용병 위로 올라갈 Y 오프셋
 
     private GameObject skillContainerInstance; // 🆕 생성된 SkillContainer 인스턴스
     private List<SkillSlot> skillSlots = new List<SkillSlot>(); // 내부 슬롯 참조
