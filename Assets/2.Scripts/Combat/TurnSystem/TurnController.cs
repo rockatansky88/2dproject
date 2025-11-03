@@ -146,9 +146,9 @@ public class TurnController : MonoBehaviour
 
         Debug.Log($"[TurnController] 🎯 AI {monster.Name}이(가) {target.Name}을(를) 타겟으로 {skill.skillName} 사용");
 
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🆕 추가: 타겟 화살표 표시 (용병 위에 화살표 표시)
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        // 타겟 화살표 표시 (용병 위에 화살표 표시)
+
         if (CombatManager.Instance != null)
         {
             // CombatUI를 통해 타겟 화살표 표시
@@ -270,7 +270,9 @@ public class TurnController : MonoBehaviour
         if (allMonstersDead)
         {
             Debug.Log("[TurnController] ✅ 몬스터 전멸! 전투 승리");
-            return true;
+            
+            StartCoroutine(DelayedBattleEnd());
+            return false; // 아직 종료 안 함 (대기 중)
         }
 
         return false;
@@ -296,5 +298,19 @@ public class TurnController : MonoBehaviour
         }
 
         EndTurn();
+    }
+
+    /// <summary>
+    /// 페이드아웃 대기 후 전투 종료 이벤트 발생
+    /// </summary>
+    private IEnumerator DelayedBattleEnd()
+    {
+        Debug.Log("[TurnController] 몬스터 페이드아웃 대기 중... (2초)");
+        
+        // 페이드아웃 시간(1.5초) + 여유(0.5초) = 2초
+        yield return new WaitForSeconds(2f);
+        
+        Debug.Log("[TurnController] ✅ 페이드아웃 완료 - 전투 종료 이벤트 발생");
+        OnBattleEnd?.Invoke();
     }
 }

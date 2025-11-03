@@ -10,6 +10,7 @@ using System.Collections;
 /// - 클릭 이벤트 (타겟 선택)
 /// - 몬스터 턴 표시 (빨간색 외곽선 깜빡임)
 /// - 턴 제어: 플레이어 턴에만 클릭 가능
+/// - 사망 시 페이드아웃 효과
 /// </summary>
 public class MonsterUISlot : MonoBehaviour
 {
@@ -28,9 +29,16 @@ public class MonsterUISlot : MonoBehaviour
     [SerializeField] private Button selectButton;
 
     [Header("Damage Display")]
-    [SerializeField] private Text damageText;          // 데미지 표시 텍스트
-    [SerializeField] private float damageFloatSpeed = 50f; // 위로 올라가는 속도
-    [SerializeField] private float damageFadeDuration = 1f; // 사라지는 시간
+    [SerializeField] private Text damageText;
+    [SerializeField] private float damageFloatSpeed = 50f;
+    [SerializeField] private float damageFadeDuration = 1f;
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 🆕 추가: 페이드아웃 설정
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    [Header("Death FadeOut")]
+    [SerializeField] private float fadeOutDuration = 1.5f; // 페이드아웃 시간
+    [SerializeField] private CanvasGroup canvasGroup; // 전체 슬롯의 투명도 제어
 
     private Outline turnOutline;
     private Coroutine turnBlinkCoroutine;
@@ -113,17 +121,30 @@ public class MonsterUISlot : MonoBehaviour
             selectButton.onClick.RemoveAllListeners();
             selectButton.onClick.AddListener(OnButtonClicked);
 
-            Debug.Log($"[MonsterUISlot] ✅ 버튼 클릭 이벤트 연결 완료\n" +
-                     $"  - Interactable: {selectButton.interactable}\n" +
-                     $"  - Raycast Target: {(selectButton.GetComponent<Image>()?.raycastTarget ?? false)}\n" +
-                     $"  - RectTransform Size: {selectButton.GetComponent<RectTransform>()?.rect.size}");
+            Debug.Log($"[MonsterUISlot] ✅ 버튼 클릭 이벤트 연결 완료");
         }
 
-        // 🆕 추가: 데미지 텍스트 초기 숨김
+        // 8. 데미지 텍스트 초기 숨김
         if (damageText != null)
         {
             damageText.gameObject.SetActive(false);
         }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // 🆕 추가: CanvasGroup 자동 생성 (없으면)
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        if (canvasGroup == null)
+        {
+            canvasGroup = GetComponent<CanvasGroup>();
+            if (canvasGroup == null)
+            {
+                canvasGroup = gameObject.AddComponent<CanvasGroup>();
+                Debug.Log($"[MonsterUISlot] ✅ CanvasGroup 자동 생성");
+            }
+        }
+
+        // 초기 알파값 1 (완전 불투명)
+        canvasGroup.alpha = 1f;
 
         Debug.Log($"[MonsterUISlot] ✅ {monster.Name} UI 슬롯 초기화 완료");
     }
@@ -152,12 +173,16 @@ public class MonsterUISlot : MonoBehaviour
         }
     }
 
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 🔧 수정: 몬스터 사망 처리 - 페이드아웃 추가
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     /// <summary>
-    /// 몬스터 사망 처리
+    /// 몬스터 사망 처리 (페이드아웃 효과)
     /// </summary>
     private void OnMonsterDeath()
     {
-        Debug.Log($"[MonsterUISlot] {monster.Name} 사망 - UI 비활성화");
+        Debug.Log($"[MonsterUISlot] {monster.Name} 사망 - 페이드아웃 시작");
 
         // 버튼 비활성화
         if (selectButton != null)
@@ -165,15 +190,47 @@ public class MonsterUISlot : MonoBehaviour
             selectButton.interactable = false;
         }
 
-        // 이미지 반투명 처리
-        if (monsterImage != null)
+        // 턴 표시 비활성화
+        SetTurnActive(false);
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // 페이드아웃 효과 시작
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        StartCoroutine(FadeOutAndDestroy());
+    }
+
+    /// <summary>
+    /// 페이드아웃 후 슬롯 비활성화
+    /// </summary>
+    private IEnumerator FadeOutAndDestroy()
+    {
+        if (canvasGroup == null)
         {
-            Color color = monsterImage.color;
-            color.a = 0.5f;
-            monsterImage.color = color;
+            Debug.LogWarning("[MonsterUISlot] ⚠️ CanvasGroup이 없어서 즉시 비활성화");
+            gameObject.SetActive(false);
+            yield break;
         }
 
-        SetTurnActive(false);
+        float elapsedTime = 0f;
+        float startAlpha = canvasGroup.alpha;
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // 알파값을 1 → 0으로 서서히 감소
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        while (elapsedTime < fadeOutDuration)
+        {
+            elapsedTime += Time.deltaTime;
+            canvasGroup.alpha = Mathf.Lerp(startAlpha, 0f, elapsedTime / fadeOutDuration);
+            yield return null;
+        }
+
+        // 완전히 투명하게
+        canvasGroup.alpha = 0f;
+
+        Debug.Log($"[MonsterUISlot] ✅ {monster.Name} 페이드아웃 완료 - 슬롯 비활성화");
+
+        // 슬롯 비활성화 (파괴하지 않고 숨김)
+        gameObject.SetActive(false);
     }
 
     /// <summary>
@@ -256,7 +313,7 @@ public class MonsterUISlot : MonoBehaviour
 
     /// <summary>
     /// 피격 데미지 표시
-    /// 빨간색 텍스트가 위로 올라가면서 서서히 사라지는 애니메이션
+    /// 데미지 크기와 색상 설정, 애니메이션 재생
     /// </summary>
     /// <param name="damage">피해량</param>
     /// <param name="isCritical">크리티컬 여부 (크리티컬 시 노란색 + 크기 확대)</param>
@@ -264,26 +321,23 @@ public class MonsterUISlot : MonoBehaviour
     {
         if (damageText == null)
         {
-            Debug.LogWarning("[MonsterUISlot] ⚠️ damageText가 null입니다! Inspector에서 할당해주세요");
+            Debug.LogWarning("[MonsterUISlot] ⚠️ damageText가 null입니다!");
             return;
         }
 
-        // 🔧 데미지 텍스트 설정
-        damageText.text = $"-{damage}";
-
-        // 🔧 크리티컬 여부에 따른 스타일 변경
         if (isCritical)
         {
-            damageText.color = new Color(1f, 0.8f, 0f, 1f); // 오렌지색
-            damageText.fontSize = 24; // 크기 확대
+            damageText.text = $"CRITICAL!\n-{damage}";
+            damageText.color = new Color(1f, 0.8f, 0f, 1f);
+            damageText.fontSize = 24;
         }
         else
         {
-            damageText.color = new Color(1f, 0f, 0f, 1f); // 빨간색
-            damageText.fontSize = 18; // 기본 크기
+            damageText.text = $"-{damage}";
+            damageText.color = new Color(1f, 0f, 0f, 1f);
+            damageText.fontSize = 18;
         }
 
-        // 🔧 애니메이션 시작
         StartCoroutine(FloatingDamageAnimation());
 
         Debug.Log($"[MonsterUISlot] ✅ {monster.Name} 피격 표시: -{damage} (크리티컬: {isCritical})");
@@ -296,7 +350,6 @@ public class MonsterUISlot : MonoBehaviour
     {
         damageText.gameObject.SetActive(true);
 
-        // 초기 위치 저장
         Vector3 startPosition = damageText.transform.localPosition;
         float elapsedTime = 0f;
 
@@ -304,11 +357,9 @@ public class MonsterUISlot : MonoBehaviour
         {
             elapsedTime += Time.deltaTime;
 
-            // 위로 이동
             float yOffset = damageFloatSpeed * Time.deltaTime;
             damageText.transform.localPosition += new Vector3(0, yOffset, 0);
 
-            // 알파값 감소 (서서히 사라짐)
             Color color = damageText.color;
             color.a = Mathf.Lerp(1f, 0f, elapsedTime / damageFadeDuration);
             damageText.color = color;
@@ -316,14 +367,9 @@ public class MonsterUISlot : MonoBehaviour
             yield return null;
         }
 
-        // 애니메이션 종료 후 숨김 및 위치 초기화
         damageText.gameObject.SetActive(false);
         damageText.transform.localPosition = startPosition;
     }
-
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🆕 추가: 클릭 가능 여부 설정 (턴 제어)
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
     /// <summary>
     /// 몬스터 클릭 가능 여부 설정
