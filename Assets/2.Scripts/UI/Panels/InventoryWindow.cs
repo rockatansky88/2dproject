@@ -3,6 +3,7 @@ using UnityEngine.UI;
 
 /// <summary>
 /// 인벤토리 윈도우 메인 컨트롤러
+/// HP/MP Fill Bar를 통해 용병의 현재 상태를 시각적으로 표시합니다.
 /// </summary>
 [RequireComponent(typeof(CanvasGroup))]
 public class InventoryWindow : MonoBehaviour
@@ -23,6 +24,13 @@ public class InventoryWindow : MonoBehaviour
     [SerializeField] private Text statsWisdomText;         // WIS
     [SerializeField] private Text statsIntelligenceText;   // INT
     [SerializeField] private Text statsSpeedText;          // SPD
+
+    [Header("HP/MP Fill Bars")]
+    [Tooltip("HP를 시각적으로 표시하는 Fill Image (Image Type: Filled, Fill Method: Horizontal)")]
+    [SerializeField] private Image statsHpFillImage;       // HP Fill Bar
+
+    [Tooltip("MP를 시각적으로 표시하는 Fill Image (Image Type: Filled, Fill Method: Horizontal)")]
+    [SerializeField] private Image statsMpFillImage;       // MP Fill Bar
 
     [Header("Mercenary List Panel")]
     [SerializeField] private Transform mercenaryListContainer; // 용병 슬롯 생성 부모
@@ -246,6 +254,7 @@ public class InventoryWindow : MonoBehaviour
 
     /// <summary>
     /// 특정 용병의 스탯을 StatsPanel에 표시
+    /// HP/MP Fill Bar를 통해 시각적으로 게이지를 표시합니다.
     /// </summary>
     public void ShowMercenaryStats(MercenaryInstance mercenary)
     {
@@ -276,21 +285,41 @@ public class InventoryWindow : MonoBehaviour
             statsLevelText.text = $"Level {mercenary.level}";
         }
 
-
-        // maxHP/maxMP 표시 (계산된 전투 스탯)
-
+        // HP 텍스트
         if (statsHealthText != null)
         {
-            // HP 표시: "HP: 179/179" (전투에서 사용되는 값)
             statsHealthText.text = $"HP: {mercenary.currentHP}/{mercenary.maxHP}";
         }
 
+        // MP 텍스트
         if (statsMpText != null)
         {
-            // MP 표시: "MP: 79/79" (전투에서 사용되는 값)
             statsMpText.text = $"MP: {mercenary.currentMP}/{mercenary.maxMP}";
         }
 
+        if (statsHpFillImage != null)
+        {
+            float hpFillAmount = mercenary.maxHP > 0 ? (float)mercenary.currentHP / mercenary.maxHP : 0f;
+            statsHpFillImage.fillAmount = hpFillAmount;
+            Debug.Log($"[InventoryWindow] HP Fill Bar 업데이트: {hpFillAmount:P0} ({mercenary.currentHP}/{mercenary.maxHP})");
+        }
+        else
+        {
+            Debug.LogWarning("[InventoryWindow] ⚠️ statsHpFillImage가 null입니다! Inspector에서 할당해주세요");
+        }
+
+        if (statsMpFillImage != null)
+        {
+            float mpFillAmount = mercenary.maxMP > 0 ? (float)mercenary.currentMP / mercenary.maxMP : 0f;
+            statsMpFillImage.fillAmount = mpFillAmount;
+            Debug.Log($"[InventoryWindow] MP Fill Bar 업데이트: {mpFillAmount:P0} ({mercenary.currentMP}/{mercenary.maxMP})");
+        }
+        else
+        {
+            Debug.LogWarning("[InventoryWindow] ⚠️ statsMpFillImage가 null입니다! Inspector에서 할당해주세요");
+        }
+
+        // 기타 스탯
         if (statsStrengthText != null)
         {
             statsStrengthText.text = $"STR: {mercenary.strength}";
@@ -316,12 +345,7 @@ public class InventoryWindow : MonoBehaviour
             statsSpeedText.text = $"SPD: {mercenary.speed}";
         }
 
-        // if (statsMpText != null)
-        // {
-        //     statsMpText.text = $"MP: {mercenary.currentMP}/{mercenary.maxMP}";
-        // }
-
-        Debug.Log($"[InventoryWindow] ✅ StatsPanel 업데이트 완료 - HP: {mercenary.currentHP}/{mercenary.maxHP}");
+        Debug.Log($"[InventoryWindow] ✅ StatsPanel 업데이트 완료 - HP: {mercenary.currentHP}/{mercenary.maxHP}, MP: {mercenary.currentMP}/{mercenary.maxMP}");
     }
 
     /// <summary>
@@ -338,11 +362,22 @@ public class InventoryWindow : MonoBehaviour
         if (statsNameText != null) statsNameText.text = "";
         if (statsLevelText != null) statsLevelText.text = "";
         if (statsHealthText != null) statsHealthText.text = "";
+        if (statsMpText != null) statsMpText.text = "";
         if (statsStrengthText != null) statsStrengthText.text = "";
         if (statsDexterityText != null) statsDexterityText.text = "";
         if (statsWisdomText != null) statsWisdomText.text = "";
         if (statsIntelligenceText != null) statsIntelligenceText.text = "";
         if (statsSpeedText != null) statsSpeedText.text = "";
+
+        if (statsHpFillImage != null)
+        {
+            statsHpFillImage.fillAmount = 0f;
+        }
+
+        if (statsMpFillImage != null)
+        {
+            statsMpFillImage.fillAmount = 0f;
+        }
 
         Debug.Log("[InventoryWindow] StatsPanel 비움");
     }
