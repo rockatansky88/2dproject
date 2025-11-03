@@ -13144,9 +13144,9 @@ MonoBehaviour:
   arrow: {fileID: 2116833313353267598}
   resultText: {fileID: 340666296881568190}
   arrowSpeed: 500
-  normalSuccessZoneWidth: 100
-  eliteSuccessZoneWidth: 70
-  bossSuccessZoneWidth: 50
+  normalSuccessZoneWidth: 70
+  eliteSuccessZoneWidth: 40
+  bossSuccessZoneWidth: 20
 --- !u!222 &8121919681748712981
 CanvasRenderer:
   m_ObjectHideFlags: 0
