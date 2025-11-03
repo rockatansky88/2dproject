@@ -7835,7 +7835,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   partySpawnParent: {fileID: 1224395872}
   monsterSpawnParent: {fileID: 675863604}
-  characterPrefab: {fileID: 0}
   monsterUISlotPrefab: {fileID: 5363944204763165848, guid: 925c49c47281e5f478bf94860e8bf190, type: 3}
   combatUI: {fileID: 1772620639}
   turnController: {fileID: 1418875891}

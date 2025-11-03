@@ -183,7 +183,7 @@ MonoBehaviour:
   emptySlotIndicator: {fileID: 3534771460260370049}
   combatStatsPanel: {fileID: 1740904991113745325}
   hpText: {fileID: 6791424408849561383}
-  mpText: {fileID: 0}
+  mpText: {fileID: 4979240213716566696}
   hpSlider: {fileID: 0}
   mpSlider: {fileID: 0}
 --- !u!114 &7826932024019849829
@@ -928,7 +928,7 @@ GameObject:
   - component: {fileID: 675955477739787362}
   - component: {fileID: 4979240213716566696}
   m_Layer: 5
-  m_Name: 'HPText '
+  m_Name: MPText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
