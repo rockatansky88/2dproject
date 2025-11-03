@@ -90,6 +90,7 @@ public class MercenaryPartySlot : MonoBehaviour
 
     /// <summary>
     /// 슬롯 초기화 (용병 데이터 설정)
+    /// 전투/비전투 상관없이 스탯 기반 HP/MP를 사용합니다.
     /// </summary>
     public void Initialize(MercenaryInstance mercenary)
     {
@@ -117,10 +118,14 @@ public class MercenaryPartySlot : MonoBehaviour
             portraitImage.color = Color.white;
         }
 
-        // 전투씬일 경우 HP/MP 업데이트
+
+        //  스탯 기반 HP/MP 사용 (maxHP/maxMP)
+        // 전투씬일 경우에만 표시하지만, 값은 스탯 기반으로 사용
+
         if (isCombatScene)
         {
-            UpdateCombatStats(mercenary.health, mercenary.health, 50, 50);
+            UpdateCombatStats(mercenary.currentHP, mercenary.maxHP, mercenary.currentMP, mercenary.maxMP);
+            Debug.Log($"[MercenaryPartySlot] 전투 스탯 초기화: HP {mercenary.currentHP}/{mercenary.maxHP}, MP {mercenary.currentMP}/{mercenary.maxMP}");
         }
 
         Debug.Log($"[MercenaryPartySlot] ✅ 초기화 완료: {mercenary.mercenaryName}");
@@ -157,6 +162,7 @@ public class MercenaryPartySlot : MonoBehaviour
 
     /// <summary>
     /// 전투씬 모드 설정
+    /// 전투 시작 시 스탯 기반 HP/MP를 즉시 표시합니다.
     /// </summary>
     public void SetCombatMode(bool isCombat)
     {
@@ -165,10 +171,17 @@ public class MercenaryPartySlot : MonoBehaviour
 
         Debug.Log($"[MercenaryPartySlot] 전투 모드 설정: {isCombat}");
 
-        // 전투씬이면서 용병이 있으면 스탯 업데이트
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // 🔧 수정: 스탯 기반 HP/MP 사용 (maxHP/maxMP)
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         if (isCombat && mercenaryData != null)
         {
-            UpdateCombatStats(mercenaryData.health, mercenaryData.health, 50, 50);
+            // ❌ 기존 코드: UpdateCombatStats(mercenaryData.health, mercenaryData.health, 50, 50);
+
+            // ✅ 수정: 스탯 기반 maxHP/maxMP 사용
+            UpdateCombatStats(mercenaryData.currentHP, mercenaryData.maxHP, mercenaryData.currentMP, mercenaryData.maxMP);
+
+            Debug.Log($"[MercenaryPartySlot] 전투 스탯 표시 - {mercenaryData.mercenaryName}: HP {mercenaryData.currentHP}/{mercenaryData.maxHP}, MP {mercenaryData.currentMP}/{mercenaryData.maxMP}");
         }
     }
 
@@ -294,10 +307,8 @@ public class MercenaryPartySlot : MonoBehaviour
         damageText.transform.localPosition = startPosition;
     }
 
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🆕 수정: Outline 기반 턴 표시로 변경
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+    // Outline 기반 턴 표시로 변경
     /// <summary>
     /// 현재 턴 표시 활성화/비활성화
     /// 용병 초상화 이미지의 Outline 컴포넌트를 사용하여 빨간색 외곽선 깜빡임

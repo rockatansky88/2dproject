@@ -17,6 +17,7 @@ public class InventoryWindow : MonoBehaviour
     [SerializeField] private Text statsNameText;           // 이름
     [SerializeField] private Text statsLevelText;          // 레벨
     [SerializeField] private Text statsHealthText;         // HP
+    [SerializeField] private Text statsMpText;             // MP
     [SerializeField] private Text statsStrengthText;       // STR
     [SerializeField] private Text statsDexterityText;      // DEX
     [SerializeField] private Text statsWisdomText;         // WIS
@@ -275,10 +276,19 @@ public class InventoryWindow : MonoBehaviour
             statsLevelText.text = $"Level {mercenary.level}";
         }
 
-        // 스탯
+
+        // maxHP/maxMP 표시 (계산된 전투 스탯)
+
         if (statsHealthText != null)
         {
-            statsHealthText.text = $"HP: {mercenary.health}";
+            // HP 표시: "HP: 179/179" (전투에서 사용되는 값)
+            statsHealthText.text = $"HP: {mercenary.currentHP}/{mercenary.maxHP}";
+        }
+
+        if (statsMpText != null)
+        {
+            // MP 표시: "MP: 79/79" (전투에서 사용되는 값)
+            statsMpText.text = $"MP: {mercenary.currentMP}/{mercenary.maxMP}";
         }
 
         if (statsStrengthText != null)
@@ -306,7 +316,12 @@ public class InventoryWindow : MonoBehaviour
             statsSpeedText.text = $"SPD: {mercenary.speed}";
         }
 
-        Debug.Log("[InventoryWindow] ✅ StatsPanel 업데이트 완료");
+        // if (statsMpText != null)
+        // {
+        //     statsMpText.text = $"MP: {mercenary.currentMP}/{mercenary.maxMP}";
+        // }
+
+        Debug.Log($"[InventoryWindow] ✅ StatsPanel 업데이트 완료 - HP: {mercenary.currentHP}/{mercenary.maxHP}");
     }
 
     /// <summary>

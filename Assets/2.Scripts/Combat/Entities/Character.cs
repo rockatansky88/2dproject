@@ -13,7 +13,7 @@ public class Character : MonoBehaviour, ICombatant
     public CombatStats Stats;
 
     [Header("스킬")]
-    public List<SkillDataSO> Skills = new List<SkillDataSO>(); // 기본 공격 + 스킬 4개
+    public List<SkillDataSO> Skills = new List<SkillDataSO>();
 
     // ICombatant 구현
     public string Name => mercenaryData?.mercenaryName ?? "Unknown";
@@ -22,11 +22,11 @@ public class Character : MonoBehaviour, ICombatant
     public bool IsPlayer => true;
 
     [Header("UI 참조")]
-    public Transform UIAnchor; // HP/MP 바 위치
-    public MercenaryPartySlot uiSlot; // 🆕 추가: 연결된 파티 슬롯
+    public Transform UIAnchor;
+    public MercenaryPartySlot uiSlot;
 
     /// <summary>
-    /// 초기화
+    /// 초기화 (MercenaryInstance 사용 - 권장)
     /// </summary>
     public void Initialize(MercenaryInstance data, List<SkillDataSO> skills)
     {
@@ -35,20 +35,15 @@ public class Character : MonoBehaviour, ICombatant
 
         // 스탯 초기화
         Stats = new CombatStats();
-        Stats.Initialize(
-            data.strength,
-            data.dexterity,
-            data.intelligence,
-            data.wisdom,
-            data.speed,
-            baseCritChance: Random.Range(5f, 15f) // 기본 크리티컬 5~15%
-        );
+
+
+        Stats.InitializeFromMercenary(data);
 
         Debug.Log($"[Character] ✅ {Name} 초기화 완료 - HP: {Stats.CurrentHP}/{Stats.MaxHP}, MP: {Stats.CurrentMP}/{Stats.MaxMP}");
     }
 
     /// <summary>
-    /// 초기화 (CharacterStatsSO 사용)
+    /// 초기화 (CharacterStatsSO 사용 - 레거시)
     /// </summary>
     public void Initialize(CharacterStatsSO characterStats, List<SkillDataSO> skills)
     {
@@ -66,21 +61,22 @@ public class Character : MonoBehaviour, ICombatant
             dexterity = characterStats.Dexterity,
             intelligence = characterStats.Intelligence,
             wisdom = characterStats.Wisdom,
-            health = characterStats.Health,
             speed = characterStats.Speed,
             level = characterStats.Level
         };
 
         Skills = skills;
 
-        // 스탯 초기화
+        // 스탯 초기화 (레거시 방법 - 실시간 계산)
         Stats = new CombatStats();
+
         Stats.Initialize(
             characterStats.Strength,
             characterStats.Dexterity,
             characterStats.Intelligence,
             characterStats.Wisdom,
             characterStats.Speed,
+            characterStats.Health, // ← baseHealth 전달
             baseCritChance: Random.Range(5f, 15f)
         );
 
@@ -89,40 +85,57 @@ public class Character : MonoBehaviour, ICombatant
 
     /// <summary>
     /// 초기화 (UI 슬롯 연결)
+    /// MercenaryInstance의 HP/MP를 전투 중 실시간으로 동기화합니다.
     /// </summary>
     public void Initialize(MercenaryInstance data, List<SkillDataSO> skills, MercenaryPartySlot slot = null)
     {
         mercenaryData = data;
         Skills = skills;
-        uiSlot = slot; // 🆕 UI 슬롯 연결
+        uiSlot = slot;
 
         // 스탯 초기화
         Stats = new CombatStats();
-        Stats.Initialize(
-            data.strength,
-            data.dexterity,
-            data.intelligence,
-            data.wisdom,
-            data.speed,
-            baseCritChance: Random.Range(5f, 15f)
-        );
 
-        // 🆕 추가: HP/MP 이벤트 구독 → UI 업데이트
-        if (uiSlot != null)
+        Stats.InitializeFromMercenary(data);
+
+        // HP/MP 변경 시 MercenaryInstance에 역반영
+        // 전투 중 HP/MP 변화가 원본 데이터에도 저장되어
+        // 전투 종료 후에도 유지됩니다.
+        Stats.OnHPChanged += (currentHP, maxHP) =>
         {
-            Stats.OnHPChanged += (currentHP, maxHP) =>
+            // MercenaryInstance 업데이트
+            if (mercenaryData != null)
+            {
+                mercenaryData.currentHP = currentHP;
+                Debug.Log($"[Character] {Name} HP 변경 → MercenaryInstance 업데이트: {currentHP}/{maxHP}");
+            }
+
+            // UI 업데이트
+            if (uiSlot != null)
             {
                 uiSlot.UpdateCombatStats(currentHP, maxHP, Stats.CurrentMP, Stats.MaxMP);
-                Debug.Log($"[Character] {Name} HP 변경 → UI 업데이트: {currentHP}/{maxHP}");
-            };
+            }
+        };
 
-            Stats.OnMPChanged += (currentMP, maxMP) =>
+        Stats.OnMPChanged += (currentMP, maxMP) =>
+        {
+            // MercenaryInstance 업데이트
+            if (mercenaryData != null)
+            {
+                mercenaryData.currentMP = currentMP;
+                Debug.Log($"[Character] {Name} MP 변경 → MercenaryInstance 업데이트: {currentMP}/{maxMP}");
+            }
+
+            // UI 업데이트
+            if (uiSlot != null)
             {
                 uiSlot.UpdateCombatStats(Stats.CurrentHP, Stats.MaxHP, currentMP, maxMP);
-                Debug.Log($"[Character] {Name} MP 변경 → UI 업데이트: {currentMP}/{maxMP}");
-            };
+            }
+        };
 
-            // 초기 HP/MP UI 업데이트
+        // 초기 HP/MP UI 업데이트
+        if (uiSlot != null)
+        {
             uiSlot.UpdateCombatStats(Stats.CurrentHP, Stats.MaxHP, Stats.CurrentMP, Stats.MaxMP);
         }
 
@@ -157,13 +170,11 @@ public class Character : MonoBehaviour, ICombatant
         return true;
     }
 
-
     // ICombatant 구현
     public void TakeDamage(int damage)
     {
         Stats.TakeDamage(damage);
 
-        // 🆕 추가: 피격 UI 표시 (크리티컬 판정은 공격자가 결정하므로 false)
         if (uiSlot != null)
         {
             uiSlot.ShowDamage(damage, isCritical: false);

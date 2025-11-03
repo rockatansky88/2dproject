@@ -18,6 +18,7 @@ public class MercenaryDetailPopup : MonoBehaviour
 
     [Header("Stat Display")]
     [SerializeField] private Text healthText;              // 체력
+    [SerializeField] private Text manaText;                // 마나
     [SerializeField] private Text strengthText;            // 힘
     [SerializeField] private Text dexterityText;           // 민첩
     [SerializeField] private Text wisdomText;              // 지혜
@@ -211,6 +212,8 @@ public class MercenaryDetailPopup : MonoBehaviour
 
     /// <summary>
     /// UI 요소 설정
+    /// 용병의 스탯 기반 HP/MP(maxHP/maxMP)를 표시합니다.
+    /// 전투/비전투 상관없이 동일한 값을 사용합니다.
     /// </summary>
     private void SetupUI(MercenaryInstance mercenary)
     {
@@ -242,10 +245,18 @@ public class MercenaryDetailPopup : MonoBehaviour
             costText.text = $"{mercenary.recruitCost}";
         }
 
-        // 스탯 표시
+        // 스탯 기반 HP/MP 표시 (currentHP/maxHP, currentMP/maxMP)
+        // 전투/비전투 상관없이 동일한 값 사용
         if (healthText != null)
         {
-            healthText.text = $"HP: {mercenary.health}";
+            healthText.text = $"HP: {mercenary.currentHP}/{mercenary.maxHP}";
+            Debug.Log($"[MercenaryDetailPopup] HP 표시: {mercenary.currentHP}/{mercenary.maxHP}");
+        }
+
+        if (manaText != null)
+        {
+            manaText.text = $"MP: {mercenary.currentMP}/{mercenary.maxMP}";
+            Debug.Log($"[MercenaryDetailPopup] MP 표시: {mercenary.currentMP}/{mercenary.maxMP}");
         }
 
         if (strengthText != null)
@@ -273,7 +284,7 @@ public class MercenaryDetailPopup : MonoBehaviour
             speedText.text = $"SPD: {mercenary.speed}";
         }
 
-        Debug.Log($"[MercenaryDetailPopup] ✅ UI 설정 완료");
+        Debug.Log($"[MercenaryDetailPopup] ✅ UI 설정 완료 - HP: {mercenary.currentHP}/{mercenary.maxHP}, MP: {mercenary.currentMP}/{mercenary.maxMP}");
     }
 
     /// <summary>

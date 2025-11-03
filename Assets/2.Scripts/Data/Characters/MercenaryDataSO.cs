@@ -25,6 +25,9 @@ public class MercenaryDataSO : ScriptableObject
     [Tooltip("체력 범위")]
     public StatRange healthRange = new StatRange(80, 120);
 
+    [Tooltip("마나 범위")]
+    public StatRange manaRange = new StatRange(50, 100);
+
     [Tooltip("힘 범위")]
     public StatRange strengthRange = new StatRange(8, 15);
 
@@ -45,12 +48,9 @@ public class MercenaryDataSO : ScriptableObject
     [Tooltip("이 용병이 사용할 스킬 목록 (기본 공격 포함, 최대 5개)")]
     public SkillDataSO[] availableSkills = new SkillDataSO[0];
 
-    [Tooltip("마나 범위")]
-    public StatRange manaRange = new StatRange(50, 100);
-
     /// <summary>
     /// 랜덤 스탯을 가진 용병 인스턴스 생성
-    /// 이 메서드는 원본 SO를 수정하지 않고 새로운 런타임 인스턴스를 생성합니다.
+    /// HP/MP는 스탯 기반으로 자동 계산됩니다.
     /// </summary>
     public MercenaryInstance CreateRandomInstance()
     {
@@ -63,20 +63,31 @@ public class MercenaryDataSO : ScriptableObject
         instance.prefab = prefab;
         instance.recruitCost = recruitCost;
 
-        // 랜덤 스탯 생성
+        // 랜덤 기본 스탯 생성
         instance.level = levelRange.GetRandomValue();
-        instance.health = healthRange.GetRandomValue();
+        instance.health = healthRange.GetRandomValue(); // 🔑 기본 체력 (80~120)
         instance.strength = strengthRange.GetRandomValue();
         instance.dexterity = dexterityRange.GetRandomValue();
         instance.wisdom = wisdomRange.GetRandomValue();
         instance.intelligence = intelligenceRange.GetRandomValue();
         instance.speed = speedRange.GetRandomValue();
 
-        // 🔧 수정: 마나 초기화 (mana 필드 제거, maxMana로 통일)
-        instance.maxMana = manaRange.GetRandomValue();
-        instance.currentMana = instance.maxMana;
+        // HP 계산: MaxHP = 기본 체력 + (STR * 5)
+        // 예: health 100 + STR 10 → MaxHP 150
+        instance.maxHP = instance.health + (instance.strength * 5);
+        instance.currentHP = instance.maxHP; // 초기에는 풀 HP
 
-        // 🔧 수정: 스킬 복사 (SkillDatabase 제거, availableSkills 직접 사용)
+        // MP 계산: MaxMP = 기본 마나 + (WIS * 3)
+        int baseMana = manaRange.GetRandomValue(); // 기본 마나 (50~100)
+        instance.maxMP = baseMana + (instance.wisdom * 3);
+        instance.currentMP = instance.maxMP; // 초기에는 풀 MP
+
+        // 크리티컬 확률 계산 (기본 5% + DEX * 0.5%)
+        instance.criticalChance = 5f + (instance.dexterity * 0.5f);
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        // 스킬 복사
         instance.skills = new List<SkillDataSO>();
         if (availableSkills != null && availableSkills.Length > 0)
         {
@@ -84,13 +95,14 @@ public class MercenaryDataSO : ScriptableObject
         }
         else
         {
-            // 스킬이 없으면 경고 로그
             Debug.LogWarning($"[MercenaryDataSO] ⚠️ {mercenaryName}에 스킬이 설정되지 않았습니다!");
         }
 
         Debug.Log($"[MercenaryDataSO] ✅ 랜덤 용병 인스턴스 생성: {mercenaryName}\n" +
-                  $"Lv.{instance.level} | HP: {instance.health} | MP: {instance.maxMana} | STR: {instance.strength} | DEX: {instance.dexterity} | " +
-                  $"WIS: {instance.wisdom} | INT: {instance.intelligence} | SPD: {instance.speed} | 스킬: {instance.skills.Count}개");
+                  $"Lv.{instance.level} | BaseHP: {instance.health} → MaxHP: {instance.maxHP} (STR+{instance.strength * 5}) | " +
+                  $"MP: {instance.currentMP}/{instance.maxMP} | " +
+                  $"STR: {instance.strength} | DEX: {instance.dexterity} | WIS: {instance.wisdom} | INT: {instance.intelligence} | " +
+                  $"SPD: {instance.speed} | Crit: {instance.criticalChance:F1}% | 스킬: {instance.skills.Count}개");
 
         return instance;
     }
@@ -123,9 +135,14 @@ public class MercenaryInstance
     public int intelligence;
     public int speed;
 
-    // 마나
-    public int maxMana;
-    public int currentMana; // 전투 중 소모되는 현재 마나
+    // HP와 MP
+    public int maxHP;
+    public int currentHP;
+    public int maxMP;
+    public int currentMP; // 전투 중 소모되는 현재 마나
+
+    // 크리티컬 확률
+    public float criticalChance;
 
     // 스킬
     public List<SkillDataSO> skills = new List<SkillDataSO>();

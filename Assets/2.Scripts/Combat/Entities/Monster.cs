@@ -16,10 +16,6 @@ public class Monster : MonoBehaviour, ICombatant
     [Header("스킬")]
     public List<SkillDataSO> Skills = new List<SkillDataSO>(); // AI가 사용할 스킬
 
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🆕 추가: UI 슬롯 참조 필드
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
     [Header("UI 참조")]
     public Transform UIAnchor; // HP 바 위치
     public MonsterUISlot uiSlot; // 🆕 추가: 연결된 몬스터 슬롯
@@ -36,26 +32,25 @@ public class Monster : MonoBehaviour, ICombatant
     public void Initialize(MonsterSpawnData data, List<SkillDataSO> skills)
     {
         spawnData = data;
-        statsData = data.monsterStats.CreateRandomInstance(); // ✅ stats -> monsterStats로 수정
+        statsData = data.monsterStats.CreateRandomInstance();
         Skills = skills;
 
         // 스탯 초기화
         Stats = new CombatStats();
+
+
         Stats.Initialize(
             statsData.Strength,
             statsData.Dexterity,
             statsData.Intelligence,
             statsData.Wisdom,
             statsData.Speed,
+            statsData.Health, // ← baseHealth 전달
             baseCritChance: Random.Range(3f, 10f) // 몬스터 기본 크리티컬 3~10%
         );
 
         Debug.Log($"[Monster] ✅ {Name} 생성 완료 - HP: {Stats.CurrentHP}/{Stats.MaxHP}");
     }
-
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🔧 수정: Initialize 메서드 - UI 이벤트 연결
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
     /// <summary>
     /// 초기화 (UI 슬롯 연결)
@@ -65,20 +60,22 @@ public class Monster : MonoBehaviour, ICombatant
         spawnData = data;
         statsData = data.monsterStats.CreateRandomInstance();
         Skills = skills;
-        uiSlot = slot; // 🆕 UI 슬롯 연결
+        uiSlot = slot; // UI 슬롯 연결
 
         // 스탯 초기화
         Stats = new CombatStats();
+
         Stats.Initialize(
             statsData.Strength,
             statsData.Dexterity,
             statsData.Intelligence,
             statsData.Wisdom,
             statsData.Speed,
+            statsData.Health,
             baseCritChance: Random.Range(3f, 10f)
         );
 
-        // 🆕 추가: HP 이벤트 구독 → UI 업데이트
+        // HP 이벤트 구독 → UI 업데이트
         if (uiSlot != null)
         {
             Stats.OnHPChanged += (currentHP, maxHP) =>
@@ -86,8 +83,6 @@ public class Monster : MonoBehaviour, ICombatant
                 // MonsterUISlot의 HP 바 업데이트는 자체 이벤트로 처리됨
                 Debug.Log($"[Monster] {Name} HP 변경 → {currentHP}/{maxHP}");
             };
-
-            // 초기 HP UI 업데이트 (MonsterUISlot.Initialize에서 자동 처리)
         }
 
         Debug.Log($"[Monster] ✅ {Name} 생성 완료 - HP: {Stats.CurrentHP}/{Stats.MaxHP}, UI 연결: {(uiSlot != null ? "O" : "X")}");
@@ -170,7 +165,7 @@ public class Monster : MonoBehaviour, ICombatant
     {
         Stats.TakeDamage(damage);
 
-        // 🆕 추가: 피격 UI 표시 (크리티컬 판정은 공격자가 결정하므로 false)
+        // 피격 UI 표시 (크리티컬 판정은 공격자가 결정하므로 false)
         if (uiSlot != null)
         {
             uiSlot.ShowDamage(damage, isCritical: false);
