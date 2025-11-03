@@ -21,10 +21,6 @@ public class Character : MonoBehaviour, ICombatant
     public bool IsAlive => Stats.IsAlive;
     public bool IsPlayer => true;
 
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🆕 추가: UI 슬롯 참조 필드
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
     [Header("UI 참조")]
     public Transform UIAnchor; // HP/MP 바 위치
     public MercenaryPartySlot uiSlot; // 🆕 추가: 연결된 파티 슬롯
@@ -91,10 +87,6 @@ public class Character : MonoBehaviour, ICombatant
         Debug.Log($"[Character] ✅ {Name} 초기화 완료 (CharacterStatsSO) - HP: {Stats.CurrentHP}/{Stats.MaxHP}, MP: {Stats.CurrentMP}/{Stats.MaxMP}");
     }
 
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🔧 수정: Initialize 메서드 - UI 이벤트 연결
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
     /// <summary>
     /// 초기화 (UI 슬롯 연결)
     /// </summary>
@@ -155,15 +147,29 @@ public class Character : MonoBehaviour, ICombatant
         // 타겟에게 데미지
         target.TakeDamage(damage);
 
-        Debug.Log($"[Character] {Name}이(가) {skill.skillName} 사용 -> {target.Name}에게 {damage} 데미지!");
+        if (target is Monster monster && monster.uiSlot != null)
+        {
+            monster.uiSlot.ShowDamage(damage, isCritical);
+        }
+
+        Debug.Log($"[Character] {Name}이(가) {skill.skillName} 사용 -> {target.Name}에게 {damage} 데미지{(isCritical ? " (크리티컬!)" : "")}!");
 
         return true;
     }
+
 
     // ICombatant 구현
     public void TakeDamage(int damage)
     {
         Stats.TakeDamage(damage);
+
+        // 🆕 추가: 피격 UI 표시 (크리티컬 판정은 공격자가 결정하므로 false)
+        if (uiSlot != null)
+        {
+            uiSlot.ShowDamage(damage, isCritical: false);
+        }
+
+        Debug.Log($"[Character] {Name} 피격 - {damage} 데미지, 남은 HP: {Stats.CurrentHP}/{Stats.MaxHP}");
     }
 
     public void Heal(int amount)

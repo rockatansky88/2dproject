@@ -153,7 +153,14 @@ public class Monster : MonoBehaviour, ICombatant
         // 타겟에게 데미지
         target.TakeDamage(damage);
 
-        Debug.Log($"[Monster] {Name}이(가) {skill.skillName} 사용 -> {target.Name}에게 {damage} 데미지!");
+
+        //피격 UI 표시
+        if (target is Character character && character.uiSlot != null)
+        {
+            character.uiSlot.ShowDamage(damage, isCritical);
+        }
+
+        Debug.Log($"[Monster] {Name}이(가) {skill.skillName} 사용 -> {target.Name}에게 {damage} 데미지{(isCritical ? " (크리티컬!)" : "")}!");
 
         return true;
     }
@@ -162,6 +169,14 @@ public class Monster : MonoBehaviour, ICombatant
     public void TakeDamage(int damage)
     {
         Stats.TakeDamage(damage);
+
+        // 🆕 추가: 피격 UI 표시 (크리티컬 판정은 공격자가 결정하므로 false)
+        if (uiSlot != null)
+        {
+            uiSlot.ShowDamage(damage, isCritical: false);
+        }
+
+        Debug.Log($"[Monster] {Name} 피격 - {damage} 데미지, 남은 HP: {Stats.CurrentHP}/{Stats.MaxHP}");
     }
 
     public void Heal(int amount)
@@ -169,9 +184,6 @@ public class Monster : MonoBehaviour, ICombatant
         Stats.Heal(amount);
     }
 
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🆕 추가: GetDifficulty() 메서드
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     /// <summary>
     /// 몬스터 난이도 반환 (TPE 미니게임용)
     /// </summary>

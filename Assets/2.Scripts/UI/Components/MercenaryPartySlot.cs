@@ -24,6 +24,11 @@ public class MercenaryPartySlot : MonoBehaviour
     [SerializeField] private Image hpFillImage;        // HP Fill Image
     [SerializeField] private Image mpFillImage;        // MP Fill Image
 
+    [Header("Damage Display")]
+    [SerializeField] private Text damageText;          // 데미지 표시 텍스트
+    [SerializeField] private float damageFloatSpeed = 50f; // 위로 올라가는 속도
+    [SerializeField] private float damageFadeDuration = 1f; // 사라지는 시간
+
     private Outline turnOutline; // 용병 초상화 이미지의 Outline 컴포넌트
     private Coroutine turnBlinkCoroutine; // 깜빡임 코루틴 참조
 
@@ -44,10 +49,13 @@ public class MercenaryPartySlot : MonoBehaviour
         // 초기 상태: 전투 스탯 UI 숨김
         SetCombatStatsVisible(false);
 
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🆕 추가: Outline 컴포넌트 초기화
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         InitializeTurnOutline();
+
+        // 🆕 추가: 데미지 텍스트 초기 숨김
+        if (damageText != null)
+        {
+            damageText.gameObject.SetActive(false);
+        }
     }
 
     /// <summary>
@@ -185,9 +193,6 @@ public class MercenaryPartySlot : MonoBehaviour
             mpText.text = $"MP: {currentMp}/{maxMp}";
         }
 
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🔧 수정: Image fillAmount 방식 (MonsterUISlot과 동일)
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         if (hpFillImage != null)
         {
             float hpFill = maxHp > 0 ? (float)currentHp / maxHp : 0f;
@@ -220,6 +225,73 @@ public class MercenaryPartySlot : MonoBehaviour
         {
             combatStatsPanel.SetActive(visible);
         }
+    }
+
+    /// <summary>
+    /// 피격 데미지 표시
+    /// 빨간색 텍스트가 위로 올라가면서 서서히 사라지는 애니메이션
+    /// </summary>
+    /// <param name="damage">피해량</param>
+    /// <param name="isCritical">크리티컬 여부 (크리티컬 시 노란색 + 크기 확대)</param>
+    public void ShowDamage(int damage, bool isCritical = false)
+    {
+        if (damageText == null)
+        {
+            Debug.LogWarning("[MercenaryPartySlot] ⚠️ damageText가 null입니다! Inspector에서 할당해주세요");
+            return;
+        }
+
+        // 🔧 데미지 텍스트 설정
+        damageText.text = $"-{damage}";
+
+        // 🔧 크리티컬 여부에 따른 스타일 변경
+        if (isCritical)
+        {
+            damageText.color = new Color(1f, 0.8f, 0f, 1f); // 오렌지색
+            damageText.fontSize = 24; // 크기 확대
+        }
+        else
+        {
+            damageText.color = new Color(1f, 0f, 0f, 1f); // 빨간색
+            damageText.fontSize = 18; // 기본 크기
+        }
+
+        // 🔧 애니메이션 시작
+        StartCoroutine(FloatingDamageAnimation());
+
+        Debug.Log($"[MercenaryPartySlot] ✅ {mercenaryData.mercenaryName} 피격 표시: -{damage} (크리티컬: {isCritical})");
+    }
+
+    /// <summary>
+    /// 데미지 텍스트 애니메이션 (위로 떠오르면서 사라짐)
+    /// </summary>
+    private IEnumerator FloatingDamageAnimation()
+    {
+        damageText.gameObject.SetActive(true);
+
+        // 초기 위치 저장
+        Vector3 startPosition = damageText.transform.localPosition;
+        float elapsedTime = 0f;
+
+        while (elapsedTime < damageFadeDuration)
+        {
+            elapsedTime += Time.deltaTime;
+
+            // 위로 이동
+            float yOffset = damageFloatSpeed * Time.deltaTime;
+            damageText.transform.localPosition += new Vector3(0, yOffset, 0);
+
+            // 알파값 감소 (서서히 사라짐)
+            Color color = damageText.color;
+            color.a = Mathf.Lerp(1f, 0f, elapsedTime / damageFadeDuration);
+            damageText.color = color;
+
+            yield return null;
+        }
+
+        // 애니메이션 종료 후 숨김 및 위치 초기화
+        damageText.gameObject.SetActive(false);
+        damageText.transform.localPosition = startPosition;
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
