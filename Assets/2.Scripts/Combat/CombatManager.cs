@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using System;  // ✅ 추가!
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,9 +19,9 @@ public class CombatManager : MonoBehaviour
     [Header("전투 설정")]
     [SerializeField] private Transform partySpawnParent;    // 파티 생성 위치
     [SerializeField] private Transform monsterSpawnParent;  // 몬스터 생성 위치
-    [SerializeField] private GameObject characterPrefab;     // 캐릭터 프리팹
+    //[SerializeField] private GameObject characterPrefab;     // 캐릭터 프리팹 
 
-    // 🆕 추가: MonsterUISlot 프리팹 참조 (Inspector에서 할당)
+    [Header("몬스터 프리팹")]
     [SerializeField] private GameObject monsterUISlotPrefab; // MonsterUISlot 프리팹
 
     [Header("컴포넌트 참조")]
@@ -98,8 +98,13 @@ public class CombatManager : MonoBehaviour
         }
     }
 
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 🔧 수정: StartCombat - 실제 사용되는 메서드
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     /// <summary>
     /// 전투 시작 (DungeonManager에서 호출)
+    /// DungeonManager.Instance.StartCombat()에서 이 메서드를 호출합니다
     /// </summary>
     public void StartCombat(List<MonsterSpawnData> monsterDataList, bool isBoss)
     {
@@ -118,7 +123,7 @@ public class CombatManager : MonoBehaviour
         // 3. UI 초기화
         InitializeCombatUI();
 
-        // 4. 턴 시스템 시작
+        // 4. 턴 시스템 시작 - 올바른 메서드 사용
         turnController.InitializeBattle(currentParty, currentMonsters);
 
         Debug.Log($"[CombatManager] ✅ 전투 초기화 완료 - 파티: {currentParty.Count}, 몬스터: {currentMonsters.Count}");
@@ -147,7 +152,6 @@ public class CombatManager : MonoBehaviour
             return;
         }
 
-        // 🔧 기존 파티 슬롯 UI 가져오기
         if (combatUI == null)
         {
             Debug.LogError("[CombatManager] ❌ CombatUI가 null입니다!");
@@ -161,7 +165,7 @@ public class CombatManager : MonoBehaviour
 
             Debug.Log($"[CombatManager] 파티 멤버 {i + 1}/{party.Count}: {mercData.mercenaryName}");
 
-            // 🆕 GameObject를 생성하지 않고, 데이터만 담는 경량 오브젝트 생성
+            // GameObject를 생성하지 않고, 데이터만 담는 경량 오브젝트 생성
             GameObject charDataObj = new GameObject($"CharacterData_{mercData.mercenaryName}");
             charDataObj.transform.SetParent(partySpawnParent);
             charDataObj.transform.localPosition = Vector3.zero;
@@ -171,8 +175,8 @@ public class CombatManager : MonoBehaviour
             // 스킬은 MercenaryInstance에서 가져옴
             List<SkillDataSO> skills = new List<SkillDataSO>(mercData.skills);
 
-            // 🆕 UI 슬롯과 함께 초기화
-            MercenaryPartySlot uiSlot = combatUI.GetPartySlot(i); // 기존 파티 슬롯 가져오기
+            // UI 슬롯과 함께 초기화
+            MercenaryPartySlot uiSlot = combatUI.GetPartySlot(i);
             character.Initialize(mercData, skills, uiSlot);
 
             currentParty.Add(character);
@@ -184,7 +188,7 @@ public class CombatManager : MonoBehaviour
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🔧 수정: SpawnMonsters - 기존 빈 슬롯 제거 후 생성
+    // 🔧 수정: SpawnMonsters - 클릭 이벤트 연결 추가
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
     /// <summary>
@@ -195,7 +199,7 @@ public class CombatManager : MonoBehaviour
     /// 2. Monster 데이터 오브젝트를 MonsterUISlot 밑에 생성
     /// 3. Monster.Initialize()에서 UI 슬롯과 연결
     /// 4. MonsterUISlot.Initialize()에서 Monster 데이터 연결
-    /// 5. DungeonSO의 스프라이트와 스탯을 MonsterUISlot에 자동 반영
+    /// 5. CombatUI.InitializeMonsterUI()로 클릭 이벤트 연결
     /// </summary>
     private void SpawnMonsters(List<MonsterSpawnData> monsterDataList)
     {
@@ -209,14 +213,13 @@ public class CombatManager : MonoBehaviour
             return;
         }
 
-        // 🔧 수정: Inspector에서 할당된 프리팹 사용
         if (monsterUISlotPrefab == null)
         {
             Debug.LogError("[CombatManager] ❌ MonsterUISlot 프리팹이 할당되지 않았습니다! Inspector에서 할당해주세요.");
             return;
         }
 
-        // 🆕 0단계: MonsterSpawnParent 밑의 기존 자식 오브젝트 모두 제거 (빈 슬롯 정리)
+        // 0단계: MonsterSpawnParent 밑의 기존 자식 오브젝트 모두 제거 (빈 슬롯 정리)
         if (monsterSpawnParent != null)
         {
             int childCount = monsterSpawnParent.childCount;
@@ -243,9 +246,9 @@ public class CombatManager : MonoBehaviour
                      $"  - 스탯SO: {(data.monsterStats != null ? data.monsterStats.name : "null")}\n" +
                      $"  - 난이도: {data.difficulty}");
 
-            // 🆕 1단계: MonsterUISlot 생성 (MonsterSpawnParent 밑에)
+            // 1단계: MonsterUISlot 생성 (MonsterSpawnParent 밑에)
             GameObject monsterUIObj = Instantiate(monsterUISlotPrefab, monsterSpawnParent);
-            monsterUIObj.name = $"MonsterUISlot_{data.monsterName}_{i}"; // 이름 정리
+            monsterUIObj.name = $"MonsterUISlot_{data.monsterName}_{i}";
             MonsterUISlot uiSlot = monsterUIObj.GetComponent<MonsterUISlot>();
 
             if (uiSlot == null)
@@ -255,23 +258,20 @@ public class CombatManager : MonoBehaviour
                 continue;
             }
 
-            // 🆕 2단계: Monster 데이터 오브젝트 생성 (MonsterUISlot 밑에 숨김)
+            // 2단계: Monster 데이터 오브젝트 생성 (MonsterUISlot 밑에 숨김)
             GameObject monsterDataObj = new GameObject($"MonsterData_{data.monsterName}_{i}");
-            monsterDataObj.transform.SetParent(monsterUIObj.transform); // UI 슬롯 밑에 배치
+            monsterDataObj.transform.SetParent(monsterUIObj.transform);
             monsterDataObj.transform.localPosition = Vector3.zero;
 
             Monster monster = monsterDataObj.AddComponent<Monster>();
 
-            // 🆕 3단계: 스킬 로드
+            // 3단계: 스킬 로드
             List<SkillDataSO> monsterSkills = LoadMonsterSkills(data);
 
-            // 🆕 4단계: Monster 초기화 (UI 슬롯 연결)
-            // DungeonSO의 스프라이트와 스탯이 MonsterSpawnData에 포함되어 있으므로
-            // Monster.Initialize()에서 자동으로 처리됨
+            // 4단계: Monster 초기화 (UI 슬롯 연결)
             monster.Initialize(data, monsterSkills, uiSlot);
 
-            // 🆕 5단계: MonsterUISlot 초기화 (Monster 데이터 연결)
-            // 이 단계에서 MonsterUISlot이 Monster의 스프라이트와 스탯을 받아서 UI에 표시
+            // 5단계: MonsterUISlot 초기화 (Monster 데이터 연결)
             uiSlot.Initialize(monster);
 
             currentMonsters.Add(monster);
@@ -283,14 +283,19 @@ public class CombatManager : MonoBehaviour
                      $"  - 스프라이트 연결: {(data.monsterSprite != null ? "O" : "X")}");
         }
 
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🆕 6단계: CombatUI에 몬스터 슬롯 연결 및 클릭 이벤트 등록
+        // 이 단계가 없으면 몬스터 클릭이 안됩니다!
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        Debug.Log("[CombatManager] ━━━ 몬스터 클릭 이벤트 연결 시작 ━━━");
         combatUI.InitializeMonsterUI(currentMonsters);
+        Debug.Log("[CombatManager] ✅ 몬스터 클릭 이벤트 연결 완료");
 
         Debug.Log($"[CombatManager] ✅ 몬스터 생성 완료 - 총 {currentMonsters.Count}마리");
     }
 
     /// <summary>
-    /// 몬스터 스킬 로드   (임시)
+    /// 몬스터 스킬 로드
     /// </summary>
     private List<SkillDataSO> LoadMonsterSkills(MonsterSpawnData data)
     {
@@ -298,7 +303,6 @@ public class CombatManager : MonoBehaviour
 
         List<SkillDataSO> skills = new List<SkillDataSO>();
 
-        // MonsterSpawnData에서 스킬 배열 가져오기
         if (data.skills != null && data.skills.Length > 0)
         {
             skills.AddRange(data.skills);
@@ -306,29 +310,10 @@ public class CombatManager : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning($"[CombatManager] ⚠️ {data.monsterName}에 스킬이 없습니다! 기본 공격 생성 중...");
+            Debug.LogWarning($"[CombatManager] ⚠️ {data.monsterName}에 스킬이 없습니다!");
         }
+
         return skills;
-    }
-
-    /// <summary>
-    /// 기본 공격 스킬 생성 (임시)
-    /// </summary>
-    private SkillDataSO CreateDefaultBasicAttack()
-    {
-        SkillDataSO basicAttack = ScriptableObject.CreateInstance<SkillDataSO>();
-        basicAttack.skillName = "기본 공격";
-        basicAttack.baseDamageMin = 5;
-        basicAttack.baseDamageMax = 10;
-        basicAttack.manaCost = 0;
-        basicAttack.isBasicAttack = true;
-        basicAttack.damageType = SkillDamageType.Physical;
-        basicAttack.targetType = SkillTargetType.Single;
-        basicAttack.statScaling = 0.5f;
-
-        Debug.Log("[CombatManager] 기본 공격 스킬 임시 생성");
-
-        return basicAttack;
     }
 
     /// <summary>
@@ -344,7 +329,7 @@ public class CombatManager : MonoBehaviour
             return;
         }
 
-        // 파티 UI 초기화
+        // 파티 UI 초기화 (전투 모드 전환)
         combatUI.InitializePartyUI(currentParty);
 
         Debug.Log("[CombatManager] ✅ 전투 UI 초기화 완료");
@@ -401,13 +386,11 @@ public class CombatManager : MonoBehaviour
 
         tpeSuccess = success;
 
-        // UI 숨김
         if (combatUI != null)
         {
             combatUI.HideTPEMinigame();
         }
 
-        // 실제 공격 실행
         ExecutePlayerAttack();
     }
 
@@ -432,19 +415,15 @@ public class CombatManager : MonoBehaviour
 
         Debug.Log($"[CombatManager] ⚔️ {player.Name}이(가) {pendingTarget.Name}에게 {pendingSkill.skillName} 사용!");
 
-        // 크리티컬 판정 (TPE 성공 시 +30% 보너스)
         float critBonus = tpeSuccess ? 30f : 0f;
         bool isCritical = player.Stats.RollCritical(critBonus);
 
         Debug.Log($"[CombatManager] 크리티컬 판정: {(isCritical ? "크리티컬!" : "일반 공격")} (보너스: +{critBonus}%)");
 
-        // 스킬 사용
         player.UseSkill(pendingSkill, pendingTarget, isCritical);
 
-        // 턴 종료
         turnController.EndCurrentTurn();
 
-        // 초기화
         pendingSkill = null;
         pendingTarget = null;
     }
@@ -456,7 +435,6 @@ public class CombatManager : MonoBehaviour
     {
         Debug.Log($"[CombatManager] 🛡️ 패링 미니게임 결과: {(success ? "성공 (데미지 0)" : "실패 (일반 데미지)")}");
 
-        // UI 숨김
         if (combatUI != null)
         {
             combatUI.HideParryMinigame();
@@ -464,20 +442,16 @@ public class CombatManager : MonoBehaviour
 
         if (success)
         {
-            // 패링 성공: 데미지 0
             Debug.Log($"[CombatManager] ✅ {pendingDefender.Name} 패링 성공! 데미지 0");
         }
         else
         {
-            // 패링 실패: 일반 데미지 적용
             Debug.Log($"[CombatManager] ❌ {pendingDefender.Name} 패링 실패! 데미지 {pendingDamage} 적용");
             pendingDefender.TakeDamage(pendingDamage);
         }
 
-        // 턴 종료
         turnController.EndCurrentTurn();
 
-        // 초기화
         pendingDamage = 0;
         pendingDefender = null;
     }
@@ -487,13 +461,11 @@ public class CombatManager : MonoBehaviour
     /// </summary>
     private void UpdateAllCombatantUI()
     {
-        // 파티 HP/MP 업데이트
         foreach (var character in currentParty)
         {
             combatUI.UpdatePartyMemberStats(character);
         }
 
-        // 몬스터 HP 업데이트
         foreach (var monster in currentMonsters)
         {
             combatUI.UpdateMonsterStats(monster);
@@ -534,15 +506,11 @@ public class CombatManager : MonoBehaviour
 
         if (isVictory)
         {
-            // 보상 계산
             CalculateRewards();
-
-            // 보상 지급
             GiveRewards();
 
             Debug.Log($"[CombatManager] ✅ 보상 지급 완료 - 골드: {totalGoldReward}, 경험치: {totalExpReward}");
 
-            // 다음 방으로 이동
             if (DungeonManager.Instance != null)
             {
                 if (DungeonManager.Instance.IsDungeonCleared())
@@ -559,7 +527,6 @@ public class CombatManager : MonoBehaviour
         }
         else
         {
-            // 패배 처리
             Debug.Log("[CombatManager] ❌ 패배! 던전 퇴장");
 
             if (DungeonManager.Instance != null)
@@ -568,10 +535,8 @@ public class CombatManager : MonoBehaviour
             }
         }
 
-        // 전투 종료 이벤트 발생
         OnCombatEnded?.Invoke(isVictory);
 
-        // 정리
         CleanupCombat();
     }
 
@@ -589,7 +554,6 @@ public class CombatManager : MonoBehaviour
             totalExpReward += UnityEngine.Random.Range(20, 100);
         }
 
-        // 보스전이면 보상 2배
         if (isBossFight)
         {
             totalGoldReward *= 2;
@@ -611,7 +575,6 @@ public class CombatManager : MonoBehaviour
             Debug.Log($"[CombatManager] ✅ 골드 {totalGoldReward} 지급");
         }
 
-        // TODO: 경험치 시스템 구현 시 추가
         Debug.Log($"[CombatManager] ✅ 경험치 {totalExpReward} 지급 (미구현)");
     }
 
@@ -622,7 +585,6 @@ public class CombatManager : MonoBehaviour
     {
         Debug.Log("[CombatManager] 전투 정리 시작");
 
-        // 파티 오브젝트 제거
         foreach (var character in currentParty)
         {
             if (character != null)
@@ -632,7 +594,6 @@ public class CombatManager : MonoBehaviour
         }
         currentParty.Clear();
 
-        // 몬스터 오브젝트 제거
         foreach (var monster in currentMonsters)
         {
             if (monster != null)
@@ -647,7 +608,6 @@ public class CombatManager : MonoBehaviour
 
     private void OnDestroy()
     {
-        // 이벤트 구독 해제
         if (turnController != null)
         {
             turnController.OnTurnStart -= OnTurnStarted;
@@ -666,12 +626,8 @@ public class CombatManager : MonoBehaviour
         }
     }
 
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🆕 추가: 플레이어 행동 요청 (CombatUI에서 호출)
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
     /// <summary>
-    /// 플레이어 행동 요청 (스킬 + 타겟 선택 완료 시)
+    /// 플레이어 행동 요청 (CombatUI에서 호출)
     /// </summary>
     public void RequestPlayerAction(SkillDataSO skill, ICombatant target)
     {
@@ -680,7 +636,6 @@ public class CombatManager : MonoBehaviour
         pendingSkill = skill;
         pendingTarget = target;
 
-        // TPE 미니게임 시작
         if (tpeMinigame != null)
         {
             MonsterDifficulty difficulty = MonsterDifficulty.Normal;
@@ -700,33 +655,20 @@ public class CombatManager : MonoBehaviour
         }
     }
 
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🆕 추가: AI 공격 실행 (TurnController에서 호출)
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
     /// <summary>
-    /// AI 공격 실행
-    /// 몬스터가 용병을 공격할 때 호출되는 메서드
-    /// 스킬의 CalculateDamage를 사용하여 데미지를 계산하고 패링 미니게임 시작
+    /// AI 공격 실행 (TurnController에서 호출)
     /// </summary>
     public void ExecuteAIAttack(Monster monster, SkillDataSO skill, Character target)
     {
         Debug.Log($"[CombatManager] 🤖 AI 공격: {monster.Name} -> {target.Name} (스킬: {skill.skillName})");
 
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🔧 수정: SkillDataSO의 CalculateDamage 메서드 사용
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-        // 크리티컬 판정
         bool isCritical = monster.Stats.RollCritical();
         Debug.Log($"[CombatManager] 크리티컬 판정: {(isCritical ? "크리티컬!" : "일반 공격")}");
 
-        // 스킬의 CalculateDamage 메서드를 직접 사용
         int damage = skill.CalculateDamage(monster.Stats, isCritical);
 
         Debug.Log($"[CombatManager] 계산된 데미지: {damage} (스킬: {skill.skillName}, 크리티컬: {isCritical})");
 
-        // 패링 미니게임 표시
         pendingDamage = damage;
         pendingDefender = target;
 
@@ -743,12 +685,8 @@ public class CombatManager : MonoBehaviour
         }
     }
 
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🆕 추가: AI 타겟 화살표 표시 (TurnController에서 호출)
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
     /// <summary>
-    /// AI 공격 시 타겟 화살표 표시 (용병 위에 표시)
+    /// AI 타겟 화살표 표시 (TurnController에서 호출)
     /// </summary>
     public void ShowTargetArrowForAI(Character target)
     {
