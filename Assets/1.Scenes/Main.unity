@@ -10359,7 +10359,7 @@ MonoBehaviour:
   monsterSpawnParent: {fileID: 675863604}
   skillSlotParent: {fileID: 1224068421}
   skillContainerPrefab: {fileID: 7483921186175032835, guid: 5fa4a9804af365647bd677982fc8ea54, type: 3}
-  skillContainerOffsetY: 60
+  skillContainerOffsetY: 80
   targetArrow: {fileID: 925491096}
   attackButton: {fileID: 1566852039}
   tpeMinigamePanel: {fileID: 7463727626792454204, guid: ffce41c87b7f2eb47b0720e56ff80c13, type: 3}

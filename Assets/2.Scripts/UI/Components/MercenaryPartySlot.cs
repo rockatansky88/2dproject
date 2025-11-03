@@ -20,14 +20,9 @@ public class MercenaryPartySlot : MonoBehaviour
     [SerializeField] private GameObject combatStatsPanel; // HP/MP UI를 담은 부모 오브젝트
     [SerializeField] private Text hpText;              // HP 텍스트
     [SerializeField] private Text mpText;              // MP 텍스트
-    [SerializeField] private Slider hpSlider;          // HP 슬라이더 (옵션)
-    [SerializeField] private Slider mpSlider;          // MP 슬라이더 (옵션)
 
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🆕 수정: Image 테두리 대신 Outline 컴포넌트 사용
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    //[Header("Turn Indicator - 현재 턴 표시")]
-    //[SerializeField] private Image turnBorder;         // ❌ 기존: 빨간색 테두리 이미지
+    [SerializeField] private Image hpFillImage;        // HP Fill Image
+    [SerializeField] private Image mpFillImage;        // MP Fill Image
 
     private Outline turnOutline; // 용병 초상화 이미지의 Outline 컴포넌트
     private Coroutine turnBlinkCoroutine; // 깜빡임 코루틴 참조
@@ -190,18 +185,29 @@ public class MercenaryPartySlot : MonoBehaviour
             mpText.text = $"MP: {currentMp}/{maxMp}";
         }
 
-        // HP 슬라이더
-        if (hpSlider != null)
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // 🔧 수정: Image fillAmount 방식 (MonsterUISlot과 동일)
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        if (hpFillImage != null)
         {
-            hpSlider.maxValue = maxHp;
-            hpSlider.value = currentHp;
+            float hpFill = maxHp > 0 ? (float)currentHp / maxHp : 0f;
+            hpFillImage.fillAmount = hpFill;
+            Debug.Log($"[MercenaryPartySlot] HP Fill 업데이트: {hpFill:P0} ({currentHp}/{maxHp})");
+        }
+        else
+        {
+            Debug.LogWarning("[MercenaryPartySlot] ⚠️ hpFillImage가 null입니다!");
         }
 
-        // MP 슬라이더
-        if (mpSlider != null)
+        if (mpFillImage != null)
         {
-            mpSlider.maxValue = maxMp;
-            mpSlider.value = currentMp;
+            float mpFill = maxMp > 0 ? (float)currentMp / maxMp : 0f;
+            mpFillImage.fillAmount = mpFill;
+            Debug.Log($"[MercenaryPartySlot] MP Fill 업데이트: {mpFill:P0} ({currentMp}/{maxMp})");
+        }
+        else
+        {
+            Debug.LogWarning("[MercenaryPartySlot] ⚠️ mpFillImage가 null입니다!");
         }
     }
 

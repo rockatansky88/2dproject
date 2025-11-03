@@ -184,8 +184,8 @@ MonoBehaviour:
   combatStatsPanel: {fileID: 1740904991113745325}
   hpText: {fileID: 6791424408849561383}
   mpText: {fileID: 4979240213716566696}
-  hpSlider: {fileID: 0}
-  mpSlider: {fileID: 0}
+  hpFillImage: {fileID: 5536149517309751521}
+  mpFillImage: {fileID: 3817652232910024283}
 --- !u!114 &7826932024019849829
 MonoBehaviour:
   m_ObjectHideFlags: 0
