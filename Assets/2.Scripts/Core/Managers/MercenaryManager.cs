@@ -40,6 +40,11 @@ public class MercenaryManager : MonoBehaviour
     public int MaxPartySize => maxPartySize;
     public bool IsPartyFull => recruitedMercenaries.Count >= maxPartySize;
 
+    /// <summary>
+    /// 현재 전투 가능한 파티 (RecruitedMercenaries와 동일) 
+    /// </summary>
+    public List<MercenaryInstance> CurrentParty => recruitedMercenaries;
+
     private void Awake()
     {
         if (Instance == null)

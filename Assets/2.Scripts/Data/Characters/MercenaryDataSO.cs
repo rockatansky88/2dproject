@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections.Generic; // 스킬 배열 생성을 위한 네임스페이스 추가
 
 /// <summary>
 /// 용병의 기본 템플릿 데이터
@@ -39,6 +40,14 @@ public class MercenaryDataSO : ScriptableObject
     [Tooltip("속도 범위")]
     public StatRange speedRange = new StatRange(8, 12);
 
+    // 🆕 추가: 스킬 정보
+    [Header("Skills")]
+    [Tooltip("이 용병이 사용할 스킬 목록 (기본 공격 포함, 최대 5개)")]
+    public SkillDataSO[] availableSkills = new SkillDataSO[0];
+
+    [Tooltip("마나 범위")]
+    public StatRange manaRange = new StatRange(50, 100);
+
     /// <summary>
     /// 랜덤 스탯을 가진 용병 인스턴스 생성
     /// 이 메서드는 원본 SO를 수정하지 않고 새로운 런타임 인스턴스를 생성합니다.
@@ -63,9 +72,25 @@ public class MercenaryDataSO : ScriptableObject
         instance.intelligence = intelligenceRange.GetRandomValue();
         instance.speed = speedRange.GetRandomValue();
 
+        // 🔧 수정: 마나 초기화 (mana 필드 제거, maxMana로 통일)
+        instance.maxMana = manaRange.GetRandomValue();
+        instance.currentMana = instance.maxMana;
+
+        // 🔧 수정: 스킬 복사 (SkillDatabase 제거, availableSkills 직접 사용)
+        instance.skills = new List<SkillDataSO>();
+        if (availableSkills != null && availableSkills.Length > 0)
+        {
+            instance.skills.AddRange(availableSkills);
+        }
+        else
+        {
+            // 스킬이 없으면 경고 로그
+            Debug.LogWarning($"[MercenaryDataSO] ⚠️ {mercenaryName}에 스킬이 설정되지 않았습니다!");
+        }
+
         Debug.Log($"[MercenaryDataSO] ✅ 랜덤 용병 인스턴스 생성: {mercenaryName}\n" +
-                  $"Lv.{instance.level} | HP: {instance.health} | STR: {instance.strength} | DEX: {instance.dexterity} | " +
-                  $"WIS: {instance.wisdom} | INT: {instance.intelligence} | SPD: {instance.speed}");
+                  $"Lv.{instance.level} | HP: {instance.health} | MP: {instance.maxMana} | STR: {instance.strength} | DEX: {instance.dexterity} | " +
+                  $"WIS: {instance.wisdom} | INT: {instance.intelligence} | SPD: {instance.speed} | 스킬: {instance.skills.Count}개");
 
         return instance;
     }
@@ -97,6 +122,13 @@ public class MercenaryInstance
     public int wisdom;
     public int intelligence;
     public int speed;
+
+    // 마나
+    public int maxMana;
+    public int currentMana; // 전투 중 소모되는 현재 마나
+
+    // 스킬
+    public List<SkillDataSO> skills = new List<SkillDataSO>();
 
     // 고용 여부 추적
     public bool isRecruited = false;

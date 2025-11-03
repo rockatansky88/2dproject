@@ -1,11 +1,13 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System;
+using System.Collections;
 
 /// <summary>
 /// 고용된 용병을 표시하는 파티 슬롯 (최대 4명)
 /// 클릭하면 상세 팝업이 열립니다 (추방 모드).
 /// 전투씬일 때는 HP/MP를 표시합니다.
+/// 턴 표시: 용병 초상화 이미지에 빨간색 Outline 깜빡임
 /// </summary>
 public class MercenaryPartySlot : MonoBehaviour
 {
@@ -20,6 +22,15 @@ public class MercenaryPartySlot : MonoBehaviour
     [SerializeField] private Text mpText;              // MP 텍스트
     [SerializeField] private Slider hpSlider;          // HP 슬라이더 (옵션)
     [SerializeField] private Slider mpSlider;          // MP 슬라이더 (옵션)
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 🆕 수정: Image 테두리 대신 Outline 컴포넌트 사용
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    //[Header("Turn Indicator - 현재 턴 표시")]
+    //[SerializeField] private Image turnBorder;         // ❌ 기존: 빨간색 테두리 이미지
+
+    private Outline turnOutline; // 용병 초상화 이미지의 Outline 컴포넌트
+    private Coroutine turnBlinkCoroutine; // 깜빡임 코루틴 참조
 
     private MercenaryInstance mercenaryData;
     private bool isCombatScene = false;
@@ -37,6 +48,41 @@ public class MercenaryPartySlot : MonoBehaviour
 
         // 초기 상태: 전투 스탯 UI 숨김
         SetCombatStatsVisible(false);
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // 🆕 추가: Outline 컴포넌트 초기화
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        InitializeTurnOutline();
+    }
+
+    /// <summary>
+    /// Outline 컴포넌트 초기화 또는 자동 생성
+    /// 용병 초상화 이미지(portraitImage)에 Outline을 추가하여 턴 표시에 사용
+    /// </summary>
+    private void InitializeTurnOutline()
+    {
+        if (portraitImage == null)
+        {
+            Debug.LogWarning("[MercenaryPartySlot] ⚠️ portraitImage가 null이어서 Outline을 생성할 수 없습니다!");
+            return;
+        }
+
+        // 기존 Outline 컴포넌트가 있는지 확인
+        turnOutline = portraitImage.GetComponent<Outline>();
+
+        // 없으면 새로 추가
+        if (turnOutline == null)
+        {
+            turnOutline = portraitImage.gameObject.AddComponent<Outline>();
+            Debug.Log($"[MercenaryPartySlot] ✅ Outline 컴포넌트 자동 생성");
+        }
+
+        // 초기 설정: 빨간색, 두께 5, 비활성화
+        turnOutline.effectColor = new Color(1f, 0f, 0f, 1f); // 빨간색
+        turnOutline.effectDistance = new Vector2(5f, 5f); // 외곽선 두께
+        turnOutline.enabled = false; // 초기엔 비활성화
+
+        Debug.Log($"[MercenaryPartySlot] ✅ Outline 초기화 완료 (빨간색, 두께 5)");
     }
 
     /// <summary>
@@ -71,7 +117,7 @@ public class MercenaryPartySlot : MonoBehaviour
         // 전투씬일 경우 HP/MP 업데이트
         if (isCombatScene)
         {
-            UpdateCombatStats(mercenary.health, mercenary.health, 50, 50); // TODO: 현재HP, 최대HP, 현재MP, 최대MP
+            UpdateCombatStats(mercenary.health, mercenary.health, 50, 50);
         }
 
         Debug.Log($"[MercenaryPartySlot] ✅ 초기화 완료: {mercenary.mercenaryName}");
@@ -101,6 +147,9 @@ public class MercenaryPartySlot : MonoBehaviour
 
         // 전투 스탯 UI 숨김
         SetCombatStatsVisible(false);
+
+        // 턴 외곽선 비활성화
+        SetTurnActive(false);
     }
 
     /// <summary>
@@ -167,6 +216,87 @@ public class MercenaryPartySlot : MonoBehaviour
         }
     }
 
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 🆕 수정: Outline 기반 턴 표시로 변경
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    /// <summary>
+    /// 현재 턴 표시 활성화/비활성화
+    /// 용병 초상화 이미지의 Outline 컴포넌트를 사용하여 빨간색 외곽선 깜빡임
+    /// </summary>
+    public void SetTurnActive(bool active)
+    {
+        // Outline null 체크
+        if (turnOutline == null)
+        {
+            Debug.LogWarning($"[MercenaryPartySlot] ⚠️ {gameObject.name}: Outline 컴포넌트가 없습니다!\n" +
+                           $"  - Mercenary: {(mercenaryData != null ? mercenaryData.mercenaryName : "null")}\n" +
+                           $"  - SetTurnActive({active}) 호출 무시\n" +
+                           $"  - Outline은 Awake()에서 자동 생성됩니다");
+            return;
+        }
+
+        // 기존 깜빡임 코루틴 중지
+        if (turnBlinkCoroutine != null)
+        {
+            StopCoroutine(turnBlinkCoroutine);
+            turnBlinkCoroutine = null;
+        }
+
+        if (active)
+        {
+            // 턴 표시 활성화 및 깜빡임 시작
+            turnOutline.enabled = true;
+            turnBlinkCoroutine = StartCoroutine(BlinkTurnOutline());
+            Debug.Log($"[MercenaryPartySlot] ✅ {mercenaryData?.mercenaryName} 턴 표시 활성화 (빨간색 외곽선 깜빡임 시작)");
+        }
+        else
+        {
+            // 턴 표시 비활성화
+            turnOutline.enabled = false;
+            Debug.Log($"[MercenaryPartySlot] {(mercenaryData != null ? mercenaryData.mercenaryName : "Unknown")} 턴 표시 비활성화");
+        }
+    }
+
+    /// <summary>
+    /// 빨간색 외곽선 깜빡임 효과
+    /// Outline의 알파값을 0.5 ~ 1.0 사이에서 반복하여 깜빡이는 효과 생성
+    /// </summary>
+    private IEnumerator BlinkTurnOutline()
+    {
+        float blinkSpeed = 2f; // 깜빡임 속도
+        bool fadingOut = true;
+
+        while (true)
+        {
+            Color color = turnOutline.effectColor;
+
+            if (fadingOut)
+            {
+                // 투명하게
+                color.a -= Time.deltaTime * blinkSpeed;
+                if (color.a <= 0.5f)
+                {
+                    color.a = 0.5f;
+                    fadingOut = false;
+                }
+            }
+            else
+            {
+                // 불투명하게
+                color.a += Time.deltaTime * blinkSpeed;
+                if (color.a >= 1f)
+                {
+                    color.a = 1f;
+                    fadingOut = true;
+                }
+            }
+
+            turnOutline.effectColor = color;
+            yield return null;
+        }
+    }
+
     /// <summary>
     /// 슬롯 클릭 핸들러
     /// </summary>
@@ -185,11 +315,26 @@ public class MercenaryPartySlot : MonoBehaviour
         OnSlotClicked?.Invoke(mercenaryData);
     }
 
+    /// <summary>
+    /// 용병 데이터 반환
+    /// </summary>
+    public MercenaryInstance GetMercenary()
+    {
+        return mercenaryData;
+    }
+
     private void OnDestroy()
     {
         if (slotButton != null)
         {
             slotButton.onClick.RemoveListener(OnClicked);
+        }
+
+        // 코루틴 정리
+        if (turnBlinkCoroutine != null)
+        {
+            StopCoroutine(turnBlinkCoroutine);
+            turnBlinkCoroutine = null;
         }
     }
 }

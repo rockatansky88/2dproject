@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   eventID: event_Acient_Statue
   eventName: "\uACE0\uB300\uC758 \uC804\uC0AC\uB3D9\uC0C1"
-  eventImage: {fileID: 21300000, guid: d462734f4d057f844883a3528d4ab934, type: 3}
+  eventImage: {fileID: 21300000, guid: c8816264fc904684a9bdb543033b2532, type: 3}
   description: "\uACE0\uB300 \uC804\uC0AC\uC758 \uB3D9\uC0C1\uC5D0\uC11C \uD798\uC774
     \uB290\uAEF4\uC9D1\uB2C8\uB2E4.\n( \uD798\uC744 10 \uC0C1\uC2B9 \uC2DC\uCF1C\uC90D\uB2C8\uB2E4.
     ) "
