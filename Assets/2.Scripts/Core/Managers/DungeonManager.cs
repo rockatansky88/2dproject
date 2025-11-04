@@ -86,10 +86,14 @@ public class DungeonManager : MonoBehaviour
 
     /// <summary>
     /// 던전 퇴장 (클리어 또는 패배)
+    /// 마을로 귀환 시 모든 용병의 HP/MP를 완전 회복하고 전투 상태를 초기화합니다.
     /// </summary>
     public void ExitDungeon()
     {
         Debug.Log("[DungeonManager] ━━━ 던전 퇴장 ━━━");
+
+        // 🆕 추가: 모든 용병 HP/MP 완전 회복
+        RestoreAllMercenaries();
 
         currentDungeon = null;
         currentRoomIndex = 0;
@@ -98,7 +102,37 @@ public class DungeonManager : MonoBehaviour
 
         OnDungeonExited?.Invoke();
 
-        Debug.Log("[DungeonManager] ? 던전 데이터 초기화 완료");
+        Debug.Log("[DungeonManager] ✅ 던전 데이터 초기화 완료");
+    }
+
+    /// <summary>
+    /// 모든 용병의 HP/MP를 완전 회복합니다.
+    /// 던전 퇴장 시 또는 마을 귀환 시 호출됩니다.
+    /// </summary>
+    private void RestoreAllMercenaries()
+    {
+        Debug.Log("[DungeonManager] ━━━ 용병 HP/MP 회복 시작 ━━━");
+
+        if (MercenaryManager.Instance == null)
+        {
+            Debug.LogError("[DungeonManager] ❌ MercenaryManager.Instance가 null입니다!");
+            return;
+        }
+
+        List<MercenaryInstance> allMercenaries = MercenaryManager.Instance.RecruitedMercenaries;
+
+        foreach (var mercenary in allMercenaries)
+        {
+            int beforeHP = mercenary.currentHP;
+            int beforeMP = mercenary.currentMP;
+
+            mercenary.currentHP = mercenary.maxHP;
+            mercenary.currentMP = mercenary.maxMP;
+
+            Debug.Log($"[DungeonManager] {mercenary.mercenaryName} 회복: HP {beforeHP} → {mercenary.currentHP}, MP {beforeMP} → {mercenary.currentMP}");
+        }
+
+        Debug.Log("[DungeonManager] ✅ 모든 용병 HP/MP 회복 완료");
     }
 
     /// <summary>

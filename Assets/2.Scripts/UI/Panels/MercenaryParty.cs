@@ -1,71 +1,71 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using System.Collections.Generic;
 
 /// <summary>
-/// °í¿ëµÈ ¿ëº´ ÆÄÆ¼ UI (»óÈ²¿¡ µû¶ó Ç¥½Ã/¼û±è)
-/// °ÔÀÓ ½ÃÀÛ ½Ã ÀÚµ¿À¸·Î ÃÊ±âÈ­µÇ¸ç, MercenaryManagerÀÇ º¯°æ»çÇ×À» °¨ÁöÇÕ´Ï´Ù.
-/// ´øÀü ÀÔ±¸/Åë·Î: ¼û±è, ÀüÅõ/ÀÌº¥Æ®: Ç¥½Ã
+/// ê³ ìš©ëœ ìš©ë³‘ íŒŒí‹° UI (ìƒí™©ì— ë”°ë¼ í‘œì‹œ/ìˆ¨ê¹€)
+/// ê²Œì„ ì‹œì‘ ì‹œ ìë™ìœ¼ë¡œ ì´ˆê¸°í™”ë˜ë©°, MercenaryManagerì˜ ë³€ê²½ì‚¬í•­ì„ ê°ì§€í•©ë‹ˆë‹¤.
+/// ë˜ì „ ì…êµ¬/í†µë¡œ: ìˆ¨ê¹€, ì „íˆ¬/ì´ë²¤íŠ¸: í‘œì‹œ
 /// </summary>
 public class MercenaryParty : MonoBehaviour
 {
     [Header("Party Slots")]
-    [SerializeField] private Transform partySlotContainer; // ÆÄÆ¼ ½½·ÔµéÀÇ ºÎ¸ğ
-    [SerializeField] private GameObject mercenaryPartySlotPrefab; // ÆÄÆ¼ ¿ëº´ ½½·Ô ÇÁ¸®ÆÕ
+    [SerializeField] private Transform partySlotContainer; // íŒŒí‹° ìŠ¬ë¡¯ë“¤ì˜ ë¶€ëª¨
+    [SerializeField] private GameObject mercenaryPartySlotPrefab; // íŒŒí‹° ìš©ë³‘ ìŠ¬ë¡¯ í”„ë¦¬íŒ¹
     [SerializeField] private int maxPartySlots = 4;
 
     [Header("Detail Popup")]
-    [SerializeField] private MercenaryDetailPopup detailPopup; // Canvas¿¡¼­ ÂüÁ¶
+    [SerializeField] private MercenaryDetailPopup detailPopup; // Canvasì—ì„œ ì°¸ì¡°
 
     [Header("Canvas Settings")]
-    [SerializeField] private Canvas canvas; // ÀÌ UIÀÇ Canvas
-    [SerializeField] private int combatSortOrder = 100; // ÀüÅõ/ÀÌº¥Æ® ½Ã Sort Order
+    [SerializeField] private Canvas canvas; // ì´ UIì˜ Canvas
+    [SerializeField] private int combatSortOrder = 100; // ì „íˆ¬/ì´ë²¤íŠ¸ ì‹œ Sort Order
 
-    // ½½·Ô ¸ñ·Ï
+    // ìŠ¬ë¡¯ ëª©ë¡
     private List<MercenaryPartySlot> partySlots = new List<MercenaryPartySlot>();
     private CanvasGroup canvasGroup;
 
     private void Awake()
     {
-        Debug.Log("[MercenaryParty] Awake ½ÃÀÛ");
+        Debug.Log("[MercenaryParty] Awake ì‹œì‘");
 
-        // CanvasGroup °¡Á®¿À±â ¶Ç´Â Ãß°¡
+        // CanvasGroup ê°€ì ¸ì˜¤ê¸° ë˜ëŠ” ì¶”ê°€
         canvasGroup = GetComponent<CanvasGroup>();
         if (canvasGroup == null)
         {
             canvasGroup = gameObject.AddComponent<CanvasGroup>();
-            Debug.Log("[MercenaryParty] CanvasGroup ÄÄÆ÷³ÍÆ® Ãß°¡µÊ");
+            Debug.Log("[MercenaryParty] CanvasGroup ì»´í¬ë„ŒíŠ¸ ì¶”ê°€ë¨");
         }
 
-        // Canvas °¡Á®¿À±â
+        // Canvas ê°€ì ¸ì˜¤ê¸°
         if (canvas == null)
         {
             canvas = GetComponent<Canvas>();
         }
 
-        // ÆÄÆ¼ ½½·Ô ÃÊ±âÈ­ (4°³ °íÁ¤)
+        // íŒŒí‹° ìŠ¬ë¡¯ ì´ˆê¸°í™” (4ê°œ ê³ ì •)
         InitializePartySlots();
 
-        // ÃÊ±â »óÅÂ: ¼û±è
+        // ì´ˆê¸° ìƒíƒœ: ìˆ¨ê¹€
         Hide();
     }
 
     private void Start()
     {
-        Debug.Log("[MercenaryParty] Start ½ÃÀÛ");
+        Debug.Log("[MercenaryParty] Start ì‹œì‘");
 
-        // MercenaryManager ÀÌº¥Æ® ±¸µ¶
+        // MercenaryManager ì´ë²¤íŠ¸ êµ¬ë…
         if (MercenaryManager.Instance != null)
         {
             MercenaryManager.Instance.OnPartyChanged += RefreshPartySlots;
-            Debug.Log("[MercenaryParty] MercenaryManager ÀÌº¥Æ® ±¸µ¶ ¿Ï·á");
+            Debug.Log("[MercenaryParty] MercenaryManager ì´ë²¤íŠ¸ êµ¬ë… ì™„ë£Œ");
 
-            // ÃÊ±â ÆÄÆ¼ °»½Å
+            // ì´ˆê¸° íŒŒí‹° ê°±ì‹ 
             RefreshPartySlots();
         }
         else
         {
-            Debug.LogWarning("[MercenaryParty] ?? MercenaryManager.Instance°¡ nullÀÔ´Ï´Ù. ³ªÁß¿¡ Àç½ÃµµÇÕ´Ï´Ù.");
-            // MercenaryManager°¡ ¾ÆÁ÷ ¾øÀ¸¸é ³ªÁß¿¡ Àç½Ãµµ
+            Debug.LogWarning("[MercenaryParty] ?? MercenaryManager.Instanceê°€ nullì…ë‹ˆë‹¤. ë‚˜ì¤‘ì— ì¬ì‹œë„í•©ë‹ˆë‹¤.");
+            // MercenaryManagerê°€ ì•„ì§ ì—†ìœ¼ë©´ ë‚˜ì¤‘ì— ì¬ì‹œë„
             Invoke(nameof(DelayedStart), 0.1f);
         }
     }
@@ -76,23 +76,23 @@ public class MercenaryParty : MonoBehaviour
         {
             MercenaryManager.Instance.OnPartyChanged += RefreshPartySlots;
             RefreshPartySlots();
-            Debug.Log("[MercenaryParty] ? Áö¿¬µÈ ÃÊ±âÈ­ ¼º°ø");
+            Debug.Log("[MercenaryParty] ? ì§€ì—°ëœ ì´ˆê¸°í™” ì„±ê³µ");
         }
         else
         {
-            Debug.LogError("[MercenaryParty] ? MercenaryManager°¡ ¿©ÀüÈ÷ nullÀÔ´Ï´Ù!");
+            Debug.LogError("[MercenaryParty] ? MercenaryManagerê°€ ì—¬ì „íˆ nullì…ë‹ˆë‹¤!");
         }
     }
 
     private void OnDestroy()
     {
-        // ÀÌº¥Æ® ±¸µ¶ ÇØÁ¦
+        // ì´ë²¤íŠ¸ êµ¬ë… í•´ì œ
         if (MercenaryManager.Instance != null)
         {
             MercenaryManager.Instance.OnPartyChanged -= RefreshPartySlots;
         }
 
-        // ½½·Ô ÀÌº¥Æ® ÇØÁ¦
+        // ìŠ¬ë¡¯ ì´ë²¤íŠ¸ í•´ì œ
         foreach (var slot in partySlots)
         {
             if (slot != null)
@@ -103,13 +103,13 @@ public class MercenaryParty : MonoBehaviour
     }
 
     /// <summary>
-    /// ÆÄÆ¼ ½½·Ô ÃÊ±âÈ­ (4°³ °íÁ¤)
+    /// íŒŒí‹° ìŠ¬ë¡¯ ì´ˆê¸°í™” (4ê°œ ê³ ì •)
     /// </summary>
     private void InitializePartySlots()
     {
-        Debug.Log("[MercenaryParty] ¦¬¦¬¦¬ ÆÄÆ¼ ½½·Ô ÃÊ±âÈ­ ½ÃÀÛ ¦¬¦¬¦¬");
+        Debug.Log("[MercenaryParty] â”â”â” íŒŒí‹° ìŠ¬ë¡¯ ì´ˆê¸°í™” ì‹œì‘ â”â”â”");
 
-        // ±âÁ¸ ½½·Ô Á¦°Å (Áßº¹ ¹æÁö)
+        // ê¸°ì¡´ ìŠ¬ë¡¯ ì œê±° (ì¤‘ë³µ ë°©ì§€)
         foreach (var slot in partySlots)
         {
             if (slot != null)
@@ -119,7 +119,7 @@ public class MercenaryParty : MonoBehaviour
         }
         partySlots.Clear();
 
-        // 4°³ÀÇ ÆÄÆ¼ ½½·Ô »ı¼º
+        // 4ê°œì˜ íŒŒí‹° ìŠ¬ë¡¯ ìƒì„±
         for (int i = 0; i < maxPartySlots; i++)
         {
             GameObject slotObj = Instantiate(mercenaryPartySlotPrefab, partySlotContainer);
@@ -127,76 +127,76 @@ public class MercenaryParty : MonoBehaviour
 
             if (slot != null)
             {
-                slot.SetEmpty(); // ºó ½½·ÔÀ¸·Î ÃÊ±âÈ­
+                slot.SetEmpty(); // ë¹ˆ ìŠ¬ë¡¯ìœ¼ë¡œ ì´ˆê¸°í™”
                 slot.OnSlotClicked += OnPartySlotClicked;
                 partySlots.Add(slot);
 
-                Debug.Log($"[MercenaryParty] ÆÄÆ¼ ½½·Ô {i + 1} »ı¼º ¿Ï·á");
+                Debug.Log($"[MercenaryParty] íŒŒí‹° ìŠ¬ë¡¯ {i + 1} ìƒì„± ì™„ë£Œ");
             }
             else
             {
-                Debug.LogError($"[MercenaryParty] ? ½½·Ô {i + 1}¿¡ MercenaryPartySlot ÄÄÆ÷³ÍÆ®°¡ ¾ø½À´Ï´Ù!");
+                Debug.LogError($"[MercenaryParty] ? ìŠ¬ë¡¯ {i + 1}ì— MercenaryPartySlot ì»´í¬ë„ŒíŠ¸ê°€ ì—†ìŠµë‹ˆë‹¤!");
             }
         }
 
-        Debug.Log($"[MercenaryParty] ? ÆÄÆ¼ ½½·Ô {partySlots.Count}°³ ÃÊ±âÈ­ ¿Ï·á");
+        Debug.Log($"[MercenaryParty] ? íŒŒí‹° ìŠ¬ë¡¯ {partySlots.Count}ê°œ ì´ˆê¸°í™” ì™„ë£Œ");
     }
 
     /// <summary>
-    /// ÆÄÆ¼ ½½·Ô °»½Å (¿ëº´ µ¥ÀÌÅÍ ¹İ¿µ)
+    /// íŒŒí‹° ìŠ¬ë¡¯ ê°±ì‹  (ìš©ë³‘ ë°ì´í„° ë°˜ì˜)
     /// </summary>
     public void RefreshPartySlots()
     {
-        Debug.Log("[MercenaryParty] ¦¬¦¬¦¬ ÆÄÆ¼ ½½·Ô °»½Å ½ÃÀÛ ¦¬¦¬¦¬");
+        Debug.Log("[MercenaryParty] â”â”â” íŒŒí‹° ìŠ¬ë¡¯ ê°±ì‹  ì‹œì‘ â”â”â”");
 
         if (MercenaryManager.Instance == null)
         {
-            Debug.LogError("[MercenaryParty] ? MercenaryManager.Instance°¡ nullÀÔ´Ï´Ù!");
+            Debug.LogError("[MercenaryParty] ? MercenaryManager.Instanceê°€ nullì…ë‹ˆë‹¤!");
             return;
         }
 
         List<MercenaryInstance> recruited = MercenaryManager.Instance.RecruitedMercenaries;
-        Debug.Log($"[MercenaryParty] °í¿ëµÈ ¿ëº´ ¼ö: {recruited.Count}");
+        Debug.Log($"[MercenaryParty] ê³ ìš©ëœ ìš©ë³‘ ìˆ˜: {recruited.Count}");
 
-        // ½½·Ô °»½Å
+        // ìŠ¬ë¡¯ ê°±ì‹ 
         for (int i = 0; i < partySlots.Count; i++)
         {
             if (i < recruited.Count)
             {
                 partySlots[i].Initialize(recruited[i]);
-                Debug.Log($"[MercenaryParty] ÆÄÆ¼ ½½·Ô {i + 1} °»½Å: {recruited[i].mercenaryName}");
+                Debug.Log($"[MercenaryParty] íŒŒí‹° ìŠ¬ë¡¯ {i + 1} ê°±ì‹ : {recruited[i].mercenaryName}");
             }
             else
             {
                 partySlots[i].SetEmpty();
-                Debug.Log($"[MercenaryParty] ÆÄÆ¼ ½½·Ô {i + 1} ºñ¿ò");
+                Debug.Log($"[MercenaryParty] íŒŒí‹° ìŠ¬ë¡¯ {i + 1} ë¹„ì›€");
             }
         }
 
-        Debug.Log("[MercenaryParty] ? ÆÄÆ¼ ½½·Ô °»½Å ¿Ï·á");
+        Debug.Log("[MercenaryParty] ? íŒŒí‹° ìŠ¬ë¡¯ ê°±ì‹  ì™„ë£Œ");
     }
 
     /// <summary>
-    /// ÆÄÆ¼ ½½·Ô Å¬¸¯ ½Ã »ó¼¼ ÆË¾÷ Ç¥½Ã (Ãß¹æ ¸ğµå)
+    /// íŒŒí‹° ìŠ¬ë¡¯ í´ë¦­ ì‹œ ìƒì„¸ íŒì—… í‘œì‹œ (ì¶”ë°© ëª¨ë“œ)
     /// </summary>
     private void OnPartySlotClicked(MercenaryInstance mercenary)
     {
         if (mercenary == null)
         {
-            Debug.Log("[MercenaryParty] ºó ÆÄÆ¼ ½½·Ô Å¬¸¯µÊ - ¹«½Ã");
+            Debug.Log("[MercenaryParty] ë¹ˆ íŒŒí‹° ìŠ¬ë¡¯ í´ë¦­ë¨ - ë¬´ì‹œ");
             return;
         }
 
-        Debug.Log($"[MercenaryParty] ??? ÆÄÆ¼ ½½·Ô Å¬¸¯: {mercenary.mercenaryName}");
+        Debug.Log($"[MercenaryParty] ??? íŒŒí‹° ìŠ¬ë¡¯ í´ë¦­: {mercenary.mercenaryName}");
 
-        // DetailPopupÀÌ ¾øÀ¸¸é Ã£±â
+        // DetailPopupì´ ì—†ìœ¼ë©´ ì°¾ê¸°
         if (detailPopup == null)
         {
             detailPopup = FindObjectOfType<MercenaryDetailPopup>();
 
             if (detailPopup == null)
             {
-                Debug.LogError("[MercenaryParty] ? MercenaryDetailPopupÀ» Ã£À» ¼ö ¾ø½À´Ï´Ù!");
+                Debug.LogError("[MercenaryParty] ? MercenaryDetailPopupì„ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤!");
                 return;
             }
         }
@@ -205,11 +205,11 @@ public class MercenaryParty : MonoBehaviour
     }
 
     /// <summary>
-    /// ÀüÅõ¾À ¸ğµå ¼³Á¤ (ÀüÅõ¾À¿¡¼­¸¸ HP/MP Ç¥½Ã)
+    /// ì „íˆ¬ì”¬ ëª¨ë“œ ì„¤ì • (ì „íˆ¬ì”¬ì—ì„œë§Œ HP/MP í‘œì‹œ)
     /// </summary>
     public void SetCombatMode(bool isCombat)
     {
-        Debug.Log($"[MercenaryParty] ÀüÅõ ¸ğµå ¼³Á¤: {isCombat}");
+        Debug.Log($"[MercenaryParty] ì „íˆ¬ ëª¨ë“œ ì„¤ì •: {isCombat}");
 
         foreach (var slot in partySlots)
         {
@@ -219,7 +219,7 @@ public class MercenaryParty : MonoBehaviour
             }
         }
 
-        // ÀüÅõ ¸ğµåÀÏ ¶§ ÀÚµ¿À¸·Î Ç¥½Ã
+        // ì „íˆ¬ ëª¨ë“œì¼ ë•Œ ìë™ìœ¼ë¡œ í‘œì‹œ
         if (isCombat)
         {
             Show();
@@ -227,11 +227,35 @@ public class MercenaryParty : MonoBehaviour
     }
 
     /// <summary>
-    /// ÆÄÆ¼ UI Ç¥½Ã
+    /// ì „íˆ¬ ìƒíƒœ ì™„ì „ ì´ˆê¸°í™” (ë§ˆì„ ê·€í™˜ ì‹œ)
+    /// ë¹¨ê°„ í…Œë‘ë¦¬ ì œê±° ë° ì¼ë°˜ ëª¨ë“œë¡œ ì „í™˜
+    /// </summary>
+    public void ResetCombatState()
+    {
+        Debug.Log("[MercenaryParty] â”â”â” ì „íˆ¬ ìƒíƒœ ì´ˆê¸°í™” â”â”â”");
+
+        // ëª¨ë“  ìŠ¬ë¡¯ì„ ì¼ë°˜ ëª¨ë“œë¡œ ì „í™˜
+        foreach (var slot in partySlots)
+        {
+            if (slot != null)
+            {
+                slot.SetCombatMode(false); // ì „íˆ¬ ëª¨ë“œ í•´ì œ
+                slot.ResetHighlight();     // ë¹¨ê°„ í…Œë‘ë¦¬ ì œê±°
+            }
+        }
+
+        // UI ê°±ì‹ 
+        RefreshPartySlots();
+
+        Debug.Log("[MercenaryParty] âœ… ì „íˆ¬ ìƒíƒœ ì´ˆê¸°í™” ì™„ë£Œ");
+    }
+
+    /// <summary>
+    /// íŒŒí‹° UI í‘œì‹œ
     /// </summary>
     public void Show()
     {
-        Debug.Log("[MercenaryParty] ÆÄÆ¼ UI Ç¥½Ã");
+        Debug.Log("[MercenaryParty] íŒŒí‹° UI í‘œì‹œ");
 
         if (canvasGroup != null)
         {
@@ -249,11 +273,11 @@ public class MercenaryParty : MonoBehaviour
     }
 
     /// <summary>
-    /// ÆÄÆ¼ UI ¼û±è
+    /// íŒŒí‹° UI ìˆ¨ê¹€
     /// </summary>
     public void Hide()
     {
-        Debug.Log("[MercenaryParty] ÆÄÆ¼ UI ¼û±è");
+        Debug.Log("[MercenaryParty] íŒŒí‹° UI ìˆ¨ê¹€");
 
         if (canvasGroup != null)
         {

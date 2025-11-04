@@ -426,4 +426,26 @@ public class MercenaryPartySlot : MonoBehaviour
             turnBlinkCoroutine = null;
         }
     }
+
+    // 🆕 추가: 하이라이트 제거 메서드
+    /// <summary>
+    /// 턴 하이라이트 강제 제거 (마을 귀환 시)
+    /// </summary>
+    public void ResetHighlight()
+    {
+        Debug.Log($"[MercenaryPartySlot] 하이라이트 제거: {mercenaryData?.mercenaryName ?? "Empty"}");
+
+        // 깜빡임 코루틴 중지
+        if (turnBlinkCoroutine != null)
+        {
+            StopCoroutine(turnBlinkCoroutine);
+            turnBlinkCoroutine = null;
+        }
+
+        // Outline 비활성화
+        if (turnOutline != null)
+        {
+            turnOutline.enabled = false;
+        }
+    }
 }

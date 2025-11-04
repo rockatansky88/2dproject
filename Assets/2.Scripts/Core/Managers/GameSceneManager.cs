@@ -561,9 +561,21 @@ public class GameSceneManager : MonoBehaviour
         ShowCorridorUI();
     }
 
+    /// <summary>
+    /// 던전 퇴장 이벤트 핸들러 (마을 귀환 처리)
+    /// 전투 상태를 완전히 초기화하고 마을 UI를 표시합니다.
+    /// </summary>
     private void OnDungeonExited()
     {
-        Debug.Log("[GameSceneManager] 📡 OnDungeonExited 이벤트 → 마을 UI 표시");
+        Debug.Log("[GameSceneManager] 📡 OnDungeonExited 이벤트 → 마을 귀환 처리");
+
+        if (mercenaryParty != null)
+        {
+            mercenaryParty.ResetCombatState();
+            Debug.Log("[GameSceneManager] ✅ MercenaryParty 전투 상태 초기화 완료");
+        }
+
+        // 마을 UI 표시
         ShowTownUI();
     }
 
