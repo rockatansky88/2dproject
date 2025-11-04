@@ -5,6 +5,7 @@ using UnityEngine.UI;
 /// 용병 상세 정보 팝업
 /// 모드 1: 고용 모드 (상점 용병 클릭 시) - 고용 버튼 표시
 /// 모드 2: 추방 모드 (파티 용병 클릭 시) - 추방 버튼 표시
+/// HP/MP Fill Bar를 통해 용병의 현재 상태를 시각적으로 표시합니다.
 /// </summary>
 public class MercenaryDetailPopup : MonoBehaviour
 {
@@ -18,11 +19,19 @@ public class MercenaryDetailPopup : MonoBehaviour
 
     [Header("Stat Display")]
     [SerializeField] private Text healthText;              // 체력
+    [SerializeField] private Text manaText;                // 마나
     [SerializeField] private Text strengthText;            // 힘
     [SerializeField] private Text dexterityText;           // 민첩
     [SerializeField] private Text wisdomText;              // 지혜
     [SerializeField] private Text intelligenceText;        // 지능
     [SerializeField] private Text speedText;               // 속도
+
+    [Header("HP/MP Fill Bars")]
+    [Tooltip("HP를 시각적으로 표시하는 Fill Image (Image Type: Filled, Fill Method: Horizontal)")]
+    [SerializeField] private Image healthFillImage;        // HP Fill Bar
+
+    [Tooltip("MP를 시각적으로 표시하는 Fill Image (Image Type: Filled, Fill Method: Horizontal)")]
+    [SerializeField] private Image manaFillImage;          // MP Fill Bar
 
     [Header("Buttons")]
     [SerializeField] private Button recruitButton;         // 고용 버튼
@@ -209,8 +218,13 @@ public class MercenaryDetailPopup : MonoBehaviour
         Debug.Log("[MercenaryDetailPopup] ✅ 추방 모드 표시 완료");
     }
 
+
+
     /// <summary>
     /// UI 요소 설정
+    /// 용병의 스탯 기반 HP/MP(maxHP/maxMP)를 표시합니다.
+    /// 전투/비전투 상관없이 동일한 값을 사용합니다.
+    /// HP/MP Fill Bar를 통해 시각적으로 게이지를 표시합니다.
     /// </summary>
     private void SetupUI(MercenaryInstance mercenary)
     {
@@ -242,12 +256,44 @@ public class MercenaryDetailPopup : MonoBehaviour
             costText.text = $"{mercenary.recruitCost}";
         }
 
-        // 스탯 표시
+        // HP 텍스트
         if (healthText != null)
         {
-            healthText.text = $"HP: {mercenary.health}";
+            healthText.text = $"HP: {mercenary.currentHP}/{mercenary.maxHP}";
+            Debug.Log($"[MercenaryDetailPopup] HP 표시: {mercenary.currentHP}/{mercenary.maxHP}");
         }
 
+        // MP 텍스트
+        if (manaText != null)
+        {
+            manaText.text = $"MP: {mercenary.currentMP}/{mercenary.maxMP}";
+            Debug.Log($"[MercenaryDetailPopup] MP 표시: {mercenary.currentMP}/{mercenary.maxMP}");
+        }
+
+        if (healthFillImage != null)
+        {
+            float hpFillAmount = mercenary.maxHP > 0 ? (float)mercenary.currentHP / mercenary.maxHP : 0f;
+            healthFillImage.fillAmount = hpFillAmount;
+            Debug.Log($"[MercenaryDetailPopup] HP Fill Bar 업데이트: {hpFillAmount:P0} ({mercenary.currentHP}/{mercenary.maxHP})");
+        }
+        else
+        {
+            Debug.LogWarning("[MercenaryDetailPopup] ⚠️ healthFillImage가 null입니다! Inspector에서 할당해주세요");
+        }
+
+
+        if (manaFillImage != null)
+        {
+            float mpFillAmount = mercenary.maxMP > 0 ? (float)mercenary.currentMP / mercenary.maxMP : 0f;
+            manaFillImage.fillAmount = mpFillAmount;
+            Debug.Log($"[MercenaryDetailPopup] MP Fill Bar 업데이트: {mpFillAmount:P0} ({mercenary.currentMP}/{mercenary.maxMP})");
+        }
+        else
+        {
+            Debug.LogWarning("[MercenaryDetailPopup] ⚠️ manaFillImage가 null입니다! Inspector에서 할당해주세요");
+        }
+
+        // 기타 스탯
         if (strengthText != null)
         {
             strengthText.text = $"STR: {mercenary.strength}";
@@ -273,7 +319,7 @@ public class MercenaryDetailPopup : MonoBehaviour
             speedText.text = $"SPD: {mercenary.speed}";
         }
 
-        Debug.Log($"[MercenaryDetailPopup] ✅ UI 설정 완료");
+        Debug.Log($"[MercenaryDetailPopup] ✅ UI 설정 완료 - HP: {mercenary.currentHP}/{mercenary.maxHP}, MP: {mercenary.currentMP}/{mercenary.maxMP}");
     }
 
     /// <summary>

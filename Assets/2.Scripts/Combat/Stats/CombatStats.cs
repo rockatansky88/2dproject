@@ -1,37 +1,77 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using System;
 
 /// <summary>
-/// ÀüÅõ ½ºÅÈ ÅëÇÕ °ü¸® Å¬·¡½º
-/// - Ä³¸¯ÅÍ¿Í ¸ó½ºÅÍ ¸ğµÎ »ç¿ë
-/// - ½ºÅÈ º¯È­ ½Ã ÀÚµ¿À¸·Î ÆÄ»ı ½ºÅÈ Àç°è»ê
+/// ì „íˆ¬ ì¤‘ ì‚¬ìš©ë˜ëŠ” ìŠ¤íƒ¯ í´ë˜ìŠ¤
+/// - ìºë¦­í„°ì™€ ëª¬ìŠ¤í„° ëª¨ë‘ ì‚¬ìš©
+/// - ìŠ¤íƒ¯ ë³€í™” ì‹œ ìë™ìœ¼ë¡œ íŒŒìƒ ìŠ¤íƒ¯ ì¬ê³„ì‚°
 /// </summary>
 [System.Serializable]
 public class CombatStats
 {
-    [Header("±âº» ½ºÅÈ")]
-    public int Strength;       // Èû - ¹°¸® °ø°İ·Â, HP Áõ°¡
-    public int Dexterity;      // ¹ÎÃ¸ - Å©¸®Æ¼ÄÃ È®·ü
-    public int Intelligence;   // Áö´É - ¸¶¹ı °ø°İ·Â
-    public int Wisdom;         // ÁöÇı - MP Áõ°¡
-    public int Speed;          // ¼Óµµ - ÅÏ ¼ø¼­
+    [Header("ê¸°ë³¸ ìŠ¤íƒ¯")]
+    public int Strength;       // í˜ - ë¬¼ë¦¬ ê³µê²©ë ¥, HP ì¦ê°€
+    public int Dexterity;      // ë¯¼ì²© - í¬ë¦¬í‹°ì»¬ í™•ë¥ 
+    public int Intelligence;   // ì§€ëŠ¥ - ë§ˆë²• ê³µê²©ë ¥
+    public int Wisdom;         // ì§€í˜œ - MP ì¦ê°€
+    public int Speed;          // ì†ë„ - í„´ ìˆœì„œ
 
-    [Header("ÆÄ»ı ½ºÅÈ (ÀÚµ¿ °è»ê)")]
-    public int MaxHP;          // ÃÖ´ë HP
-    public int CurrentHP;      // ÇöÀç HP
-    public int MaxMP;          // ÃÖ´ë MP
-    public int CurrentMP;      // ÇöÀç MP
-    public float CriticalChance; // Å©¸®Æ¼ÄÃ È®·ü (%)
+    [Header("íŒŒìƒ ìŠ¤íƒ¯ (ìë™ ê³„ì‚°)")]
+    public int MaxHP;          // ìµœëŒ€ HP
+    public int CurrentHP;      // í˜„ì¬ HP
+    public int MaxMP;          // ìµœëŒ€ MP
+    public int CurrentMP;      // í˜„ì¬ MP
+    public float CriticalChance; // í¬ë¦¬í‹°ì»¬ í™•ë¥  (%)
 
-    // ½ºÅÈ º¯È­ ÀÌº¥Æ®
+    // ìŠ¤íƒ¯ ë³€í™” ì´ë²¤íŠ¸
     public event Action OnStatsChanged;
-    public event Action<int, int> OnHPChanged;  // (ÇöÀç HP, ÃÖ´ë HP)
-    public event Action<int, int> OnMPChanged;  // (ÇöÀç MP, ÃÖ´ë MP)
+    public event Action<int, int> OnHPChanged;  // (í˜„ì¬ HP, ìµœëŒ€ HP)
+    public event Action<int, int> OnMPChanged;  // (í˜„ì¬ MP, ìµœëŒ€ MP)
 
+    // â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”
+    // ğŸ†• ì¶”ê°€: MercenaryInstanceì—ì„œ ë¯¸ë¦¬ ê³„ì‚°ëœ ìŠ¤íƒ¯ ë¡œë“œ
+    // â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”
     /// <summary>
-    /// ÃÊ±âÈ­
+    /// MercenaryInstanceì—ì„œ ì´ë¯¸ ê³„ì‚°ëœ ìŠ¤íƒ¯ì„ ê·¸ëŒ€ë¡œ ë¡œë“œí•©ë‹ˆë‹¤.
+    /// HP/MP ì¬ê³„ì‚° ì—†ì´ ì €ì¥ëœ ê°’ì„ ì‚¬ìš©í•©ë‹ˆë‹¤.
     /// </summary>
-    public void Initialize(int str, int dex, int intel, int wis, int spd, float baseCritChance = 5f)
+    public void InitializeFromMercenary(MercenaryInstance mercenary)
+    {
+        // ê¸°ë³¸ ìŠ¤íƒ¯
+        Strength = mercenary.strength;
+        Dexterity = mercenary.dexterity;
+        Intelligence = mercenary.intelligence;
+        Wisdom = mercenary.wisdom;
+        Speed = mercenary.speed;
+
+        // ë¯¸ë¦¬ ê³„ì‚°ëœ HP/MP ì‚¬ìš© (ì¬ê³„ì‚° í•˜ì§€ ì•ŠìŒ!)
+        MaxHP = mercenary.maxHP; // health + (STR * 5)
+        CurrentHP = mercenary.currentHP;
+        MaxMP = mercenary.maxMP; // baseMana + (WIS * 3)
+        CurrentMP = mercenary.currentMP;
+        CriticalChance = mercenary.criticalChance;
+
+        Debug.Log($"[CombatStats] âœ… ì´ˆê¸°í™” ì™„ë£Œ (MercenaryInstance ë¡œë“œ)\n" +
+                  $"STR: {Strength}, DEX: {Dexterity}, INT: {Intelligence}, WIS: {Wisdom}, SPD: {Speed}\n" +
+                  $"HP: {CurrentHP}/{MaxHP}, MP: {CurrentMP}/{MaxMP}, Crit: {CriticalChance:F1}%");
+
+        OnStatsChanged?.Invoke();
+    }
+
+    // â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”
+    // ğŸ”§ ìˆ˜ì •: Initialize - baseHealth íŒŒë¼ë¯¸í„° ì¶”ê°€
+    // â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”
+    /// <summary>
+    /// ì´ˆê¸°í™” (ê¸°ë³¸ ìŠ¤íƒ¯ ê¸°ë°˜ - ì‹¤ì‹œê°„ ê³„ì‚°)
+    /// </summary>
+    /// <param name="str">í˜</param>
+    /// <param name="dex">ë¯¼ì²©</param>
+    /// <param name="intel">ì§€ëŠ¥</param>
+    /// <param name="wis">ì§€í˜œ</param>
+    /// <param name="spd">ì†ë„</param>
+    /// <param name="baseHealth">ê¸°ë³¸ ì²´ë ¥ (ëœë¤ê°’)</param>
+    /// <param name="baseCritChance">ê¸°ë³¸ í¬ë¦¬í‹°ì»¬ í™•ë¥ </param>
+    public void Initialize(int str, int dex, int intel, int wis, int spd, int baseHealth, float baseCritChance = 5f)
     {
         Strength = str;
         Dexterity = dex;
@@ -39,101 +79,101 @@ public class CombatStats
         Wisdom = wis;
         Speed = spd;
 
-        // ÆÄ»ı ½ºÅÈ °è»ê
-        RecalculateDerivedStats(baseCritChance);
+        // íŒŒìƒ ìŠ¤íƒ¯ ê³„ì‚°
+        RecalculateDerivedStats(baseHealth, baseCritChance);
 
-        // Ã¼·Â/¸¶³ª Ç® ÃæÀü
+        // ì²´ë ¥/ë§ˆë‚˜ í’€ ìƒíƒœ
         CurrentHP = MaxHP;
         CurrentMP = MaxMP;
 
-        Debug.Log($"[CombatStats] ? ÃÊ±âÈ­ ¿Ï·á\n" +
+        Debug.Log($"[CombatStats] âœ… ì´ˆê¸°í™” ì™„ë£Œ (ì‹¤ì‹œê°„ ê³„ì‚°)\n" +
                   $"STR: {Strength}, DEX: {Dexterity}, INT: {Intelligence}, WIS: {Wisdom}, SPD: {Speed}\n" +
-                  $"HP: {CurrentHP}/{MaxHP}, MP: {CurrentMP}/{MaxMP}, Crit: {CriticalChance}%");
+                  $"BaseHP: {baseHealth} â†’ MaxHP: {MaxHP}, MaxMP: {MaxMP}, Crit: {CriticalChance}%");
     }
 
     /// <summary>
-    /// ÆÄ»ı ½ºÅÈ Àç°è»ê
+    /// íŒŒìƒ ìŠ¤íƒ¯ ì¬ê³„ì‚°
     /// </summary>
-    public void RecalculateDerivedStats(float baseCritChance = 5f)
+    /// <param name="baseHealth">ê¸°ë³¸ ì²´ë ¥</param>
+    /// <param name="baseCritChance">ê¸°ë³¸ í¬ë¦¬í‹°ì»¬ í™•ë¥ </param>
+    /// <param name="baseMana">ê¸°ë³¸ ë§ˆë‚˜ (ê¸°ë³¸ê°’ 50)</param>
+    public void RecalculateDerivedStats(int baseHealth, float baseCritChance = 5f, int baseMana = 50)
     {
-        // HP = 100 + (STR * 5)
-        // ¿¹: STR 10 -> HP 150
-        MaxHP = 100 + (Strength * 5);
+        // HP = ê¸°ë³¸ ì²´ë ¥ + (STR * 5)
+        MaxHP = baseHealth + (Strength * 5);
 
-        // MP = 50 + (WIS * 3)
-        // ¿¹: WIS 10 -> MP 80
-        MaxMP = 50 + (Wisdom * 3);
+        // MP = ê¸°ë³¸ ë§ˆë‚˜ + (WIS * 3)
+        MaxMP = baseMana + (Wisdom * 3);
 
-        // Å©¸®Æ¼ÄÃ È®·ü = ±âº» È®·ü + (DEX * 0.5%)
-        // ¿¹: ±âº» 5% + DEX 10 -> 10%
+        // í¬ë¦¬í‹°ì»¬ í™•ë¥  = ê¸°ë³¸ í™•ë¥  + (DEX * 0.5%)
         CriticalChance = baseCritChance + (Dexterity * 0.5f);
 
-        Debug.Log($"[CombatStats] ÆÄ»ı ½ºÅÈ °è»ê ¿Ï·á - MaxHP: {MaxHP}, MaxMP: {MaxMP}, Crit: {CriticalChance}%");
+        Debug.Log($"[CombatStats] íŒŒìƒ ìŠ¤íƒ¯ ì¬ê³„ì‚° ì™„ë£Œ - BaseHP: {baseHealth} â†’ MaxHP: {MaxHP}, MaxMP: {MaxMP}, Crit: {CriticalChance}%");
 
         OnStatsChanged?.Invoke();
     }
 
     /// <summary>
-    /// µ¥¹ÌÁö ¹Ş±â
+    /// ë°ë¯¸ì§€ ë°›ê¸°
     /// </summary>
     public void TakeDamage(int damage)
     {
         int oldHP = CurrentHP;
         CurrentHP = Mathf.Max(0, CurrentHP - damage);
 
-        Debug.Log($"[CombatStats] ?? µ¥¹ÌÁö {damage} ¹ŞÀ½: {oldHP} -> {CurrentHP}");
+        Debug.Log($"[CombatStats] ğŸ©¸ ë°ë¯¸ì§€ {damage} ë°›ìŒ: {oldHP} -> {CurrentHP}");
 
         OnHPChanged?.Invoke(CurrentHP, MaxHP);
     }
 
     /// <summary>
-    /// È¸º¹
+    /// íšŒë³µ
     /// </summary>
     public void Heal(int amount)
     {
         int oldHP = CurrentHP;
         CurrentHP = Mathf.Min(MaxHP, CurrentHP + amount);
 
-        Debug.Log($"[CombatStats] ?? È¸º¹ {amount}: {oldHP} -> {CurrentHP}");
+        Debug.Log($"[CombatStats] ğŸ’š íšŒë³µ {amount}: {oldHP} -> {CurrentHP}");
 
         OnHPChanged?.Invoke(CurrentHP, MaxHP);
     }
 
     /// <summary>
-    /// ¸¶³ª ¼Ò¸ğ
+    /// ë§ˆë‚˜ ì†Œëª¨
     /// </summary>
     public bool ConsumeMana(int amount)
     {
         if (CurrentMP < amount)
         {
-            Debug.LogWarning($"[CombatStats] ? ¸¶³ª ºÎÁ·: {CurrentMP}/{amount}");
+            Debug.LogWarning($"[CombatStats] âš ï¸ ë§ˆë‚˜ ë¶€ì¡±: {CurrentMP}/{amount}");
             return false;
         }
 
         int oldMP = CurrentMP;
         CurrentMP -= amount;
 
-        Debug.Log($"[CombatStats] ?? ¸¶³ª ¼Ò¸ğ {amount}: {oldMP} -> {CurrentMP}");
+        Debug.Log($"[CombatStats] ğŸ’™ ë§ˆë‚˜ ì†Œëª¨ {amount}: {oldMP} -> {CurrentMP}");
 
         OnMPChanged?.Invoke(CurrentMP, MaxMP);
         return true;
     }
 
     /// <summary>
-    /// ¸¶³ª È¸º¹
+    /// ë§ˆë‚˜ íšŒë³µ
     /// </summary>
     public void RestoreMana(int amount)
     {
         int oldMP = CurrentMP;
         CurrentMP = Mathf.Min(MaxMP, CurrentMP + amount);
 
-        Debug.Log($"[CombatStats] ?? ¸¶³ª È¸º¹ {amount}: {oldMP} -> {CurrentMP}");
+        Debug.Log($"[CombatStats] ğŸ”µ ë§ˆë‚˜ íšŒë³µ {amount}: {oldMP} -> {CurrentMP}");
 
         OnMPChanged?.Invoke(CurrentMP, MaxMP);
     }
 
     /// <summary>
-    /// Å©¸®Æ¼ÄÃ ÆÇÁ¤
+    /// í¬ë¦¬í‹°ì»¬ íŒì •
     /// </summary>
     public bool RollCritical(float bonusChance = 0f)
     {
@@ -141,18 +181,18 @@ public class CombatStats
         float roll = UnityEngine.Random.Range(0f, 100f);
         bool isCrit = roll < totalChance;
 
-        Debug.Log($"[CombatStats] ?? Å©¸®Æ¼ÄÃ ÆÇÁ¤: {roll:F1} < {totalChance:F1}% => {(isCrit ? "¼º°ø!" : "½ÇÆĞ")}");
+        Debug.Log($"[CombatStats] ğŸ² í¬ë¦¬í‹°ì»¬ íŒì •: {roll:F1} < {totalChance:F1}% => {(isCrit ? "ì„±ê³µ!" : "ì‹¤íŒ¨")}");
 
         return isCrit;
     }
 
     /// <summary>
-    /// »ıÁ¸ ¿©ºÎ
+    /// ìƒì¡´ ì—¬ë¶€
     /// </summary>
     public bool IsAlive => CurrentHP > 0;
 
     /// <summary>
-    /// ½ºÅÈ ¹öÇÁ/µğ¹öÇÁ Àû¿ë
+    /// ì„ì‹œ ìŠ¤íƒ¯ ë²„í”„/ë””ë²„í”„ ì ìš©
     /// </summary>
     public void ApplyStatModifier(int strMod, int dexMod, int intMod, int wisMod, int spdMod)
     {
@@ -162,8 +202,9 @@ public class CombatStats
         Wisdom += wisMod;
         Speed += spdMod;
 
-        Debug.Log($"[CombatStats] ?? ½ºÅÈ º¯°æ Àû¿ë: STR {strMod:+0;-#}, DEX {dexMod:+0;-#}, INT {intMod:+0;-#}, WIS {wisMod:+0;-#}, SPD {spdMod:+0;-#}");
+        Debug.Log($"[CombatStats] ğŸ“Š ìŠ¤íƒ¯ ë²„í”„ ì ìš©: STR {strMod:+0;-#}, DEX {dexMod:+0;-#}, INT {intMod:+0;-#}, WIS {wisMod:+0;-#}, SPD {spdMod:+0;-#}");
 
-        RecalculateDerivedStats();
+        // âœ… ë²„í”„ ì ìš© ì‹œ MaxHP/MaxMPëŠ” ë³€ê²½í•˜ì§€ ì•ŠìŒ (ê¸°ë³¸ê°’ ìœ ì§€)
+        // ë§Œì•½ MaxHP/MaxMPë„ ì¬ê³„ì‚°í•˜ë ¤ë©´ baseHealthë¥¼ ë³„ë„ë¡œ ì €ì¥í•´ì•¼ í•¨
     }
 }

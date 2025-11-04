@@ -373,6 +373,7 @@ public class CombatManager : MonoBehaviour
         Debug.Log("[CombatManager] ━━━━━━ 전투 종료 ━━━━━━");
 
         bool isVictory = CheckVictory();
+        // 2초 대기후 전투 종료
 
         EndCombat(isVictory);
     }

@@ -129,6 +129,7 @@ public class GameSceneManager : MonoBehaviour
         if (DungeonManager.Instance != null)
         {
             DungeonManager.Instance.OnDungeonEntered += OnDungeonEntered;
+            DungeonManager.Instance.OnDungeonExited += OnDungeonExited;
             DungeonManager.Instance.OnRoomProgressed += OnRoomProgressed;
             DungeonManager.Instance.OnRoomTypeSelected += OnRoomTypeSelected;
             DungeonManager.Instance.OnMonstersSpawned += OnMonstersSpawned;
@@ -439,10 +440,6 @@ public class GameSceneManager : MonoBehaviour
         Debug.Log("[GameSceneManager] ✅ 몬스터 스프라이트 생성 완료");
     }
 
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🖱️ 버튼 이벤트 핸들러
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
     private void OnEnterDungeonClicked()
     {
         Debug.Log("[GameSceneManager] 🖱️ 던전 입장 버튼 클릭");
@@ -558,14 +555,28 @@ public class GameSceneManager : MonoBehaviour
         }
     }
 
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 📡 DungeonManager 이벤트 핸들러
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
     private void OnDungeonEntered(DungeonDataSO dungeon)
     {
         Debug.Log($"[GameSceneManager] 📡 OnDungeonEntered 이벤트: {dungeon.dungeonName}");
         ShowCorridorUI();
+    }
+
+    /// <summary>
+    /// 던전 퇴장 이벤트 핸들러 (마을 귀환 처리)
+    /// 전투 상태를 완전히 초기화하고 마을 UI를 표시합니다.
+    /// </summary>
+    private void OnDungeonExited()
+    {
+        Debug.Log("[GameSceneManager] 📡 OnDungeonExited 이벤트 → 마을 귀환 처리");
+
+        if (mercenaryParty != null)
+        {
+            mercenaryParty.ResetCombatState();
+            Debug.Log("[GameSceneManager] ✅ MercenaryParty 전투 상태 초기화 완료");
+        }
+
+        // 마을 UI 표시
+        ShowTownUI();
     }
 
     private void OnRoomProgressed(int currentRoom, int totalRooms)
@@ -674,6 +685,7 @@ public class GameSceneManager : MonoBehaviour
         if (DungeonManager.Instance != null)
         {
             DungeonManager.Instance.OnDungeonEntered -= OnDungeonEntered;
+            DungeonManager.Instance.OnDungeonExited -= OnDungeonExited;
             DungeonManager.Instance.OnRoomProgressed -= OnRoomProgressed;
             DungeonManager.Instance.OnRoomTypeSelected -= OnRoomTypeSelected;
             DungeonManager.Instance.OnMonstersSpawned -= OnMonstersSpawned;

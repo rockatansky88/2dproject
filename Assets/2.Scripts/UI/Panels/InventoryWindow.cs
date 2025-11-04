@@ -3,6 +3,7 @@ using UnityEngine.UI;
 
 /// <summary>
 /// 인벤토리 윈도우 메인 컨트롤러
+/// HP/MP Fill Bar를 통해 용병의 현재 상태를 시각적으로 표시합니다.
 /// </summary>
 [RequireComponent(typeof(CanvasGroup))]
 public class InventoryWindow : MonoBehaviour
@@ -17,11 +18,19 @@ public class InventoryWindow : MonoBehaviour
     [SerializeField] private Text statsNameText;           // 이름
     [SerializeField] private Text statsLevelText;          // 레벨
     [SerializeField] private Text statsHealthText;         // HP
+    [SerializeField] private Text statsMpText;             // MP
     [SerializeField] private Text statsStrengthText;       // STR
     [SerializeField] private Text statsDexterityText;      // DEX
     [SerializeField] private Text statsWisdomText;         // WIS
     [SerializeField] private Text statsIntelligenceText;   // INT
     [SerializeField] private Text statsSpeedText;          // SPD
+
+    [Header("HP/MP Fill Bars")]
+    [Tooltip("HP를 시각적으로 표시하는 Fill Image (Image Type: Filled, Fill Method: Horizontal)")]
+    [SerializeField] private Image statsHpFillImage;       // HP Fill Bar
+
+    [Tooltip("MP를 시각적으로 표시하는 Fill Image (Image Type: Filled, Fill Method: Horizontal)")]
+    [SerializeField] private Image statsMpFillImage;       // MP Fill Bar
 
     [Header("Mercenary List Panel")]
     [SerializeField] private Transform mercenaryListContainer; // 용병 슬롯 생성 부모
@@ -35,6 +44,16 @@ public class InventoryWindow : MonoBehaviour
 
     private bool isOpen = false;
     private CanvasGroup canvasGroup;
+
+    //  현재 선택된 용병 (아이템 사용 대상)
+    private MercenaryInstance selectedMercenary;
+
+    // 상점 모드 확인 프로퍼티
+    /// <summary>
+    /// 현재 상점 패널이 활성화되어 있는지 확인합니다.
+    /// 아이템 판매 가능 여부를 체크할 때 사용됩니다.
+    /// </summary>
+    public bool IsShopModeActive => shopPanel != null && shopPanel.activeSelf;
 
     private void Awake()
     {
@@ -245,6 +264,7 @@ public class InventoryWindow : MonoBehaviour
 
     /// <summary>
     /// 특정 용병의 스탯을 StatsPanel에 표시
+    /// HP/MP Fill Bar를 통해 시각적으로 게이지를 표시합니다.
     /// </summary>
     public void ShowMercenaryStats(MercenaryInstance mercenary)
     {
@@ -253,6 +273,9 @@ public class InventoryWindow : MonoBehaviour
             Debug.LogError("[InventoryWindow] ❌ mercenary가 null입니다!");
             return;
         }
+
+        // 🆕 추가: 선택된 용병 저장 (아이템 사용 대상)
+        selectedMercenary = mercenary;
 
         Debug.Log($"[InventoryWindow] StatsPanel에 용병 표시: {mercenary.mercenaryName}");
 
@@ -275,12 +298,41 @@ public class InventoryWindow : MonoBehaviour
             statsLevelText.text = $"Level {mercenary.level}";
         }
 
-        // 스탯
+        // HP 텍스트
         if (statsHealthText != null)
         {
-            statsHealthText.text = $"HP: {mercenary.health}";
+            statsHealthText.text = $"HP: {mercenary.currentHP}/{mercenary.maxHP}";
         }
 
+        // MP 텍스트
+        if (statsMpText != null)
+        {
+            statsMpText.text = $"MP: {mercenary.currentMP}/{mercenary.maxMP}";
+        }
+
+        if (statsHpFillImage != null)
+        {
+            float hpFillAmount = mercenary.maxHP > 0 ? (float)mercenary.currentHP / mercenary.maxHP : 0f;
+            statsHpFillImage.fillAmount = hpFillAmount;
+            Debug.Log($"[InventoryWindow] HP Fill Bar 업데이트: {hpFillAmount:P0} ({mercenary.currentHP}/{mercenary.maxHP})");
+        }
+        else
+        {
+            Debug.LogWarning("[InventoryWindow] ⚠️ statsHpFillImage가 null입니다! Inspector에서 할당해주세요");
+        }
+
+        if (statsMpFillImage != null)
+        {
+            float mpFillAmount = mercenary.maxMP > 0 ? (float)mercenary.currentMP / mercenary.maxMP : 0f;
+            statsMpFillImage.fillAmount = mpFillAmount;
+            Debug.Log($"[InventoryWindow] MP Fill Bar 업데이트: {mpFillAmount:P0} ({mercenary.currentMP}/{mercenary.maxMP})");
+        }
+        else
+        {
+            Debug.LogWarning("[InventoryWindow] ⚠️ statsMpFillImage가 null입니다! Inspector에서 할당해주세요");
+        }
+
+        // 기타 스탯
         if (statsStrengthText != null)
         {
             statsStrengthText.text = $"STR: {mercenary.strength}";
@@ -306,7 +358,7 @@ public class InventoryWindow : MonoBehaviour
             statsSpeedText.text = $"SPD: {mercenary.speed}";
         }
 
-        Debug.Log("[InventoryWindow] ✅ StatsPanel 업데이트 완료");
+        Debug.Log($"[InventoryWindow] ✅ StatsPanel 업데이트 완료 - HP: {mercenary.currentHP}/{mercenary.maxHP}, MP: {mercenary.currentMP}/{mercenary.maxMP}");
     }
 
     /// <summary>
@@ -323,11 +375,22 @@ public class InventoryWindow : MonoBehaviour
         if (statsNameText != null) statsNameText.text = "";
         if (statsLevelText != null) statsLevelText.text = "";
         if (statsHealthText != null) statsHealthText.text = "";
+        if (statsMpText != null) statsMpText.text = "";
         if (statsStrengthText != null) statsStrengthText.text = "";
         if (statsDexterityText != null) statsDexterityText.text = "";
         if (statsWisdomText != null) statsWisdomText.text = "";
         if (statsIntelligenceText != null) statsIntelligenceText.text = "";
         if (statsSpeedText != null) statsSpeedText.text = "";
+
+        if (statsHpFillImage != null)
+        {
+            statsHpFillImage.fillAmount = 0f;
+        }
+
+        if (statsMpFillImage != null)
+        {
+            statsMpFillImage.fillAmount = 0f;
+        }
 
         Debug.Log("[InventoryWindow] StatsPanel 비움");
     }
@@ -346,4 +409,13 @@ public class InventoryWindow : MonoBehaviour
     }
 
     public bool IsOpen => isOpen;
+
+    /// <summary>
+    /// 현재 선택된 용병을 반환합니다 (아이템 사용 대상).
+    /// 선택된 용병이 없으면 null을 반환합니다.
+    /// </summary>
+    public MercenaryInstance GetSelectedMercenary()
+    {
+        return selectedMercenary;
+    }
 }
