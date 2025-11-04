@@ -129,6 +129,7 @@ public class GameSceneManager : MonoBehaviour
         if (DungeonManager.Instance != null)
         {
             DungeonManager.Instance.OnDungeonEntered += OnDungeonEntered;
+            DungeonManager.Instance.OnDungeonExited += OnDungeonExited;
             DungeonManager.Instance.OnRoomProgressed += OnRoomProgressed;
             DungeonManager.Instance.OnRoomTypeSelected += OnRoomTypeSelected;
             DungeonManager.Instance.OnMonstersSpawned += OnMonstersSpawned;
@@ -439,10 +440,6 @@ public class GameSceneManager : MonoBehaviour
         Debug.Log("[GameSceneManager] ✅ 몬스터 스프라이트 생성 완료");
     }
 
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🖱️ 버튼 이벤트 핸들러
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
     private void OnEnterDungeonClicked()
     {
         Debug.Log("[GameSceneManager] 🖱️ 던전 입장 버튼 클릭");
@@ -558,14 +555,16 @@ public class GameSceneManager : MonoBehaviour
         }
     }
 
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 📡 DungeonManager 이벤트 핸들러
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
     private void OnDungeonEntered(DungeonDataSO dungeon)
     {
         Debug.Log($"[GameSceneManager] 📡 OnDungeonEntered 이벤트: {dungeon.dungeonName}");
         ShowCorridorUI();
+    }
+
+    private void OnDungeonExited()
+    {
+        Debug.Log("[GameSceneManager] 📡 OnDungeonExited 이벤트 → 마을 UI 표시");
+        ShowTownUI();
     }
 
     private void OnRoomProgressed(int currentRoom, int totalRooms)
@@ -674,6 +673,7 @@ public class GameSceneManager : MonoBehaviour
         if (DungeonManager.Instance != null)
         {
             DungeonManager.Instance.OnDungeonEntered -= OnDungeonEntered;
+            DungeonManager.Instance.OnDungeonExited -= OnDungeonExited;
             DungeonManager.Instance.OnRoomProgressed -= OnRoomProgressed;
             DungeonManager.Instance.OnRoomTypeSelected -= OnRoomTypeSelected;
             DungeonManager.Instance.OnMonstersSpawned -= OnMonstersSpawned;

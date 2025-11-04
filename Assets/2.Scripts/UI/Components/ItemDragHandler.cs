@@ -1,114 +1,173 @@
-using UnityEngine;
-using UnityEngine.EventSystems;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// - ÁÂÅ¬¸¯: ¾ÆÀÌÅÛ ÇÈ¾÷/ÀÌµ¿
-/// - ¿ìÅ¬¸¯: ¾ÆÀÌÅÛ »ç¿ë
-/// - Ctrl + ÁÂÅ¬¸¯: »óÁ¡¿¡¼­ ÆÇ¸Å
+/// ì•„ì´í…œ ë“œë˜ê·¸&ë“œë¡­ í•¸ë“¤ëŸ¬
+/// - ì¢Œí´ë¦­: ì•„ì´í…œ í”½ì—…/ì´ë™
+/// - ë§ˆìš°ìŠ¤ë¥¼ ë”°ë¼ë‹¤ë‹ˆëŠ” ë“œë˜ê·¸ ì´ë¯¸ì§€ í‘œì‹œ
+/// - ì „ì—­ ì‹±ê¸€í†¤ìœ¼ë¡œ ê´€ë¦¬ë˜ì–´ ëª¨ë“  ItemSlotì—ì„œ ì‚¬ìš© ê°€ëŠ¥
 /// </summary>
 public class ItemDragHandler : MonoBehaviour
 {
     public static ItemDragHandler Instance { get; private set; }
 
     [Header("Drag Visual")]
-    [SerializeField] private Canvas dragCanvas; // µå·¡±× ÀÌ¹ÌÁö¸¦ Ç¥½ÃÇÒ Äµ¹ö½º
-    [SerializeField] private Image dragImage;   // µå·¡±× ÁßÀÎ ¾ÆÀÌÅÛ ÀÌ¹ÌÁö
+    [Tooltip("ë“œë˜ê·¸ ì´ë¯¸ì§€ë¥¼ í‘œì‹œí•  Canvas (ë©”ì¸ Canvas í• ë‹¹)")]
+    [SerializeField] private Canvas dragCanvas;
 
-    private ItemSlot draggedSlot;               // µå·¡±× ÁßÀÎ ½½·Ô
-    private ItemDataSO draggedItem;             // µå·¡±× ÁßÀÎ ¾ÆÀÌÅÛ
+    [Tooltip("ë“œë˜ê·¸ ì¤‘ í‘œì‹œë  Image ì˜¤ë¸Œì íŠ¸ (DragImageContainer)")]
+    [SerializeField] private GameObject dragImageObject;
+
+    [Tooltip("ë“œë˜ê·¸ ì´ë¯¸ì§€ ì»´í¬ë„ŒíŠ¸")]
+    [SerializeField] private Image dragImage;
+
+    private RectTransform dragRectTransform;    // RectTransform ìºì‹œ
+    private ItemSlot draggedSlot;               // ë“œë˜ê·¸ ì¤‘ì¸ ìŠ¬ë¡¯
+    private ItemDataSO draggedItem;             // ë“œë˜ê·¸ ì¤‘ì¸ ì•„ì´í…œ
     private bool isDragging = false;
 
     private void Awake()
     {
-        // ½Ì±ÛÅæ ¼³Á¤
+        Debug.Log("[ItemDragHandler] â”â”â” Awake ì‹œì‘ â”â”â”");
+
+        // ì‹±ê¸€í†¤ ì„¤ì •
         if (Instance == null)
         {
             Instance = this;
-            Debug.Log("[ItemDragHandler] ½Ì±ÛÅæ ÀÎ½ºÅÏ½º »ı¼ºµÊ");
+            Debug.Log("[ItemDragHandler] âœ… ì‹±ê¸€í†¤ ì¸ìŠ¤í„´ìŠ¤ ìƒì„±ë¨");
         }
         else
         {
-            Debug.LogWarning("[ItemDragHandler] Áßº¹ ÀÎ½ºÅÏ½º ÆÄ±«µÊ");
+            Debug.LogWarning("[ItemDragHandler] âš ï¸ ì¤‘ë³µ ì¸ìŠ¤í„´ìŠ¤ íŒŒê´´ë¨");
             Destroy(gameObject);
             return;
         }
 
-        // µå·¡±× ÀÌ¹ÌÁö ÃÊ±â ºñÈ°¼ºÈ­
-        if (dragImage != null)
+        // RectTransform ìºì‹œ
+        if (dragImageObject != null)
         {
-            dragImage.gameObject.SetActive(false);
+            dragRectTransform = dragImageObject.GetComponent<RectTransform>();
+
+            if (dragRectTransform == null)
+            {
+                Debug.LogError("[ItemDragHandler] âŒ DragImageObjectì— RectTransformì´ ì—†ìŠµë‹ˆë‹¤!");
+            }
+            else
+            {
+                Debug.Log("[ItemDragHandler] âœ… RectTransform ìºì‹œ ì™„ë£Œ");
+            }
         }
+        else
+        {
+            Debug.LogError("[ItemDragHandler] âŒ dragImageObjectê°€ nullì…ë‹ˆë‹¤! Inspectorì—ì„œ í• ë‹¹í•´ì£¼ì„¸ìš”!");
+        }
+
+        // ë“œë˜ê·¸ ì´ë¯¸ì§€ ì´ˆê¸° ë¹„í™œì„±í™”
+        if (dragImageObject != null)
+        {
+            dragImageObject.SetActive(false);
+            Debug.Log("[ItemDragHandler] âœ… ë“œë˜ê·¸ ì´ë¯¸ì§€ ì´ˆê¸° ë¹„í™œì„±í™”");
+        }
+
+        // Canvas í™•ì¸
+        if (dragCanvas == null)
+        {
+            Debug.LogError("[ItemDragHandler] âŒ dragCanvasê°€ nullì…ë‹ˆë‹¤! Inspectorì—ì„œ í• ë‹¹í•´ì£¼ì„¸ìš”!");
+        }
+        else
+        {
+            Debug.Log($"[ItemDragHandler] âœ… Drag Canvas ì—°ê²°ë¨: {dragCanvas.name}");
+        }
+
+        Debug.Log("[ItemDragHandler] â”â”â” Awake ì™„ë£Œ â”â”â”");
     }
 
     private void Update()
     {
-        // µå·¡±× ÁßÀÏ ¶§ ¸¶¿ì½º À§Ä¡ ÃßÀû
-        if (isDragging && dragImage != null)
+        // ë“œë˜ê·¸ ì¤‘ì¼ ë•Œ ë§ˆìš°ìŠ¤ ìœ„ì¹˜ ì¶”ì 
+        if (isDragging && dragRectTransform != null && dragCanvas != null)
         {
-            dragImage.transform.position = Input.mousePosition;
+            // ìŠ¤í¬ë¦° ì¢Œí‘œë¥¼ Canvas ì¢Œí‘œë¡œ ë³€í™˜
+            Vector2 localPoint;
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                dragCanvas.transform as RectTransform,
+                Input.mousePosition,
+                dragCanvas.worldCamera,
+                out localPoint
+            );
+
+            dragRectTransform.localPosition = localPoint;
         }
     }
 
     /// <summary>
-    /// µå·¡±× ½ÃÀÛ
+    /// ë“œë˜ê·¸ ì‹œì‘
     /// </summary>
     public void BeginDrag(ItemSlot slot, ItemDataSO item)
     {
+        Debug.Log($"[ItemDragHandler] â”â”â” BeginDrag í˜¸ì¶œë¨ â”â”â”");
+
         if (item == null)
         {
-            Debug.LogWarning("[ItemDragHandler] µå·¡±×ÇÒ ¾ÆÀÌÅÛÀÌ nullÀÔ´Ï´Ù");
+            Debug.LogWarning("[ItemDragHandler] âš ï¸ ë“œë˜ê·¸í•  ì•„ì´í…œì´ nullì…ë‹ˆë‹¤");
             return;
         }
 
-        Debug.Log($"[ItemDragHandler] µå·¡±× ½ÃÀÛ: {item.itemName}");
+        Debug.Log($"[ItemDragHandler] ë“œë˜ê·¸ ì‹œì‘: {item.itemName}");
 
         draggedSlot = slot;
         draggedItem = item;
         isDragging = true;
 
-        // µå·¡±× ÀÌ¹ÌÁö È°¼ºÈ­
-        if (dragImage != null)
+        // ë“œë˜ê·¸ ì´ë¯¸ì§€ í™œì„±í™”
+        if (dragImageObject != null && dragImage != null)
         {
             dragImage.sprite = item.icon;
-            dragImage.gameObject.SetActive(true);
-            dragImage.transform.position = Input.mousePosition;
+            dragImageObject.SetActive(true);
 
-            // ¹İÅõ¸í ¼³Á¤
+            // ë°˜íˆ¬ëª… ì„¤ì •
             Color color = dragImage.color;
             color.a = 0.7f;
             dragImage.color = color;
+
+            Debug.Log($"[ItemDragHandler] âœ… ë“œë˜ê·¸ ì´ë¯¸ì§€ í™œì„±í™”ë¨: {item.itemName}");
+        }
+        else
+        {
+            Debug.LogError("[ItemDragHandler] âŒ dragImageObject ë˜ëŠ” dragImageê°€ nullì…ë‹ˆë‹¤!");
         }
     }
 
     /// <summary>
-    /// µå·¡±× Á¾·á (½½·Ô¿¡ µå·Ó)
+    /// ë“œë˜ê·¸ ì¢…ë£Œ (ìŠ¬ë¡¯ì— ë“œë¡­)
     /// </summary>
     public void EndDrag(ItemSlot targetSlot)
     {
+        Debug.Log($"[ItemDragHandler] â”â”â” EndDrag í˜¸ì¶œë¨ â”â”â”");
+
         if (!isDragging)
         {
-            Debug.LogWarning("[ItemDragHandler] µå·¡±× ÁßÀÌ ¾Æ´Õ´Ï´Ù");
+            Debug.LogWarning("[ItemDragHandler] âš ï¸ ë“œë˜ê·¸ ì¤‘ì´ ì•„ë‹™ë‹ˆë‹¤");
             return;
         }
 
-        Debug.Log($"[ItemDragHandler] µå·¡±× Á¾·á: {draggedItem?.itemName ?? "null"}");
+        Debug.Log($"[ItemDragHandler] ë“œë˜ê·¸ ì¢…ë£Œ: {draggedItem?.itemName ?? "null"}");
 
-        // µå·¡±× ÀÌ¹ÌÁö ºñÈ°¼ºÈ­
-        if (dragImage != null)
+        // ë“œë˜ê·¸ ì´ë¯¸ì§€ ë¹„í™œì„±í™”
+        if (dragImageObject != null)
         {
-            dragImage.gameObject.SetActive(false);
+            dragImageObject.SetActive(false);
         }
 
-        // °°Àº ½½·Ô¿¡ µå·ÓÇÑ °æ¿ì ¹«½Ã
+        // ê°™ì€ ìŠ¬ë¡¯ì— ë“œë¡­í•œ ê²½ìš° ë¬´ì‹œ
         if (targetSlot == draggedSlot)
         {
-            Debug.Log("[ItemDragHandler] °°Àº ½½·Ô¿¡ µå·ÓÇÔ, Ãë¼Ò");
+            Debug.Log("[ItemDragHandler] ê°™ì€ ìŠ¬ë¡¯ì— ë“œë¡­í•¨, ì·¨ì†Œ");
             ResetDrag();
             return;
         }
 
-        // Å¸°Ù ½½·ÔÀÌ ÀÖÀ¸¸é ½º¿Ò
+        // íƒ€ê²Ÿ ìŠ¬ë¡¯ì´ ìˆìœ¼ë©´ ìŠ¤ì™‘
         if (targetSlot != null)
         {
             SwapItems(draggedSlot, targetSlot);
@@ -118,46 +177,50 @@ public class ItemDragHandler : MonoBehaviour
     }
 
     /// <summary>
-    /// µå·¡±× Ãë¼Ò
+    /// ë“œë˜ê·¸ ì·¨ì†Œ
     /// </summary>
     public void CancelDrag()
     {
-        Debug.Log("[ItemDragHandler] µå·¡±× Ãë¼Ò");
+        Debug.Log("[ItemDragHandler] ë“œë˜ê·¸ ì·¨ì†Œ");
 
-        if (dragImage != null)
+        if (dragImageObject != null)
         {
-            dragImage.gameObject.SetActive(false);
+            dragImageObject.SetActive(false);
         }
 
         ResetDrag();
     }
 
     /// <summary>
-    /// ¾ÆÀÌÅÛ ½º¿Ò
+    /// ì•„ì´í…œ ìŠ¤ì™‘
     /// </summary>
     private void SwapItems(ItemSlot slotA, ItemSlot slotB)
     {
-        Debug.Log($"[ItemDragHandler] ¾ÆÀÌÅÛ ½º¿Ò: {slotA.ItemData?.itemName} <-> {slotB.ItemData?.itemName}");
+        Debug.Log($"[ItemDragHandler] ì•„ì´í…œ ìŠ¤ì™‘: {slotA.ItemData?.itemName} <-> {slotB.ItemData?.itemName}");
 
         ItemDataSO tempItem = slotA.ItemData;
         int tempQuantity = slotA.Quantity;
 
         slotA.Initialize(slotB.ItemData, slotA.SlotType, slotB.Quantity);
         slotB.Initialize(tempItem, slotB.SlotType, tempQuantity);
+
+        Debug.Log("[ItemDragHandler] âœ… ìŠ¤ì™‘ ì™„ë£Œ");
     }
 
     /// <summary>
-    /// µå·¡±× »óÅÂ ÃÊ±âÈ­
+    /// ë“œë˜ê·¸ ìƒíƒœ ì´ˆê¸°í™”
     /// </summary>
     private void ResetDrag()
     {
         draggedSlot = null;
         draggedItem = null;
         isDragging = false;
+
+        Debug.Log("[ItemDragHandler] ë“œë˜ê·¸ ìƒíƒœ ì´ˆê¸°í™”");
     }
 
     /// <summary>
-    /// ÇöÀç µå·¡±× ÁßÀÎÁö È®ÀÎ
+    /// í˜„ì¬ ë“œë˜ê·¸ ì¤‘ì¸ì§€ í™•ì¸
     /// </summary>
     public bool IsDragging => isDragging;
 }

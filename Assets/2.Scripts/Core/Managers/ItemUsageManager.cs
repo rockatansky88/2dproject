@@ -1,61 +1,58 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using System;
 
 /// <summary>
-/// ¾ÆÀÌÅÛ »ç¿ë Ã³¸® ¸Å´ÏÀú
-/// - HP/MP Æ÷¼Ç »ç¿ë
-/// - ¸¶À» ±ÍÈ¯ ½ºÅ©·Ñ »ç¿ë
-/// - ´øÀü¿¡¼­¸¸ »ç¿ë °¡´ÉÇÏµµ·Ï Á¦ÇÑ
+/// ì•„ì´í…œ ì‚¬ìš© ì²˜ë¦¬ ë§¤ë‹ˆì €
+/// - HP/MP í¬ì…˜ ì‚¬ìš©
+/// - ë§ˆì„ ê·€í™˜ ìŠ¤í¬ë¡¤ ì‚¬ìš©
+/// - ë˜ì „ì—ì„œë§Œ ì‚¬ìš© ê°€ëŠ¥í•˜ë„ë¡ ì œí•œ
 /// </summary>
 public class ItemUsageManager : MonoBehaviour
 {
     public static ItemUsageManager Instance { get; private set; }
 
-    [Header("Confirmation Popup")]
-    [SerializeField] private GameObject confirmationPopupPrefab; // È®ÀÎ ÆË¾÷ ÇÁ¸®ÆÕ (ÃßÈÄ ±¸Çö)
-
     private void Awake()
     {
-        // ½Ì±ÛÅæ ¼³Á¤
+        // ì‹±ê¸€í†¤ ì„¤ì •
         if (Instance == null)
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
-            Debug.Log("[ItemUsageManager] ½Ì±ÛÅæ ÀÎ½ºÅÏ½º »ı¼ºµÊ");
+            Debug.Log("[ItemUsageManager] ì‹±ê¸€í†¤ ì¸ìŠ¤í„´ìŠ¤ ìƒì„±ë¨");
         }
         else
         {
-            Debug.LogWarning("[ItemUsageManager] Áßº¹ ÀÎ½ºÅÏ½º ÆÄ±«µÊ");
+            Debug.LogWarning("[ItemUsageManager] ì¤‘ë³µ ì¸ìŠ¤í„´ìŠ¤ íŒŒê´´ë¨");
             Destroy(gameObject);
             return;
         }
     }
 
     /// <summary>
-    /// ¾ÆÀÌÅÛ »ç¿ë ¸ŞÀÎ ÇÔ¼ö
+    /// ì•„ì´í…œ ì‚¬ìš© ë©”ì¸ í•¨ìˆ˜
     /// </summary>
     public void UseItem(ItemDataSO item, MercenaryInstance targetMercenary = null)
     {
         if (item == null)
         {
-            Debug.LogError("[ItemUsageManager] ¾ÆÀÌÅÛÀÌ nullÀÔ´Ï´Ù");
+            Debug.LogError("[ItemUsageManager] ì•„ì´í…œì´ nullì…ë‹ˆë‹¤");
             return;
         }
 
-        Debug.Log($"[ItemUsageManager] ¦¬¦¬¦¬ ¾ÆÀÌÅÛ »ç¿ë ½Ãµµ: {item.itemName} ¦¬¦¬¦¬");
+        Debug.Log($"[ItemUsageManager] â”â”â” ì•„ì´í…œ ì‚¬ìš© ì‹œë„: {item.itemName} â”â”â”");
 
-        // ´øÀü¿¡¼­¸¸ »ç¿ë °¡´É
+        // ë˜ì „ì—ì„œë§Œ ì‚¬ìš© ê°€ëŠ¥
         if (!IsInDungeon())
         {
-            Debug.LogWarning("[ItemUsageManager] ´øÀü¿¡¼­¸¸ ¾ÆÀÌÅÛÀ» »ç¿ëÇÒ ¼ö ÀÖ½À´Ï´Ù");
-            ShowMessage("´øÀü¿¡¼­¸¸ »ç¿ë °¡´ÉÇÕ´Ï´Ù");
+            Debug.LogWarning("[ItemUsageManager] ë˜ì „ì—ì„œë§Œ ì•„ì´í…œì„ ì‚¬ìš©í•  ìˆ˜ ìˆìŠµë‹ˆë‹¤");
+            ShowMessage("ë˜ì „ì—ì„œë§Œ ì‚¬ìš© ê°€ëŠ¥í•©ë‹ˆë‹¤");
             return;
         }
 
-        // ¾ÆÀÌÅÛ Å¸ÀÔ¿¡ µû¶ó Ã³¸®
+        // ì•„ì´í…œ íƒ€ì…ì— ë”°ë¼ ì²˜ë¦¬
         if (item.isTownPortalScroll)
         {
-            UseTownPortalScroll();
+            UseTownPortalScroll(item);
         }
         else if (item.healAmount > 0 || item.manaAmount > 0)
         {
@@ -63,28 +60,28 @@ public class ItemUsageManager : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning($"[ItemUsageManager] {item.itemName}Àº(´Â) »ç¿ëÇÒ ¼ö ¾ø´Â ¾ÆÀÌÅÛÀÔ´Ï´Ù");
-            ShowMessage("»ç¿ëÇÒ ¼ö ¾ø´Â ¾ÆÀÌÅÛÀÔ´Ï´Ù");
+            Debug.LogWarning($"[ItemUsageManager] {item.itemName}ì€(ëŠ”) ì‚¬ìš©í•  ìˆ˜ ì—†ëŠ” ì•„ì´í…œì…ë‹ˆë‹¤");
+            ShowMessage("ì‚¬ìš©í•  ìˆ˜ ì—†ëŠ” ì•„ì´í…œì…ë‹ˆë‹¤");
         }
     }
 
     /// <summary>
-    /// HP/MP Æ÷¼Ç »ç¿ë
+    /// HP/MP í¬ì…˜ ì‚¬ìš©
     /// </summary>
     private void UsePotion(ItemDataSO item, MercenaryInstance targetMercenary)
     {
         if (targetMercenary == null)
         {
-            Debug.LogWarning("[ItemUsageManager] ´ë»ó ¿ëº´ÀÌ ¼±ÅÃµÇÁö ¾Ê¾Ò½À´Ï´Ù");
-            ShowMessage("»ç¿ëÇÒ ¿ëº´À» ¼±ÅÃÇØÁÖ¼¼¿ä");
+            Debug.LogWarning("[ItemUsageManager] ëŒ€ìƒ ìš©ë³‘ì´ ì„ íƒë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤");
+            ShowMessage("ì‚¬ìš©í•  ìš©ë³‘ì„ ì„ íƒí•´ì£¼ì„¸ìš”");
             return;
         }
 
-        Debug.Log($"[ItemUsageManager] Æ÷¼Ç »ç¿ë: {item.itemName} ¡æ {targetMercenary.mercenaryName}");
+        Debug.Log($"[ItemUsageManager] í¬ì…˜ ì‚¬ìš©: {item.itemName} â†’ {targetMercenary.mercenaryName}");
 
         bool used = false;
 
-        // HP È¸º¹
+        // HP íšŒë³µ
         if (item.healAmount > 0)
         {
             int beforeHP = targetMercenary.currentHP;
@@ -93,19 +90,19 @@ public class ItemUsageManager : MonoBehaviour
 
             if (healedAmount > 0)
             {
-                Debug.Log($"[ItemUsageManager] HP È¸º¹: {targetMercenary.mercenaryName} +{healedAmount} HP ({beforeHP} ¡æ {targetMercenary.currentHP})");
-                ShowMessage($"{targetMercenary.mercenaryName}ÀÇ HP°¡ {healedAmount} È¸º¹µÇ¾ú½À´Ï´Ù");
+                Debug.Log($"[ItemUsageManager] HP íšŒë³µ: {targetMercenary.mercenaryName} +{healedAmount} HP ({beforeHP} â†’ {targetMercenary.currentHP})");
+                ShowMessage($"{targetMercenary.mercenaryName}ì˜ HPê°€ {healedAmount} íšŒë³µë˜ì—ˆìŠµë‹ˆë‹¤");
                 used = true;
             }
             else
             {
-                Debug.Log($"[ItemUsageManager] HP°¡ ÀÌ¹Ì ÃÖ´ëÀÔ´Ï´Ù");
-                ShowMessage("HP°¡ ÀÌ¹Ì ÃÖ´ëÀÔ´Ï´Ù");
+                Debug.Log($"[ItemUsageManager] HPê°€ ì´ë¯¸ ìµœëŒ€ì…ë‹ˆë‹¤");
+                ShowMessage("HPê°€ ì´ë¯¸ ìµœëŒ€ì…ë‹ˆë‹¤");
                 return;
             }
         }
 
-        // MP È¸º¹
+        // MP íšŒë³µ
         if (item.manaAmount > 0)
         {
             int beforeMP = targetMercenary.currentMP;
@@ -114,102 +111,97 @@ public class ItemUsageManager : MonoBehaviour
 
             if (restoredAmount > 0)
             {
-                Debug.Log($"[ItemUsageManager] MP È¸º¹: {targetMercenary.mercenaryName} +{restoredAmount} MP ({beforeMP} ¡æ {targetMercenary.currentMP})");
-                ShowMessage($"{targetMercenary.mercenaryName}ÀÇ MP°¡ {restoredAmount} È¸º¹µÇ¾ú½À´Ï´Ù");
+                Debug.Log($"[ItemUsageManager] MP íšŒë³µ: {targetMercenary.mercenaryName} +{restoredAmount} MP ({beforeMP} â†’ {targetMercenary.currentMP})");
+                ShowMessage($"{targetMercenary.mercenaryName}ì˜ MPê°€ {restoredAmount} íšŒë³µë˜ì—ˆìŠµë‹ˆë‹¤");
                 used = true;
             }
             else
             {
-                Debug.Log($"[ItemUsageManager] MP°¡ ÀÌ¹Ì ÃÖ´ëÀÔ´Ï´Ù");
-                if (!used) // HPµµ È¸º¹ÇÏÁö ¾Ê¾ÒÀ¸¸é
+                Debug.Log($"[ItemUsageManager] MPê°€ ì´ë¯¸ ìµœëŒ€ì…ë‹ˆë‹¤");
+                if (!used) // HPë„ íšŒë³µí•˜ì§€ ì•Šì•˜ìœ¼ë©´
                 {
-                    ShowMessage("MP°¡ ÀÌ¹Ì ÃÖ´ëÀÔ´Ï´Ù");
+                    ShowMessage("MPê°€ ì´ë¯¸ ìµœëŒ€ì…ë‹ˆë‹¤");
                     return;
                 }
             }
         }
 
-        // ¾ÆÀÌÅÛ ¼Ò¸ğ
+        // ì•„ì´í…œ ì†Œëª¨
         if (used && InventoryManager.Instance != null)
         {
             InventoryManager.Instance.RemoveItem(item.itemID, 1);
-            Debug.Log($"[ItemUsageManager] ¾ÆÀÌÅÛ ¼Ò¸ğ: {item.itemName}");
+            Debug.Log($"[ItemUsageManager] ì•„ì´í…œ ì†Œëª¨: {item.itemName}");
         }
 
-        // UI °»½Å (InventoryWindow)
+        // UI ê°±ì‹  (InventoryWindow)
         RefreshInventoryUI();
     }
 
     /// <summary>
-    /// ¸¶À» ±ÍÈ¯ ½ºÅ©·Ñ »ç¿ë
+    /// ë§ˆì„ ê·€í™˜ ìŠ¤í¬ë¡¤ ì‚¬ìš©
+    /// itemIDë¥¼ íŒŒë¼ë¯¸í„°ë¡œ ë°›ì•„ì„œ í™•ì‹¤í•˜ê²Œ ì†Œëª¨ ì²˜ë¦¬
     /// </summary>
-    private void UseTownPortalScroll()
+    private void UseTownPortalScroll(ItemDataSO scrollItem)
     {
-        Debug.Log("[ItemUsageManager] ¸¶À» ±ÍÈ¯ ½ºÅ©·Ñ »ç¿ë ½Ãµµ");
+        Debug.Log("[ItemUsageManager] â”â”â” ë§ˆì„ ê·€í™˜ ìŠ¤í¬ë¡¤ ì‚¬ìš© ì‹œë„ â”â”â”");
 
-        // È®ÀÎ ÆË¾÷ Ç¥½Ã
-        ShowConfirmation(
-            "´øÀü¿¡¼­ ³ª°¡½Ã°Ú½À´Ï±î?",
+        if (ConfirmationPopup.Instance == null)
+        {
+            Debug.LogError("[ItemUsageManager] âŒ ConfirmationPopup.Instanceê°€ nullì…ë‹ˆë‹¤!");
+            return;
+        }
+
+        // í™•ì¸ íŒì—… í‘œì‹œ
+        ConfirmationPopup.Instance.Show(
+            message: "ë˜ì „ì—ì„œ ë‚˜ê°€ì‹œê² ìŠµë‹ˆê¹Œ?",
             onConfirm: () =>
             {
-                Debug.Log("[ItemUsageManager] ¸¶À» ±ÍÈ¯ ½ÂÀÎµÊ");
+                Debug.Log("[ItemUsageManager] âœ… ë§ˆì„ ê·€í™˜ ìŠ¹ì¸ë¨");
 
-                // ´øÀü ÅğÀå
+                // 1. ì•„ì´í…œ ë¨¼ì € ì†Œëª¨
+                if (InventoryManager.Instance != null)
+                {
+                    InventoryManager.Instance.RemoveItem(scrollItem.itemID, 1);
+                    Debug.Log($"[ItemUsageManager] âœ… í¬íƒˆ ìŠ¤í¬ë¡¤ ì†Œëª¨: {scrollItem.itemName}");
+                }
+
+                // 2. ì¸ë²¤í† ë¦¬ ìœˆë„ìš° ë‹«ê¸° (ì—´ë ¤ìˆë‹¤ë©´)
+                InventoryWindow inventoryWindow = FindObjectOfType<InventoryWindow>();
+                if (inventoryWindow != null && inventoryWindow.IsOpen)
+                {
+                    inventoryWindow.CloseWindow();
+                    Debug.Log("[ItemUsageManager] ì¸ë²¤í† ë¦¬ ìœˆë„ìš° ë‹«ê¸°");
+                }
+
+                // 3. ë˜ì „ í‡´ì¥ â†’ GameSceneManagerê°€ ìë™ìœ¼ë¡œ ShowTownUI() í˜¸ì¶œ
                 if (DungeonManager.Instance != null)
                 {
                     DungeonManager.Instance.ExitDungeon();
+                    Debug.Log("[ItemUsageManager] âœ… ë˜ì „ í‡´ì¥ ì™„ë£Œ");
                 }
 
-                // ¾ÆÀÌÅÛ ¼Ò¸ğ
-                if (InventoryManager.Instance != null)
-                {
-                    // Æ÷Å» ½ºÅ©·Ñ itemID Ã£±â
-                    var allItems = InventoryManager.Instance.GetAllItems();
-                    foreach (var kvp in allItems)
-                    {
-                        ItemDataSO itemData = InventoryManager.Instance.GetItemData(kvp.Key);
-                        if (itemData != null && itemData.isTownPortalScroll)
-                        {
-                            InventoryManager.Instance.RemoveItem(itemData.itemID, 1);
-                            Debug.Log($"[ItemUsageManager] Æ÷Å» ½ºÅ©·Ñ ¼Ò¸ğ: {itemData.itemName}");
-                            break;
-                        }
-                    }
-                }
-
-                ShowMessage("¸¶À»·Î ±ÍÈ¯ÇÕ´Ï´Ù");
+                ShowMessage("ë§ˆì„ë¡œ ê·€í™˜í•©ë‹ˆë‹¤");
             },
             onCancel: () =>
             {
-                Debug.Log("[ItemUsageManager] ¸¶À» ±ÍÈ¯ Ãë¼ÒµÊ");
-            }
+                Debug.Log("[ItemUsageManager] âŒ ë§ˆì„ ê·€í™˜ ì·¨ì†Œë¨");
+            },
+            title: "ë§ˆì„ ê·€í™˜"
         );
     }
 
     /// <summary>
-    /// È®ÀÎ ÆË¾÷ Ç¥½Ã
-    /// </summary>
-    private void ShowConfirmation(string message, Action onConfirm, Action onCancel)
-    {
-        Debug.Log($"[ItemUsageManager] È®ÀÎ ÆË¾÷ Ç¥½Ã: {message}");
-
-        // TODO: ½ÇÁ¦ UI ÆË¾÷ ±¸Çö ½Ã ´ëÃ¼
-        // ÀÓ½Ã·Î µğ¹ö±× ·Î±× + ÀÚµ¿ È®ÀÎ
-        Debug.LogWarning("[ItemUsageManager] È®ÀÎ ÆË¾÷ UI ¹Ì±¸Çö, ÀÚµ¿À¸·Î ½ÂÀÎµË´Ï´Ù");
-        onConfirm?.Invoke();
-    }
-
-    /// <summary>
-    /// ¸Ş½ÃÁö Ç¥½Ã
+    /// ë©”ì‹œì§€ í‘œì‹œ (ë””ë²„ê·¸ ë¡œê·¸)
     /// </summary>
     private void ShowMessage(string message)
     {
-        Debug.Log($"[ItemUsageManager] ¸Ş½ÃÁö: {message}");
-        // TODO: UI Åä½ºÆ® ¸Ş½ÃÁö ½Ã½ºÅÛ ±¸Çö ½Ã Ãß°¡
+        Debug.Log($"[ItemUsageManager] ğŸ“¢ ë©”ì‹œì§€: {message}");
+        // TODO: UI í† ìŠ¤íŠ¸ ë©”ì‹œì§€ ì‹œìŠ¤í…œ êµ¬í˜„ ì‹œ ì¶”ê°€
+
     }
 
     /// <summary>
-    /// ´øÀü ³»ºÎÀÎÁö È®ÀÎ
+    /// ë˜ì „ ë‚´ë¶€ì¸ì§€ í™•ì¸
     /// </summary>
     private bool IsInDungeon()
     {
@@ -217,19 +209,19 @@ public class ItemUsageManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ÀÎº¥Åä¸® UI °»½Å
+    /// ì¸ë²¤í† ë¦¬ UI ê°±ì‹ 
     /// </summary>
     private void RefreshInventoryUI()
     {
         InventoryWindow inventoryWindow = FindObjectOfType<InventoryWindow>();
         if (inventoryWindow != null && inventoryWindow.IsOpen)
         {
-            // ÇöÀç ¼±ÅÃµÈ ¿ëº´ ½ºÅÈ ÀçÇ¥½Ã
+            // í˜„ì¬ ì„ íƒëœ ìš©ë³‘ ìŠ¤íƒ¯ ì¬í‘œì‹œ
             MercenaryInstance selectedMercenary = inventoryWindow.GetSelectedMercenary();
             if (selectedMercenary != null)
             {
                 inventoryWindow.ShowMercenaryStats(selectedMercenary);
-                Debug.Log("[ItemUsageManager] ÀÎº¥Åä¸® UI °»½Å ¿Ï·á");
+                Debug.Log("[ItemUsageManager] ì¸ë²¤í† ë¦¬ UI ê°±ì‹  ì™„ë£Œ");
             }
         }
     }
