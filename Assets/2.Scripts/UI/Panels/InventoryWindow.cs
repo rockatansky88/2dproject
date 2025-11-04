@@ -45,6 +45,16 @@ public class InventoryWindow : MonoBehaviour
     private bool isOpen = false;
     private CanvasGroup canvasGroup;
 
+    //  현재 선택된 용병 (아이템 사용 대상)
+    private MercenaryInstance selectedMercenary;
+
+    // 상점 모드 확인 프로퍼티
+    /// <summary>
+    /// 현재 상점 패널이 활성화되어 있는지 확인합니다.
+    /// 아이템 판매 가능 여부를 체크할 때 사용됩니다.
+    /// </summary>
+    public bool IsShopModeActive => shopPanel != null && shopPanel.activeSelf;
+
     private void Awake()
     {
         canvasGroup = GetComponent<CanvasGroup>();
@@ -264,6 +274,9 @@ public class InventoryWindow : MonoBehaviour
             return;
         }
 
+        // 🆕 추가: 선택된 용병 저장 (아이템 사용 대상)
+        selectedMercenary = mercenary;
+
         Debug.Log($"[InventoryWindow] StatsPanel에 용병 표시: {mercenary.mercenaryName}");
 
         // 전신 이미지
@@ -396,4 +409,13 @@ public class InventoryWindow : MonoBehaviour
     }
 
     public bool IsOpen => isOpen;
+
+    /// <summary>
+    /// 현재 선택된 용병을 반환합니다 (아이템 사용 대상).
+    /// 선택된 용병이 없으면 null을 반환합니다.
+    /// </summary>
+    public MercenaryInstance GetSelectedMercenary()
+    {
+        return selectedMercenary;
+    }
 }

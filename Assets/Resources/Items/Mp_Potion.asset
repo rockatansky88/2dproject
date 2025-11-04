@@ -22,3 +22,5 @@ MonoBehaviour:
   equipSlot: 0
   statModifiers: []
   healAmount: 0
+  manaAmount: 40
+  isTownPortalScroll: 0

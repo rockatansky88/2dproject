@@ -32,15 +32,6 @@ public class InventoryPanel : MonoBehaviour
         RefreshInventory();
     }
 
-    private void OnDestroy()
-    {
-        if (InventoryManager.Instance != null)
-        {
-            InventoryManager.Instance.OnInventoryChanged -= RefreshInventory;
-            Debug.Log("[InventoryPanel] 이벤트 구독 해제");
-        }
-    }
-
     /// <summary>
     /// 슬롯 초기화
     /// </summary>
@@ -51,7 +42,14 @@ public class InventoryPanel : MonoBehaviour
         // 기존 슬롯 제거
         foreach (var slot in slots)
         {
-            if (slot != null) Destroy(slot.gameObject);
+            if (slot != null)
+            {
+                // 🆕 추가: 이벤트 구독 해제
+                slot.OnItemUsed -= OnItemUsed;
+                slot.OnItemSold -= OnItemSold;
+
+                Destroy(slot.gameObject);
+            }
         }
         slots.Clear();
 
@@ -76,7 +74,11 @@ public class InventoryPanel : MonoBehaviour
             if (slot != null)
             {
                 slot.Initialize(null, SlotType.Player, 0);
-                slot.OnSlotClicked += OnSlotClicked;
+
+                // 🆕 추가: 이벤트 구독
+                slot.OnItemUsed += OnItemUsed;
+                slot.OnItemSold += OnItemSold;
+
                 slots.Add(slot);
             }
             else
@@ -159,14 +161,46 @@ public class InventoryPanel : MonoBehaviour
         Debug.Log($"[InventoryPanel] ✅ 총 {slotIndex}개 슬롯에 아이템 배치 완료");
     }
 
+    // 🆕 추가: 아이템 사용 핸들러
     /// <summary>
-    /// 슬롯 클릭 처리 (판매)
+    /// 아이템 사용 (우클릭)
     /// </summary>
-    private void OnSlotClicked(ItemDataSO item, SlotType slotType)
+    private void OnItemUsed(ItemDataSO item)
     {
-        Debug.Log($"[InventoryPanel] 슬롯 클릭: {item?.itemName ?? "null"}, 타입: {slotType}");
+        if (item == null) return;
 
-        if (item == null || slotType != SlotType.Player) return;
+        Debug.Log($"[InventoryPanel] 아이템 사용: {item.itemName}");
+
+        // 대상 용병 가져오기
+        InventoryWindow inventoryWindow = GetComponentInParent<InventoryWindow>();
+        MercenaryInstance targetMercenary = inventoryWindow?.GetSelectedMercenary();
+
+        if (targetMercenary == null)
+        {
+            Debug.LogWarning("[InventoryPanel] 대상 용병이 선택되지 않았습니다");
+            return;
+        }
+
+        // ItemUsageManager로 처리 위임
+        if (ItemUsageManager.Instance != null)
+        {
+            ItemUsageManager.Instance.UseItem(item, targetMercenary);
+        }
+        else
+        {
+            Debug.LogError("[InventoryPanel] ItemUsageManager.Instance가 null입니다!");
+        }
+    }
+
+    // 🆕 수정: OnSlotClicked → OnItemSold로 변경
+    /// <summary>
+    /// 아이템 판매 (Ctrl + 좌클릭, 상점 모드만)
+    /// </summary>
+    private void OnItemSold(ItemDataSO item)
+    {
+        Debug.Log($"[InventoryPanel] 아이템 판매: {item?.itemName ?? "null"}");
+
+        if (item == null) return;
 
         // 판매 처리
         if (ShopManager.Instance != null)
@@ -185,6 +219,25 @@ public class InventoryPanel : MonoBehaviour
         else
         {
             Debug.LogError("[InventoryPanel] ❌ ShopManager.Instance가 null입니다!");
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (InventoryManager.Instance != null)
+        {
+            InventoryManager.Instance.OnInventoryChanged -= RefreshInventory;
+            Debug.Log("[InventoryPanel] 이벤트 구독 해제");
+        }
+
+        // 🆕 추가: 슬롯 이벤트 구독 해제
+        foreach (var slot in slots)
+        {
+            if (slot != null)
+            {
+                slot.OnItemUsed -= OnItemUsed;
+                slot.OnItemSold -= OnItemSold;
+            }
         }
     }
 }

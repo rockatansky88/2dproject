@@ -30,6 +30,13 @@ public class DungeonManager : MonoBehaviour
     public event Action<List<MonsterSpawnData>> OnMonstersSpawned; // 몬스터 스폰
     public event Action<RoomEventDataSO> OnEventTriggered;         // 이벤트 발생
 
+    // 
+    /// <summary>
+    /// 현재 던전에 입장한 상태인지 확인합니다.
+    /// 포탈 스크롤 등 던전 전용 아이템 사용 가능 여부를 체크할 때 사용됩니다.
+    /// </summary>
+    public bool IsInDungeon => currentDungeon != null;
+
     private void Awake()
     {
         Debug.Log("[DungeonManager] ━━━ Awake 시작 ━━━");
