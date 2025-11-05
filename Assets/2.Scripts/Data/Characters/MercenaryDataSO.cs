@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections.Generic; // 스킬 배열 생성을 위한 네임스페이스 추가
+using System.Collections.Generic;
 
 /// <summary>
 /// 용병의 기본 템플릿 데이터
@@ -9,14 +9,14 @@ using System.Collections.Generic; // 스킬 배열 생성을 위한 네임스페
 public class MercenaryDataSO : ScriptableObject
 {
     [Header("Basic Info")]
-    public string mercenaryID;           // 고유 ID (예: "warrior_001")
-    public string mercenaryName;         // 이름 (예: "전사 로렌")
-    public Sprite portrait;              // 초상화
-    public Sprite fullBodySprite;        // 전신 이미지 (상세 패널용)
-    public GameObject prefab;            // 전투용 프리팹
+    public string mercenaryID;
+    public string mercenaryName;
+    public Sprite portrait;
+    public Sprite fullBodySprite;
+    public GameObject prefab;
 
     [Header("Recruitment")]
-    public int recruitCost = 100;        // 고용 비용
+    public int recruitCost = 100;
 
     [Header("Stat Ranges - 랜덤 생성 범위")]
     [Tooltip("레벨 범위")]
@@ -43,7 +43,6 @@ public class MercenaryDataSO : ScriptableObject
     [Tooltip("속도 범위")]
     public StatRange speedRange = new StatRange(8, 12);
 
-    // 🆕 추가: 스킬 정보
     [Header("Skills")]
     [Tooltip("이 용병이 사용할 스킬 목록 (기본 공격 포함, 최대 5개)")]
     public SkillDataSO[] availableSkills = new SkillDataSO[0];
@@ -63,31 +62,23 @@ public class MercenaryDataSO : ScriptableObject
         instance.prefab = prefab;
         instance.recruitCost = recruitCost;
 
-        // 랜덤 기본 스탯 생성
         instance.level = levelRange.GetRandomValue();
-        instance.health = healthRange.GetRandomValue(); // 🔑 기본 체력 (80~120)
+        instance.health = healthRange.GetRandomValue();
         instance.strength = strengthRange.GetRandomValue();
         instance.dexterity = dexterityRange.GetRandomValue();
         instance.wisdom = wisdomRange.GetRandomValue();
         instance.intelligence = intelligenceRange.GetRandomValue();
         instance.speed = speedRange.GetRandomValue();
 
-        // HP 계산: MaxHP = 기본 체력 + (STR * 5)
-        // 예: health 100 + STR 10 → MaxHP 150
         instance.maxHP = instance.health + (instance.strength * 5);
-        instance.currentHP = instance.maxHP; // 초기에는 풀 HP
+        instance.currentHP = instance.maxHP;
 
-        // MP 계산: MaxMP = 기본 마나 + (WIS * 3)
-        int baseMana = manaRange.GetRandomValue(); // 기본 마나 (50~100)
+        int baseMana = manaRange.GetRandomValue();
         instance.maxMP = baseMana + (instance.wisdom * 3);
-        instance.currentMP = instance.maxMP; // 초기에는 풀 MP
+        instance.currentMP = instance.maxMP;
 
-        // 크리티컬 확률 계산 (기본 5% + DEX * 0.5%)
         instance.criticalChance = 5f + (instance.dexterity * 0.5f);
 
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-        // 스킬 복사
         instance.skills = new List<SkillDataSO>();
         if (availableSkills != null && availableSkills.Length > 0)
         {
@@ -110,15 +101,12 @@ public class MercenaryDataSO : ScriptableObject
 
 /// <summary>
 /// 런타임에 생성되는 용병 인스턴스 (랜덤 스탯 적용)
-/// 이 클래스는 실제 게임에서 사용되는 용병 데이터입니다.
+/// 이벤트 버프/디버프를 관리하며, 던전이 끝날 때까지 임시 스탯이 적용됩니다.
 /// </summary>
 [System.Serializable]
 public class MercenaryInstance
 {
-    // 원본 데이터 참조
     public MercenaryDataSO sourceData;
-
-    // 기본 정보
     public string mercenaryID;
     public string mercenaryName;
     public Sprite portrait;
@@ -126,7 +114,7 @@ public class MercenaryInstance
     public GameObject prefab;
     public int recruitCost;
 
-    // 랜덤 생성된 스탯
+    // 🔑 기본 스탯 (버프 적용 전 원본 값)
     public int level;
     public int health;
     public int strength;
@@ -135,18 +123,165 @@ public class MercenaryInstance
     public int intelligence;
     public int speed;
 
-    // HP와 MP
     public int maxHP;
     public int currentHP;
     public int maxMP;
-    public int currentMP; // 전투 중 소모되는 현재 마나
-
-    // 크리티컬 확률
+    public int currentMP;
     public float criticalChance;
-
-    // 스킬
     public List<SkillDataSO> skills = new List<SkillDataSO>();
-
-    // 고용 여부 추적
     public bool isRecruited = false;
+
+    // 🆕 추가: 이벤트 버프 리스트 (던전 동안 유지)
+    [System.NonSerialized]
+    public List<EventBuffData> activeBuffs = new List<EventBuffData>();
+
+    /// <summary>
+    /// 이벤트 버프 적용
+    /// 던전 이벤트에서 획득한 버프를 용병에게 추가합니다.
+    /// </summary>
+    public void ApplyEventBuff(EventBuffData buff)
+    {
+        if (buff == null)
+        {
+            Debug.LogError($"[MercenaryInstance] ❌ {mercenaryName}: buff가 null입니다!");
+            return;
+        }
+
+        // 중복 버프 체크 (같은 ID의 버프가 있으면 덮어쓰기)
+        EventBuffData existingBuff = activeBuffs.Find(b => b.buffID == buff.buffID);
+        if (existingBuff != null)
+        {
+            Debug.Log($"[MercenaryInstance] {mercenaryName}: 기존 버프 '{buff.buffName}' 갱신");
+            activeBuffs.Remove(existingBuff);
+        }
+
+        activeBuffs.Add(buff);
+
+        Debug.Log($"[MercenaryInstance] ✅ {mercenaryName}: 버프 '{buff.buffName}' 적용\n" +
+                  $"STR {buff.strengthModifier:+0;-#}, DEX {buff.dexterityModifier:+0;-#}, INT {buff.intelligenceModifier:+0;-#}, " +
+                  $"WIS {buff.wisdomModifier:+0;-#}, SPD {buff.speedModifier:+0;-#}");
+    }
+
+    /// <summary>
+    /// 모든 이벤트 버프 제거 (던전 퇴장 시 호출)
+    /// </summary>
+    public void ClearEventBuffs()
+    {
+        if (activeBuffs.Count > 0)
+        {
+            Debug.Log($"[MercenaryInstance] {mercenaryName}: 이벤트 버프 {activeBuffs.Count}개 제거");
+            activeBuffs.Clear();
+        }
+    }
+
+    /// <summary>
+    /// 버프가 적용된 최종 스탯 계산 (전투에서 사용)
+    /// 기본 스탯 + 모든 활성 버프의 합산
+    /// </summary>
+    public int GetModifiedStrength()
+    {
+        int total = strength;
+        foreach (var buff in activeBuffs)
+        {
+            if (buff.IsActive()) total += buff.strengthModifier;
+        }
+        return total;
+    }
+
+    public int GetModifiedDexterity()
+    {
+        int total = dexterity;
+        foreach (var buff in activeBuffs)
+        {
+            if (buff.IsActive()) total += buff.dexterityModifier;
+        }
+        return total;
+    }
+
+    public int GetModifiedIntelligence()
+    {
+        int total = intelligence;
+        foreach (var buff in activeBuffs)
+        {
+            if (buff.IsActive()) total += buff.intelligenceModifier;
+        }
+        return total;
+    }
+
+    public int GetModifiedWisdom()
+    {
+        int total = wisdom;
+        foreach (var buff in activeBuffs)
+        {
+            if (buff.IsActive()) total += buff.wisdomModifier;
+        }
+        return total;
+    }
+
+    public int GetModifiedSpeed()
+    {
+        int total = speed;
+        foreach (var buff in activeBuffs)
+        {
+            if (buff.IsActive()) total += buff.speedModifier;
+        }
+        return total;
+    }
+
+    /// <summary>
+    /// HP 회복 (최대 HP 초과 불가)
+    /// </summary>
+    public void Heal(int amount)
+    {
+        int before = currentHP;
+        currentHP = Mathf.Min(maxHP, currentHP + amount);
+        Debug.Log($"[MercenaryInstance] 💚 {mercenaryName} HP 회복 +{amount}: {before} → {currentHP}/{maxHP}");
+    }
+
+    /// <summary>
+    /// HP 감소 (0 이하로 내려가지 않음)
+    /// </summary>
+    public void TakeDamage(int damage)
+    {
+        int before = currentHP;
+        currentHP = Mathf.Max(0, currentHP - damage);
+        Debug.Log($"[MercenaryInstance] 🩸 {mercenaryName} HP 감소 -{damage}: {before} → {currentHP}/{maxHP}");
+    }
+
+    /// <summary>
+    /// HP를 퍼센트로 감소 (이벤트용)
+    /// </summary>
+    public void TakeDamagePercent(int percent)
+    {
+        int damage = Mathf.RoundToInt(maxHP * (percent / 100f));
+        TakeDamage(damage);
+    }
+
+    /// <summary>
+    /// MP 회복 (최대 MP 초과 불가)
+    /// </summary>
+    public void RestoreMana(int amount)
+    {
+        int before = currentMP;
+        currentMP = Mathf.Min(maxMP, currentMP + amount);
+        Debug.Log($"[MercenaryInstance] 🔵 {mercenaryName} MP 회복 +{amount}: {before} → {currentMP}/{maxMP}");
+    }
+
+    /// <summary>
+    /// MP 감소 (0 이하로 내려가지 않음)
+    /// </summary>
+    public void ConsumeMana(int amount)
+    {
+        int before = currentMP;
+        currentMP = Mathf.Max(0, currentMP - amount);
+        Debug.Log($"[MercenaryInstance] 💙 {mercenaryName} MP 소모 -{amount}: {before} → {currentMP}/{maxMP}");
+    }
+
+    /// <summary>
+    /// 생존 여부
+    /// </summary>
+    public bool IsAlive()
+    {
+        return currentHP > 0;
+    }
 }

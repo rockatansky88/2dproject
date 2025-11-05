@@ -5,35 +5,35 @@ using System.Collections.Generic;
 
 /// <summary>
 /// 게임 씬 전환 관리자 (마을, 던전 입구, 통로, 이벤트, 전투 화면)
-/// - 카메라 이동 방식으로 화면 전환
-/// - 각 씬의 배경 이미지를 동적으로 설정
+/// 카메라 이동 방식으로 화면 전환하며, 각 씬의 배경 이미지를 동적으로 설정합니다.
 /// </summary>
 public class GameSceneManager : MonoBehaviour
 {
     public static GameSceneManager Instance { get; private set; }
+
     [Header("Camera")]
     [SerializeField] private Camera mainCamera;
-    [SerializeField] private float cameraMoveDuration = 1f; // 카메라 이동 시간
+    [SerializeField] private float cameraMoveDuration = 1f;
 
     [Header("Positions")]
-    [SerializeField] private Transform townPosition;      // 마을 위치
-    [SerializeField] private Transform entrancePosition;  // 던전 입구 위치
-    [SerializeField] private Transform corridorPosition;  // 던전 통로 위치
-    [SerializeField] private Transform eventPosition;     // 이벤트 맵 위치
-    [SerializeField] private Transform combatPosition;    // 전투 맵 위치
+    [SerializeField] private Transform townPosition;
+    [SerializeField] private Transform entrancePosition;
+    [SerializeField] private Transform corridorPosition;
+    [SerializeField] private Transform eventPosition;
+    [SerializeField] private Transform combatPosition;
 
     [Header("UI Panels")]
-    [SerializeField] private GameObject townUI;           // 마을 UI
-    [SerializeField] private GameObject entranceUI;       // 던전 입구 UI
-    [SerializeField] private GameObject corridorUI;       // 통로 선택 UI (3갈래)
-    [SerializeField] private GameObject eventUI;          // 이벤트 UI
-    [SerializeField] private GameObject combatUI;         // 전투 UI
+    [SerializeField] private GameObject townUI;
+    [SerializeField] private GameObject entranceUI;
+    [SerializeField] private GameObject corridorUI;
+    [SerializeField] private GameObject eventUI;
+    [SerializeField] private GameObject combatUI;
 
     [Header("Town UI Elements")]
-    [SerializeField] private Image townBackgroundImage;   // 마을 배경 이미지
-    [SerializeField] private Sprite townBackgroundSprite; // 마을 배경 스프라이트
-    [SerializeField] private Button[] townShopButtons;    // 상점 버튼들 (0: 던전입구, 1: 상점, 2: 용병상점)
-    [SerializeField] private DungeonDataSO[] availableDungeons; // 🆕 추가
+    [SerializeField] private Image townBackgroundImage;
+    [SerializeField] private Sprite townBackgroundSprite;
+    [SerializeField] private Button[] townShopButtons;
+    [SerializeField] private DungeonDataSO[] availableDungeons;
 
     [Header("Entrance UI Elements")]
     [SerializeField] private Image entranceBackgroundImage;
@@ -44,24 +44,24 @@ public class GameSceneManager : MonoBehaviour
 
     [Header("Corridor UI Elements")]
     [SerializeField] private Image corridorBackgroundImage;
-    [SerializeField] private Text roomProgressText;       // "방 1/5"
-    [SerializeField] private Button[] pathButtons;        // 3갈래 버튼 (0~2)
+    [SerializeField] private Text roomProgressText;
+    [SerializeField] private Button[] pathButtons;
 
     [Header("Event UI Elements")]
     [SerializeField] private Image eventBackgroundImage;
     [SerializeField] private Image eventIllustrationImage;
     [SerializeField] private Text eventTitleText;
     [SerializeField] private Text eventDescriptionText;
-    [SerializeField] private Button proceedButton;        // 다음으로 버튼
+    [SerializeField] private Button proceedButton;
 
     [Header("Combat UI Elements")]
     [SerializeField] private Image combatBackgroundImage;
-    [SerializeField] private Transform monsterSpawnParent; // 몬스터 스프라이트 부모
-    [SerializeField] private GameObject monsterPrefab;     // 몬스터 UI 프리팹
+    [SerializeField] private Transform monsterSpawnParent;
+    [SerializeField] private GameObject monsterPrefab;
 
     [Header("Mercenary Party UI")]
-    [SerializeField] private MercenaryParty mercenaryParty; // MercenaryParty 참조
-    [SerializeField] private MercenaryWindow mercenaryWindow; // 🆕 추가
+    [SerializeField] private MercenaryParty mercenaryParty;
+    [SerializeField] private MercenaryWindow mercenaryWindow;
 
     private DungeonDataSO currentDungeonData;
 
@@ -69,7 +69,6 @@ public class GameSceneManager : MonoBehaviour
     {
         Debug.Log("[GameSceneManager] ━━━ Awake 시작 ━━━");
 
-        // 싱글톤 설정
         if (Instance == null)
         {
             Instance = this;
@@ -101,20 +100,18 @@ public class GameSceneManager : MonoBehaviour
             Debug.Log("[GameSceneManager] 다음으로 버튼 리스너 등록");
         }
 
-        // 3갈래 버튼 리스너 등록
         for (int i = 0; i < pathButtons.Length; i++)
         {
-            int index = i; // 클로저 문제 방지
+            int index = i;
             pathButtons[i].onClick.AddListener(() => OnPathSelected(index));
             Debug.Log($"[GameSceneManager] 통로 {index}번 버튼 리스너 등록");
         }
 
-        // 마을 상점 버튼 리스너 등록
         if (townShopButtons != null && townShopButtons.Length >= 3)
         {
-            townShopButtons[0].onClick.AddListener(OnDungeonEntranceClicked); // 던전입구
-            townShopButtons[1].onClick.AddListener(OnMerchantShopClicked);    // 상점
-            townShopButtons[2].onClick.AddListener(OnMercenaryShopClicked);   // 용병상점
+            townShopButtons[0].onClick.AddListener(OnDungeonEntranceClicked);
+            townShopButtons[1].onClick.AddListener(OnMerchantShopClicked);
+            townShopButtons[2].onClick.AddListener(OnMercenaryShopClicked);
             Debug.Log("[GameSceneManager] 마을 버튼 리스너 등록 완료");
         }
 
@@ -125,7 +122,6 @@ public class GameSceneManager : MonoBehaviour
     {
         Debug.Log("[GameSceneManager] ━━━ Start 시작 ━━━");
 
-        // DungeonManager 이벤트 구독 (Start에서 수행)
         if (DungeonManager.Instance != null)
         {
             DungeonManager.Instance.OnDungeonEntered += OnDungeonEntered;
@@ -137,14 +133,12 @@ public class GameSceneManager : MonoBehaviour
             Debug.Log("[GameSceneManager] ✅ DungeonManager 이벤트 구독 완료");
         }
 
-        // CombatManager 이벤트 구독
         if (CombatManager.Instance != null)
         {
             CombatManager.Instance.OnCombatEnded += OnCombatEnded;
             Debug.Log("[GameSceneManager] CombatManager 이벤트 구독");
         }
 
-        // 초기 상태: 마을 UI만 활성화
         ShowTownUI();
 
         Debug.Log("[GameSceneManager] ✅ Start 완료");
@@ -160,22 +154,20 @@ public class GameSceneManager : MonoBehaviour
         HideAllUI();
         townUI.SetActive(true);
 
-        // 마을 배경 이미지 설정
         if (townBackgroundImage != null && townBackgroundSprite != null)
         {
             townBackgroundImage.sprite = townBackgroundSprite;
             Debug.Log("[GameSceneManager] 마을 배경 이미지 설정됨");
         }
 
-        // 파티 UI 표시 (마을에서는 항상 표시)
+        // 🔧 수정: 마을에서는 파티 UI 표시 + HP/MP UI 표시 (비전투 모드)
         if (mercenaryParty != null)
         {
-            mercenaryParty.SetCombatMode(false); // 전투 모드 아님
+            mercenaryParty.SetCombatMode(false); // 전투 모드 아님 (HP/MP 숨김)
             mercenaryParty.Show();
-            Debug.Log("[GameSceneManager] 마을에서 파티 UI 표시");
+            Debug.Log("[GameSceneManager] 마을에서 파티 UI 표시 (HP/MP 숨김)");
         }
 
-        // 카메라 위치 이동
         if (mainCamera != null && townPosition != null)
         {
             StartCoroutine(MoveCameraSmooth(townPosition.position));
@@ -196,31 +188,26 @@ public class GameSceneManager : MonoBehaviour
         HideAllUI();
         entranceUI.SetActive(true);
 
-        // 배경 이미지
         if (entranceBackgroundImage != null)
         {
             entranceBackgroundImage.sprite = dungeon.entranceSprite;
         }
 
-        // 제목
         if (entranceTitleText != null)
         {
             entranceTitleText.text = dungeon.dungeonName;
         }
 
-        // 설명
         if (entranceDescriptionText != null)
         {
             entranceDescriptionText.text = $"권장 레벨: {dungeon.recommendedLevel}\n 총 {dungeon.totalRooms}개의 방을 돌파하세요!";
         }
 
-        // 파티 UI 숨김
         if (mercenaryParty != null)
         {
             mercenaryParty.Hide();
         }
 
-        // 카메라 이동
         if (mainCamera != null && entrancePosition != null)
         {
             StartCoroutine(MoveCameraSmooth(entrancePosition.position));
@@ -239,19 +226,16 @@ public class GameSceneManager : MonoBehaviour
         HideAllUI();
         corridorUI.SetActive(true);
 
-        // 배경 이미지
         if (corridorBackgroundImage != null && currentDungeonData != null)
         {
             corridorBackgroundImage.sprite = currentDungeonData.corridorSprite;
         }
 
-        // 파티 UI 숨김
         if (mercenaryParty != null)
         {
             mercenaryParty.Hide();
         }
 
-        // 카메라 이동
         if (mainCamera != null && corridorPosition != null)
         {
             StartCoroutine(MoveCameraSmooth(corridorPosition.position));
@@ -262,6 +246,7 @@ public class GameSceneManager : MonoBehaviour
 
     /// <summary>
     /// 이벤트 UI 표시
+    /// 이벤트에서도 HP/MP UI를 표시하여 회복/피해 효과를 시각적으로 확인할 수 있습니다.
     /// </summary>
     private void ShowEventUI(RoomEventDataSO eventData)
     {
@@ -270,38 +255,34 @@ public class GameSceneManager : MonoBehaviour
         HideAllUI();
         eventUI.SetActive(true);
 
-        // 배경 이미지
         if (eventBackgroundImage != null && currentDungeonData != null)
         {
             eventBackgroundImage.sprite = currentDungeonData.eventBackgroundSprite;
         }
 
-        // 이벤트 일러스트
         if (eventIllustrationImage != null)
         {
             eventIllustrationImage.sprite = eventData.eventImage;
         }
 
-        // 제목
         if (eventTitleText != null)
         {
             eventTitleText.text = eventData.eventName;
         }
 
-        // 설명
         if (eventDescriptionText != null)
         {
             eventDescriptionText.text = eventData.description;
         }
 
-        // 파티 UI 표시 (이벤트는 전투 모드 아님)
+        // 🆕 추가: 이벤트에서도 HP/MP UI 표시
         if (mercenaryParty != null)
         {
-            mercenaryParty.SetCombatMode(false);
+            mercenaryParty.SetCombatMode(true); // 전투 모드로 설정하여 HP/MP UI 활성화
             mercenaryParty.Show();
+            Debug.Log("[GameSceneManager] ✅ 이벤트 화면에서 파티 UI + HP/MP UI 표시");
         }
 
-        // 카메라 이동
         if (mainCamera != null && eventPosition != null)
         {
             StartCoroutine(MoveCameraSmooth(eventPosition.position));
@@ -326,7 +307,6 @@ public class GameSceneManager : MonoBehaviour
         HideAllUI();
         combatUI.SetActive(true);
 
-        // 배경 이미지
         if (combatBackgroundImage != null && currentDungeonData != null)
         {
             if (isBoss)
@@ -339,14 +319,12 @@ public class GameSceneManager : MonoBehaviour
             }
         }
 
-        // 파티 UI 표시 (전투 모드)
         if (mercenaryParty != null)
         {
-            mercenaryParty.SetCombatMode(true);
+            mercenaryParty.SetCombatMode(true); // 전투 모드 활성화
             mercenaryParty.Show();
         }
 
-        // 카메라 이동
         if (mainCamera != null && combatPosition != null)
         {
             StartCoroutine(MoveCameraSmooth(combatPosition.position));
@@ -377,8 +355,6 @@ public class GameSceneManager : MonoBehaviour
         Debug.Log($"[GameSceneManager] 카메라 이동 시작 → {targetPosition}");
 
         Vector3 startPosition = mainCamera.transform.position;
-
-        // Z 좌표를 유지하면서 이동 (카메라는 항상 -10 위치 유지)
         Vector3 adjustedTarget = new Vector3(targetPosition.x, targetPosition.y, startPosition.z);
 
         float elapsed = 0f;
@@ -387,8 +363,6 @@ public class GameSceneManager : MonoBehaviour
         {
             elapsed += Time.deltaTime;
             float t = Mathf.Clamp01(elapsed / cameraMoveDuration);
-
-            // Ease-in-out 효과
             t = t * t * (3f - 2f * t);
 
             mainCamera.transform.position = Vector3.Lerp(startPosition, adjustedTarget, t);
@@ -407,13 +381,11 @@ public class GameSceneManager : MonoBehaviour
     {
         Debug.Log($"[GameSceneManager] ━━━ 몬스터 스프라이트 생성: {monsters.Count}마리 ━━━");
 
-        // 기존 몬스터 제거
         foreach (Transform child in monsterSpawnParent)
         {
             Destroy(child.gameObject);
         }
 
-        // 새 몬스터 생성
         for (int i = 0; i < monsters.Count; i++)
         {
             MonsterSpawnData monsterData = monsters[i];
@@ -427,7 +399,6 @@ public class GameSceneManager : MonoBehaviour
                 Debug.Log($"[GameSceneManager] 몬스터 {i + 1} 생성: {monsterData.monsterName}");
             }
 
-            // 위치 조정 (가로로 배치)
             RectTransform rect = monsterObj.GetComponent<RectTransform>();
             if (rect != null)
             {
@@ -482,7 +453,6 @@ public class GameSceneManager : MonoBehaviour
     {
         Debug.Log("[GameSceneManager] 🖱️ 다음으로 버튼 클릭");
 
-        // 던전 클리어 체크
         if (DungeonManager.Instance != null && DungeonManager.Instance.IsDungeonCleared())
         {
             Debug.Log("[GameSceneManager] ✅ 던전 클리어!");
@@ -490,11 +460,9 @@ public class GameSceneManager : MonoBehaviour
             return;
         }
 
-        // 다음 방으로 이동
         ShowCorridorUI();
     }
 
-    // 상점 버튼 클릭 - 수정
     private void OnMerchantShopClicked()
     {
         Debug.Log("[GameSceneManager] 🖱️ 상점 버튼 클릭");
@@ -516,7 +484,6 @@ public class GameSceneManager : MonoBehaviour
         }
     }
 
-    // 던전 입구 버튼 클릭 - 수정
     private void OnDungeonEntranceClicked()
     {
         Debug.Log("[GameSceneManager] 🖱️ 던전 입구 버튼 클릭");
@@ -534,7 +501,6 @@ public class GameSceneManager : MonoBehaviour
         }
     }
 
-    // 용병 상점 버튼 클릭 - 수정
     private void OnMercenaryShopClicked()
     {
         Debug.Log("[GameSceneManager] 🖱️ 용병 상점 버튼 클릭");
@@ -575,7 +541,6 @@ public class GameSceneManager : MonoBehaviour
             Debug.Log("[GameSceneManager] ✅ MercenaryParty 전투 상태 초기화 완료");
         }
 
-        // 마을 UI 표시
         ShowTownUI();
     }
 
@@ -654,7 +619,6 @@ public class GameSceneManager : MonoBehaviour
 
     private void OnDestroy()
     {
-        // 버튼 리스너 해제
         if (enterDungeonButton != null)
             enterDungeonButton.onClick.RemoveListener(OnEnterDungeonClicked);
 
@@ -669,7 +633,6 @@ public class GameSceneManager : MonoBehaviour
             button.onClick.RemoveAllListeners();
         }
 
-        // 마을 버튼 리스너 해제
         if (townShopButtons != null)
         {
             foreach (var button in townShopButtons)
@@ -681,7 +644,6 @@ public class GameSceneManager : MonoBehaviour
             }
         }
 
-        // DungeonManager 이벤트 구독 해제
         if (DungeonManager.Instance != null)
         {
             DungeonManager.Instance.OnDungeonEntered -= OnDungeonEntered;

@@ -94,28 +94,49 @@ public class InventoryManager : MonoBehaviour
         return null;
     }
 
+    // 🔧 수정: bool 반환 추가 및 로그 개선
     /// <summary>
     /// 아이템 추가
+    /// 던전 이벤트 보상, 상점 구매 등에서 사용됩니다.
     /// </summary>
-    public void AddItem(ItemDataSO item, int amount = 1)
+    /// <param name="item">추가할 아이템 데이터</param>
+    /// <param name="amount">추가할 개수</param>
+    /// <returns>성공 여부</returns>
+    public bool AddItem(ItemDataSO item, int amount = 1)
     {
         if (item == null)
         {
-            Debug.LogError("아이템이 null입니다!");
-            return;
+            Debug.LogError("[InventoryManager] ❌ 아이템이 null입니다!");
+            return false;
         }
 
+        if (amount <= 0)
+        {
+            Debug.LogWarning($"[InventoryManager] ⚠️ 추가할 개수가 0 이하입니다: {amount}");
+            return false;
+        }
+
+        // 인벤토리에 추가
         if (inventory.ContainsKey(item.itemID))
         {
             inventory[item.itemID] += amount;
+            Debug.Log($"[InventoryManager] ✅ 아이템 추가: {item.itemName} x{amount} (총: {inventory[item.itemID]}개)");
         }
         else
         {
+            // 슬롯 개수 체크
+            if (inventory.Count >= maxSlots)
+            {
+                Debug.LogWarning($"[InventoryManager] ⚠️ 인벤토리가 가득 찼습니다! (최대 {maxSlots}개)");
+                return false;
+            }
+
             inventory[item.itemID] = amount;
+            Debug.Log($"[InventoryManager] ✅ 새 아이템 추가: {item.itemName} x{amount}");
         }
 
-        Debug.Log($"아이템 추가: {item.itemName} x{amount}");
         OnInventoryChanged?.Invoke();
+        return true;
     }
 
     /// <summary>
@@ -125,13 +146,13 @@ public class InventoryManager : MonoBehaviour
     {
         if (!inventory.ContainsKey(itemID))
         {
-            Debug.Log("해당 아이템이 없습니다!");
+            Debug.LogWarning($"[InventoryManager] ⚠️ 해당 아이템이 없습니다: {itemID}");
             return false;
         }
 
         if (inventory[itemID] < amount)
         {
-            Debug.Log("아이템 수량이 부족합니다!");
+            Debug.LogWarning($"[InventoryManager] ⚠️ 아이템 수량이 부족합니다: {itemID} (보유: {inventory[itemID]}, 필요: {amount})");
             return false;
         }
 
@@ -140,9 +161,13 @@ public class InventoryManager : MonoBehaviour
         if (inventory[itemID] <= 0)
         {
             inventory.Remove(itemID);
+            Debug.Log($"[InventoryManager] ✅ 아이템 완전 제거: {itemID}");
+        }
+        else
+        {
+            Debug.Log($"[InventoryManager] ✅ 아이템 제거: {itemID} x{amount} (남은 개수: {inventory[itemID]})");
         }
 
-        Debug.Log($"아이템 제거: {itemID} x{amount}");
         OnInventoryChanged?.Invoke();
         return true;
     }
@@ -168,6 +193,7 @@ public class InventoryManager : MonoBehaviour
     /// </summary>
     public void Clear()
     {
+        Debug.Log("[InventoryManager] 인벤토리 초기화");
         inventory.Clear();
         OnInventoryChanged?.Invoke();
     }
@@ -176,7 +202,7 @@ public class InventoryManager : MonoBehaviour
     {
         if (inventoryWindow == null)
         {
-            Debug.LogError("[InventoryManager] InventoryWindow가 설정되지 않았습니다!");
+            Debug.LogError("[InventoryManager] ❌ InventoryWindow가 설정되지 않았습니다!");
             return;
         }
 
