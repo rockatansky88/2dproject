@@ -37,11 +37,9 @@ public class GameManager : MonoBehaviour
         {
             currentGold -= amount;
             OnGoldChanged?.Invoke(currentGold);
-            Debug.Log($"°ñµå ¼Òºñ: -{amount} (ÀÜ¾×: {currentGold})");
             return true;
         }
 
-        Debug.Log("°ñµå°¡ ºÎÁ·ÇÕ´Ï´Ù!");
         return false;
     }
 
@@ -49,6 +47,5 @@ public class GameManager : MonoBehaviour
     {
         currentGold += amount;
         OnGoldChanged?.Invoke(currentGold);
-        Debug.Log($"°ñµå È¹µæ: +{amount} (ÀÜ¾×: {currentGold})");
     }
 }

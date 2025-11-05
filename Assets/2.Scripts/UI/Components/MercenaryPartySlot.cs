@@ -43,7 +43,6 @@ public class MercenaryPartySlot : MonoBehaviour
         if (slotButton != null)
         {
             slotButton.onClick.AddListener(OnClicked);
-            Debug.Log("[MercenaryPartySlot] 슬롯 버튼 리스너 등록됨");
         }
 
         SetCombatStatsVisible(false);
@@ -73,14 +72,12 @@ public class MercenaryPartySlot : MonoBehaviour
         if (turnOutline == null)
         {
             turnOutline = portraitImage.gameObject.AddComponent<Outline>();
-            Debug.Log($"[MercenaryPartySlot] ✅ Outline 컴포넌트 자동 생성");
         }
 
         turnOutline.effectColor = new Color(1f, 0f, 0f, 1f);
         turnOutline.effectDistance = new Vector2(5f, 5f);
         turnOutline.enabled = false;
 
-        Debug.Log($"[MercenaryPartySlot] ✅ Outline 초기화 완료 (빨간색, 두께 5)");
     }
 
     /// <summary>
@@ -130,7 +127,6 @@ public class MercenaryPartySlot : MonoBehaviour
     {
         mercenaryData = null;
 
-        Debug.Log("[MercenaryPartySlot] 빈 슬롯으로 설정");
 
         if (emptySlotIndicator != null)
         {
@@ -155,13 +151,11 @@ public class MercenaryPartySlot : MonoBehaviour
     {
         isCombatScene = isCombat;
 
-        Debug.Log($"[MercenaryPartySlot] 전투 모드 설정: {isCombat}");
 
         if (mercenaryData != null)
         {
             UpdateCombatStats(mercenaryData.currentHP, mercenaryData.maxHP, mercenaryData.currentMP, mercenaryData.maxMP);
 
-            Debug.Log($"[MercenaryPartySlot] 전투 스탯 갱신 - {mercenaryData.mercenaryName}: HP {mercenaryData.currentHP}/{mercenaryData.maxHP}, MP {mercenaryData.currentMP}/{mercenaryData.maxMP}");
         }
     }
 
@@ -172,7 +166,6 @@ public class MercenaryPartySlot : MonoBehaviour
     /// </summary>
     public void UpdateCombatStats(int currentHp, int maxHp, int currentMp, int maxMp)
     {
-        Debug.Log($"[MercenaryPartySlot] 전투 스탯 업데이트: HP {currentHp}/{maxHp}, MP {currentMp}/{maxMp}");
 
         if (hpText != null)
         {
@@ -188,7 +181,6 @@ public class MercenaryPartySlot : MonoBehaviour
         {
             float hpFill = maxHp > 0 ? (float)currentHp / maxHp : 0f;
             hpFillImage.fillAmount = hpFill;
-            Debug.Log($"[MercenaryPartySlot] HP Fill 업데이트: {hpFill:P0} ({currentHp}/{maxHp})");
         }
         else
         {
@@ -199,7 +191,6 @@ public class MercenaryPartySlot : MonoBehaviour
         {
             float mpFill = maxMp > 0 ? (float)currentMp / maxMp : 0f;
             mpFillImage.fillAmount = mpFill;
-            Debug.Log($"[MercenaryPartySlot] MP Fill 업데이트: {mpFill:P0} ({currentMp}/{maxMp})");
         }
         else
         {
@@ -247,7 +238,6 @@ public class MercenaryPartySlot : MonoBehaviour
 
         StartCoroutine(FloatingDamageAnimation());
 
-        Debug.Log($"[MercenaryPartySlot] ✅ {mercenaryData.mercenaryName} 피격 표시: -{damage} (크리티컬: {isCritical})");
     }
 
     /// <summary>
@@ -303,12 +293,10 @@ public class MercenaryPartySlot : MonoBehaviour
         {
             turnOutline.enabled = true;
             turnBlinkCoroutine = StartCoroutine(BlinkTurnOutline());
-            Debug.Log($"[MercenaryPartySlot] ✅ {mercenaryData?.mercenaryName} 턴 표시 활성화 (빨간색 외곽선 깜빡임 시작)");
         }
         else
         {
             turnOutline.enabled = false;
-            Debug.Log($"[MercenaryPartySlot] {(mercenaryData != null ? mercenaryData.mercenaryName : "Unknown")} 턴 표시 비활성화");
         }
     }
 
@@ -354,15 +342,12 @@ public class MercenaryPartySlot : MonoBehaviour
     /// </summary>
     private void OnClicked()
     {
-        Debug.Log($"[MercenaryPartySlot] 🖱️ 파티 슬롯 클릭됨: {mercenaryData?.mercenaryName ?? "Empty"}");
 
         if (mercenaryData == null)
         {
-            Debug.Log("[MercenaryPartySlot] 빈 슬롯이므로 무시");
             return;
         }
 
-        Debug.Log($"[MercenaryPartySlot] OnSlotClicked 이벤트 발생");
         OnSlotClicked?.Invoke(mercenaryData);
     }
 
@@ -393,7 +378,6 @@ public class MercenaryPartySlot : MonoBehaviour
     /// </summary>
     public void ResetHighlight()
     {
-        Debug.Log($"[MercenaryPartySlot] 하이라이트 제거: {mercenaryData?.mercenaryName ?? "Empty"}");
 
         if (turnBlinkCoroutine != null)
         {

@@ -36,7 +36,6 @@ public class Character : MonoBehaviour, ICombatant
         Stats = new CombatStats();
         Stats.InitializeFromMercenary(data);
 
-        Debug.Log($"[Character] ✅ {Name} 초기화 완료 - HP: {Stats.CurrentHP}/{Stats.MaxHP}, MP: {Stats.CurrentMP}/{Stats.MaxMP}");
     }
 
     /// <summary>
@@ -74,7 +73,6 @@ public class Character : MonoBehaviour, ICombatant
             baseCritChance: Random.Range(5f, 15f)
         );
 
-        Debug.Log($"[Character] ✅ {Name} 초기화 완료 (CharacterStatsSO) - HP: {Stats.CurrentHP}/{Stats.MaxHP}, MP: {Stats.CurrentMP}/{Stats.MaxMP}");
     }
 
     /// <summary>
@@ -84,7 +82,6 @@ public class Character : MonoBehaviour, ICombatant
     /// </summary>
     public void Initialize(MercenaryInstance data, List<SkillDataSO> skills, MercenaryPartySlot slot = null)
     {
-        Debug.Log($"[Character] ━━━ {data.mercenaryName} 초기화 시작 ━━━");
 
         mercenaryData = data;
         Skills = skills;
@@ -95,13 +92,6 @@ public class Character : MonoBehaviour, ICombatant
         Stats = new CombatStats();
         Stats.InitializeFromMercenary(data);
 
-        Debug.Log($"[Character] 스탯 로드 완료 (버프 포함)\n" +
-                  $"  STR: {Stats.Strength}, DEX: {Stats.Dexterity}, INT: {Stats.Intelligence}, WIS: {Stats.Wisdom}, SPD: {Stats.Speed}\n" +
-                  $"  HP: {Stats.CurrentHP}/{Stats.MaxHP}, MP: {Stats.CurrentMP}/{Stats.MaxMP}\n" +
-                  $"  활성 버프: {data.activeBuffs.Count}개 (이미 스탯에 반영됨)");
-
-        // ❌ 기존 코드 제거: ApplyEventBuffs(data) - 불필요한 중복 처리
-        // 이미 MercenaryInstance에 버프가 반영되어 있음
 
         // HP/MP 변경 시 MercenaryInstance에 역반영
         Stats.OnHPChanged += (currentHP, maxHP) =>
@@ -136,10 +126,6 @@ public class Character : MonoBehaviour, ICombatant
             uiSlot.UpdateCombatStats(Stats.CurrentHP, Stats.MaxHP, Stats.CurrentMP, Stats.MaxMP);
         }
 
-        Debug.Log($"[Character] ✅ {Name} 초기화 완료\n" +
-                  $"  최종 스탯: STR {Stats.Strength}, DEX {Stats.Dexterity}, INT {Stats.Intelligence}, WIS {Stats.Wisdom}, SPD {Stats.Speed}\n" +
-                  $"  HP: {Stats.CurrentHP}/{Stats.MaxHP}, MP: {Stats.CurrentMP}/{Stats.MaxMP}\n" +
-                  $"  UI 연결: {(uiSlot != null ? "O" : "X")}");
     }
 
     /// <summary>
@@ -161,7 +147,6 @@ public class Character : MonoBehaviour, ICombatant
             monster.uiSlot.ShowDamage(damage, isCritical);
         }
 
-        Debug.Log($"[Character] {Name}이(가) {skill.skillName} 사용 -> {target.Name}에게 {damage} 데미지{(isCritical ? " (크리티컬!)" : "")}!");
 
         return true;
     }
@@ -175,7 +160,6 @@ public class Character : MonoBehaviour, ICombatant
             uiSlot.ShowDamage(damage, isCritical: false);
         }
 
-        Debug.Log($"[Character] {Name} 피격 - {damage} 데미지, 남은 HP: {Stats.CurrentHP}/{Stats.MaxHP}");
     }
 
     public void Heal(int amount)

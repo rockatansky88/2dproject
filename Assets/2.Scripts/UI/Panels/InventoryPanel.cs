@@ -15,14 +15,12 @@ public class InventoryPanel : MonoBehaviour
 
     private void Start()
     {
-        Debug.Log("[InventoryPanel] Start() 호출");
         InitializeSlots();
 
         // 인벤토리 변경 이벤트 구독
         if (InventoryManager.Instance != null)
         {
             InventoryManager.Instance.OnInventoryChanged += RefreshInventory;
-            Debug.Log("[InventoryPanel] ✅ OnInventoryChanged 이벤트 구독 완료");
         }
         else
         {
@@ -37,14 +35,13 @@ public class InventoryPanel : MonoBehaviour
     /// </summary>
     private void InitializeSlots()
     {
-        Debug.Log($"[InventoryPanel] 슬롯 초기화 시작 (총 {maxSlots}개)");
 
         // 기존 슬롯 제거
         foreach (var slot in slots)
         {
             if (slot != null)
             {
-                // 🆕 추가: 이벤트 구독 해제
+                // 이벤트 구독 해제
                 slot.OnItemUsed -= OnItemUsed;
                 slot.OnItemSold -= OnItemSold;
 
@@ -87,7 +84,6 @@ public class InventoryPanel : MonoBehaviour
             }
         }
 
-        Debug.Log($"[InventoryPanel] ✅ 슬롯 {slots.Count}개 생성 완료");
     }
 
     /// <summary>
@@ -95,7 +91,6 @@ public class InventoryPanel : MonoBehaviour
     /// </summary>
     private void RefreshInventory()
     {
-        Debug.Log("[InventoryPanel] ━━━┛ RefreshInventory 호출됨 ━━━┛");
 
         if (InventoryManager.Instance == null)
         {
@@ -111,7 +106,6 @@ public class InventoryPanel : MonoBehaviour
 
         // 인벤토리 아이템 가져오기
         var allItems = InventoryManager.Instance.GetAllItems();
-        Debug.Log($"[InventoryPanel] 인벤토리에서 가져온 아이템: {allItems.Count}개");
 
         int slotIndex = 0;
 
@@ -120,7 +114,6 @@ public class InventoryPanel : MonoBehaviour
             string itemID = kvp.Key;
             int quantity = kvp.Value;
 
-            Debug.Log($"[InventoryPanel] 처리 중: {itemID} x{quantity}");
 
             // ✅ 수정: InventoryManager의 캐시된 데이터 사용
             ItemDataSO itemData = InventoryManager.Instance.GetItemData(itemID);
@@ -131,7 +124,6 @@ public class InventoryPanel : MonoBehaviour
                 continue;
             }
 
-            Debug.Log($"[InventoryPanel] 아이템 데이터 로드 성공: {itemData.itemName} (타입: {itemData.itemType})");
 
             // 포션인 경우 스택으로 처리
             if (itemData.itemType == ItemType.Potion)
@@ -140,7 +132,6 @@ public class InventoryPanel : MonoBehaviour
                 while (quantity > 0 && slotIndex < slots.Count)
                 {
                     int stackAmount = Mathf.Min(quantity, maxStack);
-                    Debug.Log($"[InventoryPanel] 슬롯 {slotIndex}에 포션 배치: {itemData.itemName} x{stackAmount}");
                     slots[slotIndex].Initialize(itemData, SlotType.Player, stackAmount);
                     quantity -= stackAmount;
                     slotIndex++;
@@ -151,14 +142,12 @@ public class InventoryPanel : MonoBehaviour
                 // 장비는 개별 슬롯
                 for (int i = 0; i < quantity && slotIndex < slots.Count; i++)
                 {
-                    Debug.Log($"[InventoryPanel] 슬롯 {slotIndex}에 장비 배치: {itemData.itemName}");
                     slots[slotIndex].Initialize(itemData, SlotType.Player, 1);
                     slotIndex++;
                 }
             }
         }
 
-        Debug.Log($"[InventoryPanel] ✅ 총 {slotIndex}개 슬롯에 아이템 배치 완료");
     }
 
     // 🆕 추가: 아이템 사용 핸들러
@@ -169,7 +158,6 @@ public class InventoryPanel : MonoBehaviour
     {
         if (item == null) return;
 
-        Debug.Log($"[InventoryPanel] 아이템 사용: {item.itemName}");
 
         // 대상 용병 가져오기
         InventoryWindow inventoryWindow = GetComponentInParent<InventoryWindow>();
@@ -198,7 +186,6 @@ public class InventoryPanel : MonoBehaviour
     /// </summary>
     private void OnItemSold(ItemDataSO item)
     {
-        Debug.Log($"[InventoryPanel] 아이템 판매: {item?.itemName ?? "null"}");
 
         if (item == null) return;
 
@@ -209,7 +196,6 @@ public class InventoryPanel : MonoBehaviour
 
             if (success)
             {
-                Debug.Log($"[InventoryPanel] ✅ {item.itemName} 판매 완료!");
             }
             else
             {
@@ -227,7 +213,6 @@ public class InventoryPanel : MonoBehaviour
         if (InventoryManager.Instance != null)
         {
             InventoryManager.Instance.OnInventoryChanged -= RefreshInventory;
-            Debug.Log("[InventoryPanel] 이벤트 구독 해제");
         }
 
         // 🆕 추가: 슬롯 이벤트 구독 해제

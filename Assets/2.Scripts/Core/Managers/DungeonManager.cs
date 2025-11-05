@@ -33,24 +33,21 @@ public class DungeonManager : MonoBehaviour
 
     private void Awake()
     {
-        Debug.Log("[DungeonManager] ━━━ Awake 시작 ━━━");
+        // 던전 매니저 싱글톤 인스턴스 설정
 
         if (Instance == null)
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
-            Debug.Log("[DungeonManager] 싱글톤 인스턴스 생성됨");
         }
         else
         {
-            Debug.LogWarning("[DungeonManager] 중복 인스턴스 파괴됨");
             Destroy(gameObject);
             return;
         }
 
         spawnedMonsters = new List<MonsterSpawnData>();
 
-        Debug.Log("[DungeonManager] ✅ Awake 완료");
     }
 
     /// <summary>
@@ -58,11 +55,9 @@ public class DungeonManager : MonoBehaviour
     /// </summary>
     public void EnterDungeon(DungeonDataSO dungeon)
     {
-        Debug.Log($"[DungeonManager] ━━━ 던전 입장: {dungeon.dungeonName} ━━━");
 
         if (dungeon == null)
         {
-            Debug.LogError("[DungeonManager] ❌ dungeon이 null입니다!");
             return;
         }
 
@@ -70,11 +65,9 @@ public class DungeonManager : MonoBehaviour
         currentRoomIndex = 0;
         totalRooms = dungeon.totalRooms;
 
-        Debug.Log($"[DungeonManager] 던전 데이터 로드 완료 - 총 방: {totalRooms}개");
 
         OnDungeonEntered?.Invoke(currentDungeon);
 
-        Debug.Log($"[DungeonManager] ✅ OnDungeonEntered 이벤트 발생");
     }
 
     /// <summary>
@@ -83,7 +76,6 @@ public class DungeonManager : MonoBehaviour
     /// </summary>
     public void ExitDungeon()
     {
-        Debug.Log("[DungeonManager] ━━━ 던전 퇴장 ━━━");
 
         // 🆕 추가: 모든 용병의 이벤트 버프 제거
         ClearAllEventBuffs();
@@ -98,7 +90,6 @@ public class DungeonManager : MonoBehaviour
 
         OnDungeonExited?.Invoke();
 
-        Debug.Log("[DungeonManager] ✅ 던전 데이터 초기화 완료");
     }
 
     /// <summary>
@@ -107,11 +98,9 @@ public class DungeonManager : MonoBehaviour
     /// </summary>
     private void ClearAllEventBuffs()
     {
-        Debug.Log("[DungeonManager] ━━━ 이벤트 버프 제거 시작 ━━━");
 
         if (MercenaryManager.Instance == null)
         {
-            Debug.LogError("[DungeonManager] ❌ MercenaryManager.Instance가 null입니다!");
             return;
         }
 
@@ -122,7 +111,6 @@ public class DungeonManager : MonoBehaviour
             mercenary.ClearEventBuffs();
         }
 
-        Debug.Log($"[DungeonManager] ✅ {allMercenaries.Count}명의 용병 이벤트 버프 제거 완료");
     }
 
     /// <summary>
@@ -131,11 +119,9 @@ public class DungeonManager : MonoBehaviour
     /// </summary>
     private void RestoreAllMercenaries()
     {
-        Debug.Log("[DungeonManager] ━━━ 용병 HP/MP 회복 시작 ━━━");
 
         if (MercenaryManager.Instance == null)
         {
-            Debug.LogError("[DungeonManager] ❌ MercenaryManager.Instance가 null입니다!");
             return;
         }
 
@@ -149,10 +135,8 @@ public class DungeonManager : MonoBehaviour
             mercenary.currentHP = mercenary.maxHP;
             mercenary.currentMP = mercenary.maxMP;
 
-            Debug.Log($"[DungeonManager] {mercenary.mercenaryName} 회복: HP {beforeHP} → {mercenary.currentHP}, MP {beforeMP} → {mercenary.currentMP}");
         }
 
-        Debug.Log("[DungeonManager] ✅ 모든 용병 HP/MP 회복 완료");
     }
 
     /// <summary>
@@ -160,26 +144,21 @@ public class DungeonManager : MonoBehaviour
     /// </summary>
     public void SelectPath(int pathIndex)
     {
-        Debug.Log($"[DungeonManager] ━━━ 통로 선택: {pathIndex}번 (0~2) ━━━");
 
         if (currentDungeon == null)
         {
-            Debug.LogError("[DungeonManager] ❌ currentDungeon이 null입니다!");
             return;
         }
 
         currentRoomType = DecideRoomType();
-        Debug.Log($"[DungeonManager] 결정된 방 타입: {currentRoomType}");
 
         currentRoomIndex++;
-        Debug.Log($"[DungeonManager] 현재 방 진행도: {currentRoomIndex}/{totalRooms}");
 
         OnRoomProgressed?.Invoke(currentRoomIndex, totalRooms);
         OnRoomTypeSelected?.Invoke(currentRoomType);
 
         ProcessRoom();
 
-        Debug.Log($"[DungeonManager] ✅ 방 선택 완료");
     }
 
     /// <summary>
@@ -187,11 +166,9 @@ public class DungeonManager : MonoBehaviour
     /// </summary>
     private DungeonRoomType DecideRoomType()
     {
-        Debug.Log("[DungeonManager] 방 타입 랜덤 결정 중...");
 
         if (currentRoomIndex >= totalRooms - 1)
         {
-            Debug.Log("[DungeonManager] 마지막 방 → 보스방 확정");
             return DungeonRoomType.Boss;
         }
 
@@ -199,17 +176,14 @@ public class DungeonManager : MonoBehaviour
 
         if (randomValue < 20)
         {
-            Debug.Log("[DungeonManager] 랜덤 결과 → 이벤트방 (20%)");
             return DungeonRoomType.Event;
         }
         else if (randomValue < 80)
         {
-            Debug.Log("[DungeonManager] 랜덤 결과 → 일반전투 (60%)");
             return DungeonRoomType.Combat;
         }
         else
         {
-            Debug.Log("[DungeonManager] 랜덤 결과 → 보스방 (20%)");
             return DungeonRoomType.Boss;
         }
     }
@@ -219,27 +193,22 @@ public class DungeonManager : MonoBehaviour
     /// </summary>
     private void ProcessRoom()
     {
-        Debug.Log($"[DungeonManager] ━━━ 방 처리 시작: {currentRoomType} ━━━");
 
         switch (currentRoomType)
         {
             case DungeonRoomType.Event:
-                Debug.Log("[DungeonManager] 이벤트 발생 처리...");
                 TriggerRandomEvent();
                 break;
 
             case DungeonRoomType.Combat:
-                Debug.Log("[DungeonManager] 일반 몬스터 스폰 처리...");
                 SpawnNormalMonsters();
                 break;
 
             case DungeonRoomType.Boss:
-                Debug.Log("[DungeonManager] 보스 몬스터 스폰 처리...");
                 SpawnBossMonster();
                 break;
         }
 
-        Debug.Log("[DungeonManager] ✅ 방 처리 완료");
     }
 
     /// <summary>
@@ -247,22 +216,18 @@ public class DungeonManager : MonoBehaviour
     /// </summary>
     private void TriggerRandomEvent()
     {
-        Debug.Log("[DungeonManager] ━━━ 랜덤 이벤트 선택 중... ━━━");
 
         if (currentDungeon.possibleEvents == null || currentDungeon.possibleEvents.Length == 0)
         {
-            Debug.LogWarning("[DungeonManager] ⚠️ 이벤트 리스트가 비어있습니다!");
             return;
         }
 
         int randomIndex = UnityEngine.Random.Range(0, currentDungeon.possibleEvents.Length);
         currentEvent = currentDungeon.possibleEvents[randomIndex];
 
-        Debug.Log($"[DungeonManager] 선택된 이벤트: {currentEvent.eventName} (ID: {currentEvent.eventID})");
 
         OnEventTriggered?.Invoke(currentEvent);
 
-        Debug.Log("[DungeonManager] ✅ OnEventTriggered 이벤트 발생");
     }
 
     /// <summary>
@@ -270,13 +235,11 @@ public class DungeonManager : MonoBehaviour
     /// </summary>
     private void SpawnNormalMonsters()
     {
-        Debug.Log("[DungeonManager] ━━━ 일반 몬스터 스폰 시작 ━━━");
 
         spawnedMonsters.Clear();
 
         if (currentDungeon.normalMonsters == null || currentDungeon.normalMonsters.Length == 0)
         {
-            Debug.LogError("[DungeonManager] ❌ normalMonsters 리스트가 비어있습니다!");
             return;
         }
 
@@ -286,14 +249,11 @@ public class DungeonManager : MonoBehaviour
 
         if (validMonsters.Count == 0)
         {
-            Debug.LogError("[DungeonManager] ❌ 스폰 가능한 일반 몬스터가 없습니다!");
             return;
         }
 
-        Debug.Log($"[DungeonManager] 스폰 가능한 몬스터 종류: {validMonsters.Count}개");
 
         int monsterCount = UnityEngine.Random.Range(1, 4);
-        Debug.Log($"[DungeonManager] 스폰할 몬스터 수: {monsterCount}마리");
 
         for (int i = 0; i < monsterCount; i++)
         {
@@ -302,13 +262,11 @@ public class DungeonManager : MonoBehaviour
             if (selectedMonster != null)
             {
                 spawnedMonsters.Add(selectedMonster);
-                Debug.Log($"[DungeonManager] 몬스터 {i + 1} 스폰: {selectedMonster.monsterName} (등급: {selectedMonster.rarity})");
             }
         }
 
         OnMonstersSpawned?.Invoke(spawnedMonsters);
 
-        Debug.Log($"[DungeonManager] ✅ 총 {spawnedMonsters.Count}마리 스폰 완료");
     }
 
     /// <summary>
@@ -316,13 +274,11 @@ public class DungeonManager : MonoBehaviour
     /// </summary>
     private void SpawnBossMonster()
     {
-        Debug.Log("[DungeonManager] ━━━ 보스 몬스터 스폰 시작 ━━━");
 
         spawnedMonsters.Clear();
 
         if (currentDungeon.bossMonsters == null || currentDungeon.bossMonsters.Length == 0)
         {
-            Debug.LogError("[DungeonManager] ❌ bossMonsters 리스트가 비어있습니다!");
             return;
         }
 
@@ -331,11 +287,9 @@ public class DungeonManager : MonoBehaviour
 
         spawnedMonsters.Add(selectedBoss);
 
-        Debug.Log($"[DungeonManager] 보스 스폰: {selectedBoss.monsterName}");
 
         OnMonstersSpawned?.Invoke(spawnedMonsters);
 
-        Debug.Log("[DungeonManager] ✅ 보스 스폰 완료");
     }
 
     /// <summary>
@@ -343,7 +297,6 @@ public class DungeonManager : MonoBehaviour
     /// </summary>
     private MonsterSpawnData GetWeightedRandomMonster(List<MonsterSpawnData> monsters)
     {
-        Debug.Log("[DungeonManager] 가중치 기반 몬스터 선택 중...");
 
         int totalWeight = 0;
         foreach (var monster in monsters)
@@ -351,10 +304,8 @@ public class DungeonManager : MonoBehaviour
             totalWeight += monster.spawnWeight;
         }
 
-        Debug.Log($"[DungeonManager] 총 가중치: {totalWeight}");
 
         int randomValue = UnityEngine.Random.Range(0, totalWeight);
-        Debug.Log($"[DungeonManager] 랜덤 값: {randomValue}");
 
         int cumulativeWeight = 0;
         foreach (var monster in monsters)
@@ -362,12 +313,10 @@ public class DungeonManager : MonoBehaviour
             cumulativeWeight += monster.spawnWeight;
             if (randomValue < cumulativeWeight)
             {
-                Debug.Log($"[DungeonManager] 선택된 몬스터: {monster.monsterName} (가중치: {monster.spawnWeight})");
                 return monster;
             }
         }
 
-        Debug.LogWarning("[DungeonManager] ⚠️ 몬스터 선택 실패, 첫 번째 몬스터 반환");
         return monsters[0];
     }
 
@@ -377,17 +326,14 @@ public class DungeonManager : MonoBehaviour
     /// </summary>
     public void ApplyEventEffects()
     {
-        Debug.Log("[DungeonManager] ━━━━━━ 이벤트 효과 적용 시작 ━━━━━━");
 
         if (currentEvent == null)
         {
-            Debug.LogError("[DungeonManager] ❌ currentEvent가 null입니다!");
             return;
         }
 
         if (MercenaryManager.Instance == null)
         {
-            Debug.LogError("[DungeonManager] ❌ MercenaryManager.Instance가 null입니다!");
             return;
         }
 
@@ -395,15 +341,12 @@ public class DungeonManager : MonoBehaviour
 
         if (party == null || party.Count == 0)
         {
-            Debug.LogWarning("[DungeonManager] ⚠️ 파티가 비어있습니다!");
             return;
         }
 
-        Debug.Log($"[DungeonManager] 파티 인원: {party.Count}명, 효과 개수: {currentEvent.effects.Length}개");
 
         foreach (var effect in currentEvent.effects)
         {
-            Debug.Log($"[DungeonManager] ━━ 효과 적용: {effect.effectType}, 스탯: {effect.targetStat}, 값: {effect.value} ━━");
 
             switch (effect.effectType)
             {
@@ -424,12 +367,10 @@ public class DungeonManager : MonoBehaviour
                     break;
 
                 default:
-                    Debug.LogWarning($"[DungeonManager] ⚠️ 처리되지 않은 효과 타입: {effect.effectType}");
                     break;
             }
         }
 
-        Debug.Log("[DungeonManager] ✅ 이벤트 효과 적용 완료");
     }
 
     /// <summary>
@@ -443,8 +384,6 @@ public class DungeonManager : MonoBehaviour
     {
         string effectName = isPositive ? "버프" : "디버프";
         int modifiedValue = isPositive ? effect.value : -effect.value;
-
-        Debug.Log($"[DungeonManager] ━━ {effectName} 적용 시작: {effect.targetStat} {modifiedValue:+0;-#} ━━");
 
         // HP/MP는 즉시 적용 (버프 시스템 사용 안함)
         if (effect.targetStat == StatType.HP)
@@ -468,7 +407,6 @@ public class DungeonManager : MonoBehaviour
     /// </summary>
     private void ApplyImmediateHPChange(int amount, List<MercenaryInstance> party)
     {
-        Debug.Log($"[DungeonManager] ━━ HP 즉시 변경: {amount:+0;-#} ━━");
 
         foreach (var mercenary in party)
         {
@@ -482,7 +420,6 @@ public class DungeonManager : MonoBehaviour
             }
         }
 
-        Debug.Log($"[DungeonManager] ✅ HP 변경 완료: {party.Count}명에게 {amount:+0;-#}");
     }
 
     /// <summary>
@@ -490,7 +427,6 @@ public class DungeonManager : MonoBehaviour
     /// </summary>
     private void ApplyImmediateMPChange(int amount, List<MercenaryInstance> party)
     {
-        Debug.Log($"[DungeonManager] ━━ MP 즉시 변경: {amount:+0;-#} ━━");
 
         foreach (var mercenary in party)
         {
@@ -504,7 +440,6 @@ public class DungeonManager : MonoBehaviour
             }
         }
 
-        Debug.Log($"[DungeonManager] ✅ MP 변경 완료: {party.Count}명에게 {amount:+0;-#}");
     }
 
     /// <summary>
@@ -540,17 +475,13 @@ public class DungeonManager : MonoBehaviour
                     break;
                 case StatType.MaxHP:
                     maxHP = modifiedValue;
-                    Debug.Log($"[DungeonManager] ⚠️ MaxHP 버프는 현재 미구현 (확장 예정)");
                     break;
                 case StatType.MaxMP:
                     maxMP = modifiedValue;
-                    Debug.Log($"[DungeonManager] ⚠️ MaxMP 버프는 현재 미구현 (확장 예정)");
                     break;
                 case StatType.None:
-                    Debug.LogWarning($"[DungeonManager] ⚠️ targetStat이 None입니다. Buff/Debuff에는 스탯을 지정해야 합니다.");
                     continue;
                 default:
-                    Debug.LogWarning($"[DungeonManager] ⚠️ 처리되지 않은 targetStat: {effect.targetStat}");
                     continue;
             }
 
@@ -565,7 +496,6 @@ public class DungeonManager : MonoBehaviour
             mercenary.ApplyEventBuff(buff);
         }
 
-        Debug.Log($"[DungeonManager] ✅ 스탯 버프 적용 완료: {party.Count}명에게 {effect.targetStat} {modifiedValue:+0;-#}");
     }
 
     /// <summary>
@@ -573,12 +503,10 @@ public class DungeonManager : MonoBehaviour
     /// </summary>
     private void RewardGold(int amount)
     {
-        Debug.Log($"[DungeonManager] ━━ 골드 보상: +{amount} ━━");
 
         if (GameManager.Instance != null)
         {
             GameManager.Instance.AddGold(amount);
-            Debug.Log($"[DungeonManager] ✅ 골드 {amount} 지급 완료");
         }
         else
         {
@@ -591,11 +519,9 @@ public class DungeonManager : MonoBehaviour
     /// </summary>
     private void RewardItem(ItemDataSO item, int amount)
     {
-        Debug.Log($"[DungeonManager] ━━ 아이템 보상: {item?.itemName ?? "null"} x{amount} ━━");
 
         if (item == null)
         {
-            Debug.LogError("[DungeonManager] ❌ rewardItem이 null입니다!");
             return;
         }
 
@@ -604,7 +530,6 @@ public class DungeonManager : MonoBehaviour
             bool success = InventoryManager.Instance.AddItem(item, amount);
             if (success)
             {
-                Debug.Log($"[DungeonManager] ✅ 아이템 '{item.itemName}' x{amount} 지급 완료");
             }
             else
             {
@@ -623,7 +548,6 @@ public class DungeonManager : MonoBehaviour
     public bool IsDungeonCleared()
     {
         bool isCleared = currentRoomIndex >= totalRooms;
-        Debug.Log($"[DungeonManager] 던전 클리어 여부: {isCleared} ({currentRoomIndex}/{totalRooms})");
         return isCleared;
     }
 
@@ -647,12 +571,10 @@ public class DungeonManager : MonoBehaviour
     /// </summary>
     public void CompleteDungeon()
     {
-        Debug.Log("[DungeonManager] ━━━ 던전 완전 클리어! ━━━");
 
         RewardDungeonClear();
         ExitDungeon();
 
-        Debug.Log("[DungeonManager] ✅ 던전 퇴장 완료 (이벤트 발생)");
     }
 
     /// <summary>
@@ -660,8 +582,6 @@ public class DungeonManager : MonoBehaviour
     /// </summary>
     public void MoveToNextRoom()
     {
-        Debug.Log("[DungeonManager] ━━━ 다음 방으로 이동 ━━━");
-        Debug.Log("[DungeonManager] ✅ 다음 방 대기 (GameSceneManager가 처리)");
     }
 
     /// <summary>
@@ -669,26 +589,21 @@ public class DungeonManager : MonoBehaviour
     /// </summary>
     private void RewardDungeonClear()
     {
-        Debug.Log("[DungeonManager] 던전 클리어 보상 계산 중...");
 
         if (currentDungeon == null)
         {
-            Debug.LogWarning("[DungeonManager] ⚠️ currentDungeon이 null입니다!");
             return;
         }
 
         int goldReward = UnityEngine.Random.Range(100, 500);
         int expReward = UnityEngine.Random.Range(200, 1000);
 
-        Debug.Log($"[DungeonManager] 클리어 보상 - 골드: {goldReward}, 경험치: {expReward}");
 
         if (GameManager.Instance != null)
         {
             GameManager.Instance.AddGold(goldReward);
-            Debug.Log($"[DungeonManager] ✅ 골드 {goldReward} 지급");
         }
 
-        Debug.Log($"[DungeonManager] ✅ 경험치 {expReward} 지급 (미구현)");
     }
 }
 

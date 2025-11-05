@@ -187,7 +187,6 @@ public class MercenaryInstance
         EventBuffData existingBuff = activeBuffs.Find(b => b.buffID == buff.buffID);
         if (existingBuff != null)
         {
-            Debug.Log($"[MercenaryInstance] {GetDisplayName()}: 기존 버프 '{buff.buffName}' 갱신");
             activeBuffs.Remove(existingBuff);
         }
 
@@ -208,11 +207,9 @@ public class MercenaryInstance
     {
         if (activeBuffs.Count == 0)
         {
-            Debug.Log($"[MercenaryInstance] {GetDisplayName()}: 제거할 버프 없음");
             return;
         }
 
-        Debug.Log($"[MercenaryInstance] {GetDisplayName()}: 이벤트 버프 {activeBuffs.Count}개 제거 시작");
 
         foreach (var buff in activeBuffs)
         {
@@ -306,7 +303,6 @@ public class MercenaryInstance
     {
         int before = currentHP;
         currentHP = Mathf.Min(maxHP, currentHP + amount);
-        Debug.Log($"[MercenaryInstance] 💚 {GetDisplayName()} HP 회복 +{amount}: {before} → {currentHP}/{maxHP}");
     }
 
     /// <summary>
@@ -316,7 +312,6 @@ public class MercenaryInstance
     {
         int before = currentHP;
         currentHP = Mathf.Max(0, currentHP - damage);
-        Debug.Log($"[MercenaryInstance] 🩸 {GetDisplayName()} HP 감소 -{damage}: {before} → {currentHP}/{maxHP}");
     }
 
     /// <summary>
@@ -335,7 +330,6 @@ public class MercenaryInstance
     {
         int before = currentMP;
         currentMP = Mathf.Min(maxMP, currentMP + amount);
-        Debug.Log($"[MercenaryInstance] 🔵 {GetDisplayName()} MP 회복 +{amount}: {before} → {currentMP}/{maxMP}");
     }
 
     /// <summary>
@@ -345,7 +339,6 @@ public class MercenaryInstance
     {
         int before = currentMP;
         currentMP = Mathf.Max(0, currentMP - amount);
-        Debug.Log($"[MercenaryInstance] 💙 {GetDisplayName()} MP 소모 -{amount}: {before} → {currentMP}/{maxMP}");
     }
 
     /// <summary>

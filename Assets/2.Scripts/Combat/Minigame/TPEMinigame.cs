@@ -34,7 +34,6 @@ public class TPEMinigame : MonoBehaviour
     private void Awake()
     {
         minigamePanel.SetActive(false);
-        Debug.Log("[TPEMinigame] 초기화 완료");
     }
 
     /// <summary>
@@ -43,7 +42,6 @@ public class TPEMinigame : MonoBehaviour
     /// <param name="difficulty">난이도 (Normal, Elite, Boss)</param>
     public void StartMinigame(MonsterDifficulty difficulty)
     {
-        Debug.Log($"[TPEMinigame] 타이밍 미니게임 시작 (난이도: {difficulty})");
 
         // Success 영역 크기 설정
         float zoneWidth = difficulty switch
@@ -61,12 +59,9 @@ public class TPEMinigame : MonoBehaviour
         isSuccess = false;
         arrowDirection = 1f;
 
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🔧 수정: 화살표 시작 위치를 0으로 설정 (왼쪽 끝)
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // 화살표 시작 위치를 0으로 설정 (왼쪽 끝)
         arrow.anchoredPosition = new Vector2(0, arrow.anchoredPosition.y);
 
-        Debug.Log($"[TPEMinigame] 초기 설정 - barWidth: {barWidth}, arrow 시작 위치: {arrow.anchoredPosition}");
 
         // UI 활성화
         minigamePanel.SetActive(true);
@@ -74,7 +69,6 @@ public class TPEMinigame : MonoBehaviour
 
         StartCoroutine(MoveArrow());
 
-        Debug.Log($"[TPEMinigame] Success 영역 크기: {zoneWidth}px");
     }
 
     private void Update()
@@ -100,9 +94,8 @@ public class TPEMinigame : MonoBehaviour
             Vector2 currentPos = arrow.anchoredPosition;
             currentPos.x += arrowSpeed * arrowDirection * Time.deltaTime;
 
-            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-            // 🔧 수정: 0 ~ barWidth 범위로 제한하고 방향 반전
-            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            //  0 ~ barWidth 범위로 제한하고 방향 반전
+
             if (currentPos.x >= barWidth)
             {
                 currentPos.x = barWidth;
@@ -126,16 +119,13 @@ public class TPEMinigame : MonoBehaviour
     private void CheckSuccess()
     {
         float arrowX = arrow.anchoredPosition.x;
-        
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🔧 수정: successZone의 위치도 0 ~ barWidth 기준으로 계산
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        //  successZone의 위치도 0 ~ barWidth 기준으로 계산
         float zoneLeft = successZone.anchoredPosition.x - (successZone.rect.width / 2f);
         float zoneRight = successZone.anchoredPosition.x + (successZone.rect.width / 2f);
 
         isSuccess = arrowX >= zoneLeft && arrowX <= zoneRight;
 
-        Debug.Log($"[TPEMinigame] 판정 - 화살표 위치: {arrowX:F1}, Success 영역: [{zoneLeft:F1}, {zoneRight:F1}] => {(isSuccess ? "성공!" : "실패")}");
 
         StartCoroutine(ShowResult());
     }
@@ -155,6 +145,5 @@ public class TPEMinigame : MonoBehaviour
 
         OnMinigameComplete?.Invoke(isSuccess);
 
-        Debug.Log($"[TPEMinigame] 타이밍 미니게임 종료: {(isSuccess ? "성공" : "실패")}");
     }
 }

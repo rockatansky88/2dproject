@@ -41,7 +41,6 @@ public class CombatUI : MonoBehaviour
 
     private void Awake()
     {
-        Debug.Log("[CombatUI] 초기화");
 
         if (attackButton != null)
         {
@@ -85,7 +84,6 @@ public class CombatUI : MonoBehaviour
             Destroy(child.gameObject);
         }
 
-        Debug.Log("[CombatUI] SkillContainer 생성 시작");
 
         // 🆕 SkillContainer 인스턴스 생성
         skillContainerInstance = Instantiate(skillContainerPrefab, skillSlotParent);
@@ -102,7 +100,6 @@ public class CombatUI : MonoBehaviour
         }
 
         skillSlots.AddRange(foundSlots);
-        Debug.Log($"[CombatUI] ✅ SkillContainer 생성 완료 - 내부 슬롯 {skillSlots.Count}개 발견");
 
         // 초기엔 모든 슬롯 비활성화
         foreach (var slot in skillSlots)
@@ -116,13 +113,11 @@ public class CombatUI : MonoBehaviour
     /// </summary>
     public void InitializePartyUI(List<Character> party)
     {
-        Debug.Log($"[CombatUI] 파티 UI 전투 모드 전환: {party.Count}명");
 
         // 파티 슬롯 찾기
         if (partySlots.Count == 0 && mercenaryPartyRoot != null)
         {
             partySlots.AddRange(mercenaryPartyRoot.GetComponentsInChildren<MercenaryPartySlot>(true));
-            Debug.Log($"[CombatUI] 파티 슬롯 {partySlots.Count}개 발견");
         }
 
         // 전투 모드 활성화
@@ -131,7 +126,6 @@ public class CombatUI : MonoBehaviour
             if (i < party.Count)
             {
                 partySlots[i].SetCombatMode(true);
-                Debug.Log($"[CombatUI] 파티 슬롯 {i}: 전투 모드 활성화");
             }
             else
             {
@@ -150,7 +144,6 @@ public class CombatUI : MonoBehaviour
     /// </summary>
     public void InitializeMonsterUI(List<Monster> monsters)
     {
-        Debug.Log($"[CombatUI] ━━━ 몬스터 UI 초기화: {monsters.Count}마리 ━━━");
 
         // 🔧 수정: 몬스터 슬롯 새로 찾기 (이전 참조 제거)
         monsterSlots.Clear();
@@ -158,7 +151,6 @@ public class CombatUI : MonoBehaviour
         if (monsterSpawnParent != null)
         {
             monsterSlots.AddRange(monsterSpawnParent.GetComponentsInChildren<MonsterUISlot>(true));
-            Debug.Log($"[CombatUI] 몬스터 슬롯 {monsterSlots.Count}개 발견");
         }
         else
         {
@@ -189,10 +181,8 @@ public class CombatUI : MonoBehaviour
             slot.OnMonsterClicked -= OnMonsterSlotClicked;
             slot.OnMonsterClicked += OnMonsterSlotClicked;
 
-            Debug.Log($"[CombatUI] ✅ 몬스터 슬롯 {i}: {monster.Name} 클릭 이벤트 등록");
         }
 
-        Debug.Log("[CombatUI] ✅ 몬스터 UI 초기화 완료");
     }
 
 
@@ -212,7 +202,6 @@ public class CombatUI : MonoBehaviour
             return;
         }
 
-        Debug.Log($"[CombatUI] 🎯 몬스터 클릭: {monster.Name} - 타겟으로 설정");
 
         // 🔧 1. 모든 몬스터 슬롯 선택 해제
         foreach (var slot in monsterSlots)
@@ -229,7 +218,6 @@ public class CombatUI : MonoBehaviour
         if (clickedSlot != null)
         {
             clickedSlot.SetSelected(true);
-            Debug.Log($"[CombatUI] ✅ {monster.Name} 선택 표시 활성화");
         }
 
         // 🔧 3. 타겟 화살표 표시
@@ -244,7 +232,6 @@ public class CombatUI : MonoBehaviour
     /// </summary>
     public void InitializeSkillSlots(List<SkillDataSO> skills)
     {
-        Debug.Log($"[CombatUI] 스킬 슬롯 초기화: {skills?.Count ?? 0}개");
 
         if (skillSlots.Count == 0)
         {
@@ -276,7 +263,6 @@ public class CombatUI : MonoBehaviour
             slot.Initialize(skill);
             slot.gameObject.SetActive(true);
 
-            Debug.Log($"[CombatUI] 스킬 슬롯 {i}: {skill.skillName} 할당");
         }
 
         // 🆕 SkillContainer 활성화
@@ -290,7 +276,6 @@ public class CombatUI : MonoBehaviour
             skillSlotParent.gameObject.SetActive(true);
         }
 
-        Debug.Log($"[CombatUI] ✅ 스킬 슬롯 {skillCount}개 활성화 완료");
     }
 
 
@@ -346,7 +331,6 @@ public class CombatUI : MonoBehaviour
     /// </summary>
     public void UpdateCurrentTurn(ICombatant combatant)
     {
-        Debug.Log($"[CombatUI] 현재 턴 표시: {combatant.Name}");
 
         // 1. 모든 파티 슬롯 턴 표시 제거
         foreach (var slot in partySlots)
@@ -378,7 +362,6 @@ public class CombatUI : MonoBehaviour
                 if (targetSlot != null)
                 {
                     targetSlot.SetTurnActive(true);
-                    Debug.Log($"[CombatUI] ✅ {character.mercenaryData.GetDisplayName()} 턴 표시 (instanceID: {character.mercenaryData.instanceID})");
 
                     MoveSkillContainerToMercenary(targetSlot);
                 }
@@ -408,7 +391,6 @@ public class CombatUI : MonoBehaviour
                 if (targetSlot != null)
                 {
                     targetSlot.SetTurnActive(true);
-                    Debug.Log($"[CombatUI] ✅ {monster.Name} 턴 표시 (몬스터)");
                 }
                 else
                 {
@@ -430,7 +412,6 @@ public class CombatUI : MonoBehaviour
     /// <param name="interactable">true: 클릭 가능, false: 클릭 불가</param>
     private void SetMonsterSlotsInteractable(bool interactable)
     {
-        Debug.Log($"[CombatUI] 🔒 몬스터 슬롯 클릭 가능 여부 설정: {interactable}");
 
 
         if (monsterSlots == null || monsterSlots.Count == 0)
@@ -464,7 +445,6 @@ public class CombatUI : MonoBehaviour
     /// </summary>
     public void SelectFirstAliveMonster()
     {
-        Debug.Log("[CombatUI] 첫 번째 살아있는 몬스터 자동 선택 시도");
 
         // 살아있는 몬스터 슬롯 찾기
         MonsterUISlot firstAliveSlot = monsterSlots.FirstOrDefault(s =>
@@ -474,7 +454,6 @@ public class CombatUI : MonoBehaviour
         {
             firstAliveSlot.gameObject.SetActive(true);
             Monster firstMonster = firstAliveSlot.GetMonster();
-            Debug.Log($"[CombatUI] ✅ 첫 번째 몬스터 자동 선택: {firstMonster.Name}");
 
             // 몬스터 클릭 핸들러 호출 (수동 선택과 동일한 로직)
             OnMonsterSlotClicked(firstMonster);
@@ -515,7 +494,6 @@ public class CombatUI : MonoBehaviour
 
         containerRect.position = newPosition;
 
-        Debug.Log($"[CombatUI] ✅ SkillContainer를 {targetSlot.GetMercenary().mercenaryName} 위로 이동: {newPosition}");
     }
 
     /// <summary>
@@ -549,7 +527,6 @@ public class CombatUI : MonoBehaviour
                         rt.position.z
                     );
                 }
-                Debug.Log($"[CombatUI] 타겟 화살표 표시: {target.Name} (몬스터)");
             }
             else
             {
@@ -581,7 +558,6 @@ public class CombatUI : MonoBehaviour
                         rt.position.z
                     );
                 }
-                Debug.Log($"[CombatUI] 타겟 화살표 표시: {character.mercenaryData.GetDisplayName()} (instanceID: {character.mercenaryData.instanceID})");
             }
             else
             {
@@ -622,7 +598,6 @@ public class CombatUI : MonoBehaviour
             selectedSlot.SetSelected(true);
         }
 
-        Debug.Log($"[CombatUI] 스킬 선택: {skill.skillName}");
     }
 
     /// <summary>
@@ -642,7 +617,6 @@ public class CombatUI : MonoBehaviour
             return;
         }
 
-        Debug.Log($"[CombatUI] 공격 버튼 클릭: {selectedSkill.skillName} -> {currentTarget.Name}");
 
         if (CombatManager.Instance != null)
         {
@@ -658,7 +632,6 @@ public class CombatUI : MonoBehaviour
         if (tpeMinigamePanel != null)
         {
             tpeMinigamePanel.SetActive(true);
-            Debug.Log("[CombatUI] TPE 미니게임 표시");
         }
     }
 
@@ -670,7 +643,6 @@ public class CombatUI : MonoBehaviour
         if (tpeMinigamePanel != null)
         {
             tpeMinigamePanel.SetActive(false);
-            Debug.Log("[CombatUI] TPE 미니게임 숨김");
         }
     }
 
@@ -682,7 +654,6 @@ public class CombatUI : MonoBehaviour
         if (parryMinigamePanel != null)
         {
             parryMinigamePanel.SetActive(true);
-            Debug.Log("[CombatUI] 패링 미니게임 표시");
         }
     }
 
@@ -694,7 +665,6 @@ public class CombatUI : MonoBehaviour
         if (parryMinigamePanel != null)
         {
             parryMinigamePanel.SetActive(false);
-            Debug.Log("[CombatUI] 패링 미니게임 숨김");
         }
     }
 
@@ -724,7 +694,6 @@ public class CombatUI : MonoBehaviour
                 character.Stats.MaxMP
             );
 
-            Debug.Log($"[CombatUI] ✅ {character.mercenaryData.GetDisplayName()} 스탯 업데이트 완료 - HP: {character.Stats.CurrentHP}/{character.Stats.MaxHP}");
         }
         else
         {

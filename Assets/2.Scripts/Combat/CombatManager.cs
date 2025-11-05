@@ -57,7 +57,6 @@ public class CombatManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            Debug.Log("[CombatManager] 싱글톤 인스턴스 생성");
         }
         else
         {
@@ -80,27 +79,21 @@ public class CombatManager : MonoBehaviour
             turnController.OnTurnStart += OnTurnStarted;
             turnController.OnTurnEnd += OnTurnEnded;
             turnController.OnBattleEnd += OnBattleEnded;
-            Debug.Log("[CombatManager] TurnController 이벤트 연결 완료");
         }
 
         // TPE 미니게임 이벤트 연결
         if (tpeMinigame != null)
         {
             tpeMinigame.OnMinigameComplete += OnTPEComplete;
-            Debug.Log("[CombatManager] TPEMinigame 이벤트 연결 완료");
         }
 
         // 패링 미니게임 이벤트 연결
         if (parryMinigame != null)
         {
             parryMinigame.OnParryComplete += OnParryComplete;
-            Debug.Log("[CombatManager] ParryMinigame 이벤트 연결 완료");
         }
     }
 
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🔧 수정: StartCombat - 실제 사용되는 메서드
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
     /// <summary>
     /// 전투 시작 (DungeonManager에서 호출)
@@ -108,8 +101,6 @@ public class CombatManager : MonoBehaviour
     /// </summary>
     public void StartCombat(List<MonsterSpawnData> monsterDataList, bool isBoss)
     {
-        Debug.Log($"[CombatManager] ━━━━━━ 전투 시작 ━━━━━━");
-        Debug.Log($"[CombatManager] 몬스터 수: {monsterDataList.Count}, 보스전: {isBoss}");
 
         isCombatActive = true;
         isBossFight = isBoss;
@@ -126,7 +117,6 @@ public class CombatManager : MonoBehaviour
         // 4. 턴 시스템 시작 - 올바른 메서드 사용
         turnController.InitializeBattle(currentParty, currentMonsters);
 
-        Debug.Log($"[CombatManager] ✅ 전투 초기화 완료 - 파티: {currentParty.Count}, 몬스터: {currentMonsters.Count}");
     }
 
     /// <summary>
@@ -134,7 +124,6 @@ public class CombatManager : MonoBehaviour
     /// </summary>
     private void SpawnParty()
     {
-        Debug.Log("[CombatManager] ━━━ 파티 생성 시작 ━━━");
 
         currentParty.Clear();
 
@@ -163,7 +152,6 @@ public class CombatManager : MonoBehaviour
         {
             MercenaryInstance mercData = party[i];
 
-            Debug.Log($"[CombatManager] 파티 멤버 {i + 1}/{party.Count}: {mercData.mercenaryName}");
 
             // GameObject를 생성하지 않고, 데이터만 담는 경량 오브젝트 생성
             GameObject charDataObj = new GameObject($"CharacterData_{mercData.mercenaryName}");
@@ -181,15 +169,9 @@ public class CombatManager : MonoBehaviour
 
             currentParty.Add(character);
 
-            Debug.Log($"[CombatManager] ✅ {mercData.mercenaryName} 파티 배치 완료 (UI 슬롯 {i} 연결)");
         }
 
-        Debug.Log($"[CombatManager] ✅ 파티 생성 완료 - 총 {currentParty.Count}명");
     }
-
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🔧 수정: SpawnMonsters - 클릭 이벤트 연결 추가
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
     /// <summary>
     /// 몬스터 생성 (MonsterUISlot과 Monster 데이터 통합)
@@ -203,7 +185,6 @@ public class CombatManager : MonoBehaviour
     /// </summary>
     private void SpawnMonsters(List<MonsterSpawnData> monsterDataList)
     {
-        Debug.Log("[CombatManager] ━━━ 몬스터 생성 시작 ━━━━━");
 
         currentMonsters.Clear();
 
@@ -223,28 +204,18 @@ public class CombatManager : MonoBehaviour
         if (monsterSpawnParent != null)
         {
             int childCount = monsterSpawnParent.childCount;
-            Debug.Log($"[CombatManager] 🧹 기존 몬스터 슬롯 {childCount}개 정리 중...");
 
             for (int i = childCount - 1; i >= 0; i--)
             {
                 Transform child = monsterSpawnParent.GetChild(i);
-                Debug.Log($"[CombatManager] 제거: {child.name}");
                 Destroy(child.gameObject);
             }
 
-            Debug.Log("[CombatManager] ✅ 기존 몬스터 슬롯 정리 완료");
         }
 
         for (int i = 0; i < monsterDataList.Count; i++)
         {
             MonsterSpawnData data = monsterDataList[i];
-
-            Debug.Log($"[CombatManager] 몬스터 {i + 1}/{monsterDataList.Count}: {data.monsterName} 생성 중...");
-            Debug.Log($"[CombatManager] 📊 몬스터 데이터 확인:\n" +
-                     $"  - 이름: {data.monsterName}\n" +
-                     $"  - 스프라이트: {(data.monsterSprite != null ? data.monsterSprite.name : "null")}\n" +
-                     $"  - 스탯SO: {(data.monsterStats != null ? data.monsterStats.name : "null")}\n" +
-                     $"  - 난이도: {data.difficulty}");
 
             // 1단계: MonsterUISlot 생성 (MonsterSpawnParent 밑에)
             GameObject monsterUIObj = Instantiate(monsterUISlotPrefab, monsterSpawnParent);
@@ -283,15 +254,10 @@ public class CombatManager : MonoBehaviour
                      $"  - 스프라이트 연결: {(data.monsterSprite != null ? "O" : "X")}");
         }
 
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🆕 6단계: CombatUI에 몬스터 슬롯 연결 및 클릭 이벤트 등록
-        // 이 단계가 없으면 몬스터 클릭이 안됩니다!
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        Debug.Log("[CombatManager] ━━━ 몬스터 클릭 이벤트 연결 시작 ━━━");
-        combatUI.InitializeMonsterUI(currentMonsters);
-        Debug.Log("[CombatManager] ✅ 몬스터 클릭 이벤트 연결 완료");
 
-        Debug.Log($"[CombatManager] ✅ 몬스터 생성 완료 - 총 {currentMonsters.Count}마리");
+        //CombatUI에 몬스터 슬롯 연결 및 클릭 이벤트 등록
+        combatUI.InitializeMonsterUI(currentMonsters);
+
     }
 
     /// <summary>
@@ -299,14 +265,12 @@ public class CombatManager : MonoBehaviour
     /// </summary>
     private List<SkillDataSO> LoadMonsterSkills(MonsterSpawnData data)
     {
-        Debug.Log($"[CombatManager] 몬스터 스킬 로드: {data.monsterName}");
 
         List<SkillDataSO> skills = new List<SkillDataSO>();
 
         if (data.skills != null && data.skills.Length > 0)
         {
             skills.AddRange(data.skills);
-            Debug.Log($"[CombatManager] ✅ {data.monsterName} 스킬 {skills.Count}개 로드됨");
         }
         else
         {
@@ -321,7 +285,6 @@ public class CombatManager : MonoBehaviour
     /// </summary>
     private void InitializeCombatUI()
     {
-        Debug.Log("[CombatManager] 전투 UI 초기화");
 
         if (combatUI == null)
         {
@@ -332,7 +295,6 @@ public class CombatManager : MonoBehaviour
         // 파티 UI 초기화 (전투 모드 전환)
         combatUI.InitializePartyUI(currentParty);
 
-        Debug.Log("[CombatManager] ✅ 전투 UI 초기화 완료");
     }
 
     /// <summary>
@@ -340,7 +302,6 @@ public class CombatManager : MonoBehaviour
     /// </summary>
     private void OnTurnStarted(ICombatant combatant)
     {
-        Debug.Log($"[CombatManager] ━━━ {combatant.Name}의 턴 시작 ━━━━━");
 
         // UI 업데이트
         combatUI.UpdateCurrentTurn(combatant);
@@ -359,7 +320,6 @@ public class CombatManager : MonoBehaviour
     /// </summary>
     private void OnTurnEnded(ICombatant combatant)
     {
-        Debug.Log($"[CombatManager] {combatant.Name}의 턴 종료");
 
         // HP/MP UI 업데이트
         UpdateAllCombatantUI();
@@ -370,7 +330,6 @@ public class CombatManager : MonoBehaviour
     /// </summary>
     private void OnBattleEnded()
     {
-        Debug.Log("[CombatManager] ━━━━━━ 전투 종료 ━━━━━━");
 
         bool isVictory = CheckVictory();
         // 2초 대기후 전투 종료
@@ -383,7 +342,6 @@ public class CombatManager : MonoBehaviour
     /// </summary>
     private void OnTPEComplete(bool success)
     {
-        Debug.Log($"[CombatManager] 🎯 TPE 미니게임 결과: {(success ? "성공 (크리티컬 +30%)" : "실패")}");
 
         tpeSuccess = success;
 
@@ -414,12 +372,10 @@ public class CombatManager : MonoBehaviour
             return;
         }
 
-        Debug.Log($"[CombatManager] ⚔️ {player.Name}이(가) {pendingTarget.Name}에게 {pendingSkill.skillName} 사용!");
 
         float critBonus = tpeSuccess ? 30f : 0f;
         bool isCritical = player.Stats.RollCritical(critBonus);
 
-        Debug.Log($"[CombatManager] 크리티컬 판정: {(isCritical ? "크리티컬!" : "일반 공격")} (보너스: +{critBonus}%)");
 
         player.UseSkill(pendingSkill, pendingTarget, isCritical);
 
@@ -434,7 +390,6 @@ public class CombatManager : MonoBehaviour
     /// </summary>
     private void OnParryComplete(bool success)
     {
-        Debug.Log($"[CombatManager] 🛡️ 패링 미니게임 결과: {(success ? "성공 (데미지 0)" : "실패 (일반 데미지)")}");
 
         if (combatUI != null)
         {
@@ -443,11 +398,9 @@ public class CombatManager : MonoBehaviour
 
         if (success)
         {
-            Debug.Log($"[CombatManager] ✅ {pendingDefender.Name} 패링 성공! 데미지 0");
         }
         else
         {
-            Debug.Log($"[CombatManager] ❌ {pendingDefender.Name} 패링 실패! 데미지 {pendingDamage} 적용");
             pendingDefender.TakeDamage(pendingDamage);
         }
 
@@ -483,13 +436,11 @@ public class CombatManager : MonoBehaviour
 
         if (allMonstersDead)
         {
-            Debug.Log("[CombatManager] ✅ 승리! 모든 몬스터 처치");
             return true;
         }
 
         if (allPartyDead)
         {
-            Debug.Log("[CombatManager] ❌ 패배! 파티 전멸");
             return false;
         }
 
@@ -501,7 +452,6 @@ public class CombatManager : MonoBehaviour
     /// </summary>
     public void EndCombat(bool isVictory)
     {
-        Debug.Log($"[CombatManager] ━━━ 전투 종료: {(isVictory ? "승리" : "패배")} ━━━");
 
         isCombatActive = false;
 
@@ -510,25 +460,21 @@ public class CombatManager : MonoBehaviour
             CalculateRewards();
             GiveRewards();
 
-            Debug.Log($"[CombatManager] ✅ 보상 지급 완료 - 골드: {totalGoldReward}, 경험치: {totalExpReward}");
 
             if (DungeonManager.Instance != null)
             {
                 if (DungeonManager.Instance.IsDungeonCleared())
                 {
-                    Debug.Log("[CombatManager] ✅ 던전 클리어!");
                     DungeonManager.Instance.CompleteDungeon();
                 }
                 else
                 {
-                    Debug.Log("[CombatManager] 다음 방으로 이동");
                     DungeonManager.Instance.MoveToNextRoom();
                 }
             }
         }
         else
         {
-            Debug.Log("[CombatManager] ❌ 패배! 던전 퇴장");
 
             if (DungeonManager.Instance != null)
             {
@@ -559,10 +505,8 @@ public class CombatManager : MonoBehaviour
         {
             totalGoldReward *= 2;
             totalExpReward *= 2;
-            Debug.Log("[CombatManager] 보스전 보상 2배 적용!");
         }
 
-        Debug.Log($"[CombatManager] 보상 계산 완료 - 골드: {totalGoldReward}, 경험치: {totalExpReward}");
     }
 
     /// <summary>
@@ -573,10 +517,8 @@ public class CombatManager : MonoBehaviour
         if (GameManager.Instance != null)
         {
             GameManager.Instance.AddGold(totalGoldReward);
-            Debug.Log($"[CombatManager] ✅ 골드 {totalGoldReward} 지급");
         }
 
-        Debug.Log($"[CombatManager] ✅ 경험치 {totalExpReward} 지급 (미구현)");
     }
 
     /// <summary>
@@ -584,7 +526,6 @@ public class CombatManager : MonoBehaviour
     /// </summary>
     private void CleanupCombat()
     {
-        Debug.Log("[CombatManager] 전투 정리 시작");
 
         foreach (var character in currentParty)
         {
@@ -604,7 +545,6 @@ public class CombatManager : MonoBehaviour
         }
         currentMonsters.Clear();
 
-        Debug.Log("[CombatManager] ✅ 전투 정리 완료");
     }
 
     private void OnDestroy()
@@ -632,7 +572,6 @@ public class CombatManager : MonoBehaviour
     /// </summary>
     public void RequestPlayerAction(SkillDataSO skill, ICombatant target)
     {
-        Debug.Log($"[CombatManager] 🎯 플레이어 행동 요청: {skill.skillName} -> {target.Name}");
 
         pendingSkill = skill;
         pendingTarget = target;
@@ -661,14 +600,11 @@ public class CombatManager : MonoBehaviour
     /// </summary>
     public void ExecuteAIAttack(Monster monster, SkillDataSO skill, Character target)
     {
-        Debug.Log($"[CombatManager] 🤖 AI 공격: {monster.Name} -> {target.Name} (스킬: {skill.skillName})");
 
         bool isCritical = monster.Stats.RollCritical();
-        Debug.Log($"[CombatManager] 크리티컬 판정: {(isCritical ? "크리티컬!" : "일반 공격")}");
 
         int damage = skill.CalculateDamage(monster.Stats, isCritical);
 
-        Debug.Log($"[CombatManager] 계산된 데미지: {damage} (스킬: {skill.skillName}, 크리티컬: {isCritical})");
 
         pendingDamage = damage;
         pendingDefender = target;
@@ -703,7 +639,6 @@ public class CombatManager : MonoBehaviour
             return;
         }
 
-        Debug.Log($"[CombatManager] 🎯 AI 타겟 화살표 표시: {target.Name}");
         combatUI.ShowTargetArrow(target);
     }
 }

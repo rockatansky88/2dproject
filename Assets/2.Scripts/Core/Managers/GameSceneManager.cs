@@ -67,16 +67,15 @@ public class GameSceneManager : MonoBehaviour
 
     private void Awake()
     {
-        Debug.Log("[GameSceneManager] ━━━ Awake 시작 ━━━");
+
 
         if (Instance == null)
         {
             Instance = this;
-            Debug.Log("[GameSceneManager] 싱글톤 인스턴스 생성됨");
+
         }
         else
         {
-            Debug.LogWarning("[GameSceneManager] 중복 인스턴스 파괴됨");
             Destroy(gameObject);
             return;
         }
@@ -85,26 +84,22 @@ public class GameSceneManager : MonoBehaviour
         if (enterDungeonButton != null)
         {
             enterDungeonButton.onClick.AddListener(OnEnterDungeonClicked);
-            Debug.Log("[GameSceneManager] 던전 입장 버튼 리스너 등록");
         }
 
         if (backToTownButton != null)
         {
             backToTownButton.onClick.AddListener(OnBackToTownClicked);
-            Debug.Log("[GameSceneManager] 마을로 돌아가기 버튼 리스너 등록");
         }
 
         if (proceedButton != null)
         {
             proceedButton.onClick.AddListener(OnProceedClicked);
-            Debug.Log("[GameSceneManager] 다음으로 버튼 리스너 등록");
         }
 
         for (int i = 0; i < pathButtons.Length; i++)
         {
             int index = i;
             pathButtons[i].onClick.AddListener(() => OnPathSelected(index));
-            Debug.Log($"[GameSceneManager] 통로 {index}번 버튼 리스너 등록");
         }
 
         if (townShopButtons != null && townShopButtons.Length >= 3)
@@ -112,15 +107,12 @@ public class GameSceneManager : MonoBehaviour
             townShopButtons[0].onClick.AddListener(OnDungeonEntranceClicked);
             townShopButtons[1].onClick.AddListener(OnMerchantShopClicked);
             townShopButtons[2].onClick.AddListener(OnMercenaryShopClicked);
-            Debug.Log("[GameSceneManager] 마을 버튼 리스너 등록 완료");
         }
 
-        Debug.Log("[GameSceneManager] ✅ Awake 완료");
     }
 
     private void Start()
     {
-        Debug.Log("[GameSceneManager] ━━━ Start 시작 ━━━");
 
         if (DungeonManager.Instance != null)
         {
@@ -130,18 +122,15 @@ public class GameSceneManager : MonoBehaviour
             DungeonManager.Instance.OnRoomTypeSelected += OnRoomTypeSelected;
             DungeonManager.Instance.OnMonstersSpawned += OnMonstersSpawned;
             DungeonManager.Instance.OnEventTriggered += OnEventTriggered;
-            Debug.Log("[GameSceneManager] ✅ DungeonManager 이벤트 구독 완료");
         }
 
         if (CombatManager.Instance != null)
         {
             CombatManager.Instance.OnCombatEnded += OnCombatEnded;
-            Debug.Log("[GameSceneManager] CombatManager 이벤트 구독");
         }
 
         ShowTownUI();
 
-        Debug.Log("[GameSceneManager] ✅ Start 완료");
     }
 
     /// <summary>
@@ -149,7 +138,6 @@ public class GameSceneManager : MonoBehaviour
     /// </summary>
     private void ShowTownUI()
     {
-        Debug.Log("[GameSceneManager] ━━━ 마을 UI 표시 ━━━");
 
         HideAllUI();
         townUI.SetActive(true);
@@ -157,7 +145,6 @@ public class GameSceneManager : MonoBehaviour
         if (townBackgroundImage != null && townBackgroundSprite != null)
         {
             townBackgroundImage.sprite = townBackgroundSprite;
-            Debug.Log("[GameSceneManager] 마을 배경 이미지 설정됨");
         }
 
         // 🔧 수정: 마을에서는 파티 UI 표시 + HP/MP UI 표시 (비전투 모드)
@@ -165,7 +152,6 @@ public class GameSceneManager : MonoBehaviour
         {
             mercenaryParty.SetCombatMode(false); // 전투 모드 아님 (HP/MP 숨김)
             mercenaryParty.Show();
-            Debug.Log("[GameSceneManager] 마을에서 파티 UI 표시 (HP/MP 숨김)");
         }
 
         if (mainCamera != null && townPosition != null)
@@ -173,7 +159,6 @@ public class GameSceneManager : MonoBehaviour
             StartCoroutine(MoveCameraSmooth(townPosition.position));
         }
 
-        Debug.Log("[GameSceneManager] ✅ 마을 UI 표시 완료");
     }
 
     /// <summary>
@@ -181,7 +166,6 @@ public class GameSceneManager : MonoBehaviour
     /// </summary>
     public void ShowEntranceUI(DungeonDataSO dungeon)
     {
-        Debug.Log($"[GameSceneManager] 던전 입구 UI 표시: {dungeon.dungeonName}");
 
         currentDungeonData = dungeon;
 
@@ -213,7 +197,6 @@ public class GameSceneManager : MonoBehaviour
             StartCoroutine(MoveCameraSmooth(entrancePosition.position));
         }
 
-        Debug.Log("[GameSceneManager] ✅ 입구 UI 표시 완료");
     }
 
     /// <summary>
@@ -221,7 +204,6 @@ public class GameSceneManager : MonoBehaviour
     /// </summary>
     private void ShowCorridorUI()
     {
-        Debug.Log("[GameSceneManager] 통로 선택 UI 표시");
 
         HideAllUI();
         corridorUI.SetActive(true);
@@ -241,7 +223,6 @@ public class GameSceneManager : MonoBehaviour
             StartCoroutine(MoveCameraSmooth(corridorPosition.position));
         }
 
-        Debug.Log("[GameSceneManager] ✅ 통로 UI 표시 완료");
     }
 
     /// <summary>
@@ -250,7 +231,6 @@ public class GameSceneManager : MonoBehaviour
     /// </summary>
     private void ShowEventUI(RoomEventDataSO eventData)
     {
-        Debug.Log($"[GameSceneManager] 이벤트 UI 표시: {eventData.eventName}");
 
         HideAllUI();
         eventUI.SetActive(true);
@@ -275,12 +255,11 @@ public class GameSceneManager : MonoBehaviour
             eventDescriptionText.text = eventData.description;
         }
 
-        // 🆕 추가: 이벤트에서도 HP/MP UI 표시
+        //  이벤트에서도 HP/MP UI 표시
         if (mercenaryParty != null)
         {
             mercenaryParty.SetCombatMode(true); // 전투 모드로 설정하여 HP/MP UI 활성화
             mercenaryParty.Show();
-            Debug.Log("[GameSceneManager] ✅ 이벤트 화면에서 파티 UI + HP/MP UI 표시");
         }
 
         if (mainCamera != null && eventPosition != null)
@@ -294,7 +273,6 @@ public class GameSceneManager : MonoBehaviour
             DungeonManager.Instance.ApplyEventEffects();
         }
 
-        Debug.Log("[GameSceneManager] ✅ 이벤트 UI 표시 완료");
     }
 
     /// <summary>
@@ -302,7 +280,6 @@ public class GameSceneManager : MonoBehaviour
     /// </summary>
     private void ShowCombatUI(bool isBoss)
     {
-        Debug.Log($"[GameSceneManager] 전투 UI 표시 (보스: {isBoss})");
 
         HideAllUI();
         combatUI.SetActive(true);
@@ -330,7 +307,6 @@ public class GameSceneManager : MonoBehaviour
             StartCoroutine(MoveCameraSmooth(combatPosition.position));
         }
 
-        Debug.Log("[GameSceneManager] ✅ 전투 UI 표시 완료");
     }
 
     /// <summary>
@@ -338,7 +314,6 @@ public class GameSceneManager : MonoBehaviour
     /// </summary>
     private void HideAllUI()
     {
-        Debug.Log("[GameSceneManager] 모든 UI 숨김");
 
         townUI.SetActive(false);
         entranceUI.SetActive(false);
@@ -352,7 +327,6 @@ public class GameSceneManager : MonoBehaviour
     /// </summary>
     private IEnumerator MoveCameraSmooth(Vector3 targetPosition)
     {
-        Debug.Log($"[GameSceneManager] 카메라 이동 시작 → {targetPosition}");
 
         Vector3 startPosition = mainCamera.transform.position;
         Vector3 adjustedTarget = new Vector3(targetPosition.x, targetPosition.y, startPosition.z);
@@ -371,7 +345,6 @@ public class GameSceneManager : MonoBehaviour
 
         mainCamera.transform.position = adjustedTarget;
 
-        Debug.Log("[GameSceneManager] ✅ 카메라 이동 완료");
     }
 
     /// <summary>
@@ -379,7 +352,6 @@ public class GameSceneManager : MonoBehaviour
     /// </summary>
     private void SpawnMonsterSprites(List<MonsterSpawnData> monsters)
     {
-        Debug.Log($"[GameSceneManager] ━━━ 몬스터 스프라이트 생성: {monsters.Count}마리 ━━━");
 
         foreach (Transform child in monsterSpawnParent)
         {
@@ -396,7 +368,6 @@ public class GameSceneManager : MonoBehaviour
             if (monsterImage != null)
             {
                 monsterImage.sprite = monsterData.monsterSprite;
-                Debug.Log($"[GameSceneManager] 몬스터 {i + 1} 생성: {monsterData.monsterName}");
             }
 
             RectTransform rect = monsterObj.GetComponent<RectTransform>();
@@ -408,12 +379,10 @@ public class GameSceneManager : MonoBehaviour
             }
         }
 
-        Debug.Log("[GameSceneManager] ✅ 몬스터 스프라이트 생성 완료");
     }
 
     private void OnEnterDungeonClicked()
     {
-        Debug.Log("[GameSceneManager] 🖱️ 던전 입장 버튼 클릭");
 
         if (currentDungeonData == null)
         {
@@ -429,7 +398,6 @@ public class GameSceneManager : MonoBehaviour
 
     private void OnBackToTownClicked()
     {
-        Debug.Log("[GameSceneManager] 🖱️ 마을로 돌아가기 버튼 클릭");
 
         if (DungeonManager.Instance != null)
         {
@@ -441,7 +409,6 @@ public class GameSceneManager : MonoBehaviour
 
     private void OnPathSelected(int pathIndex)
     {
-        Debug.Log($"[GameSceneManager] 🖱️ 통로 {pathIndex}번 선택");
 
         if (DungeonManager.Instance != null)
         {
@@ -451,11 +418,9 @@ public class GameSceneManager : MonoBehaviour
 
     private void OnProceedClicked()
     {
-        Debug.Log("[GameSceneManager] 🖱️ 다음으로 버튼 클릭");
 
         if (DungeonManager.Instance != null && DungeonManager.Instance.IsDungeonCleared())
         {
-            Debug.Log("[GameSceneManager] ✅ 던전 클리어!");
             OnBackToTownClicked();
             return;
         }
@@ -465,7 +430,6 @@ public class GameSceneManager : MonoBehaviour
 
     private void OnMerchantShopClicked()
     {
-        Debug.Log("[GameSceneManager] 🖱️ 상점 버튼 클릭");
 
         if (mercenaryParty != null)
         {
@@ -476,7 +440,6 @@ public class GameSceneManager : MonoBehaviour
         if (inventoryWindow != null)
         {
             inventoryWindow.OpenShopMode();
-            Debug.Log("[GameSceneManager] ✅ 상점 열림");
         }
         else
         {
@@ -486,12 +449,10 @@ public class GameSceneManager : MonoBehaviour
 
     private void OnDungeonEntranceClicked()
     {
-        Debug.Log("[GameSceneManager] 🖱️ 던전 입구 버튼 클릭");
 
         if (availableDungeons != null && availableDungeons.Length > 0)
         {
             DungeonDataSO selectedDungeon = availableDungeons[0];
-            Debug.Log($"[GameSceneManager] 던전 선택: {selectedDungeon.dungeonName}");
 
             ShowEntranceUI(selectedDungeon);
         }
@@ -503,7 +464,6 @@ public class GameSceneManager : MonoBehaviour
 
     private void OnMercenaryShopClicked()
     {
-        Debug.Log("[GameSceneManager] 🖱️ 용병 상점 버튼 클릭");
 
         if (mercenaryParty != null)
         {
@@ -513,7 +473,6 @@ public class GameSceneManager : MonoBehaviour
         if (mercenaryWindow != null)
         {
             mercenaryWindow.Open();
-            Debug.Log("[GameSceneManager] ✅ 용병 상점 열림");
         }
         else
         {
@@ -523,7 +482,6 @@ public class GameSceneManager : MonoBehaviour
 
     private void OnDungeonEntered(DungeonDataSO dungeon)
     {
-        Debug.Log($"[GameSceneManager] 📡 OnDungeonEntered 이벤트: {dungeon.dungeonName}");
         ShowCorridorUI();
     }
 
@@ -533,12 +491,10 @@ public class GameSceneManager : MonoBehaviour
     /// </summary>
     private void OnDungeonExited()
     {
-        Debug.Log("[GameSceneManager] 📡 OnDungeonExited 이벤트 → 마을 귀환 처리");
 
         if (mercenaryParty != null)
         {
             mercenaryParty.ResetCombatState();
-            Debug.Log("[GameSceneManager] ✅ MercenaryParty 전투 상태 초기화 완료");
         }
 
         ShowTownUI();
@@ -546,7 +502,6 @@ public class GameSceneManager : MonoBehaviour
 
     private void OnRoomProgressed(int currentRoom, int totalRooms)
     {
-        Debug.Log($"[GameSceneManager] 📡 OnRoomProgressed 이벤트: {currentRoom}/{totalRooms}");
 
         if (roomProgressText != null)
         {
@@ -556,7 +511,6 @@ public class GameSceneManager : MonoBehaviour
 
     private void OnRoomTypeSelected(DungeonRoomType roomType)
     {
-        Debug.Log($"[GameSceneManager] 📡 OnRoomTypeSelected 이벤트: {roomType}");
 
         switch (roomType)
         {
@@ -576,7 +530,6 @@ public class GameSceneManager : MonoBehaviour
 
     private void OnMonstersSpawned(List<MonsterSpawnData> monsters)
     {
-        Debug.Log($"[GameSceneManager] 🎯 OnMonstersSpawned 이벤트: {monsters.Count}마리");
 
         SpawnMonsterSprites(monsters);
 
@@ -589,30 +542,25 @@ public class GameSceneManager : MonoBehaviour
 
     private void OnEventTriggered(RoomEventDataSO eventData)
     {
-        Debug.Log($"[GameSceneManager] 📡 OnEventTriggered 이벤트: {eventData.eventName}");
         ShowEventUI(eventData);
     }
 
     private void OnCombatEnded(bool isVictory)
     {
-        Debug.Log($"[GameSceneManager] 🎯 OnCombatEnded 이벤트: {(isVictory ? "승리" : "패배")}");
 
         if (isVictory)
         {
             if (DungeonManager.Instance != null && DungeonManager.Instance.IsDungeonCleared())
             {
-                Debug.Log("[GameSceneManager] ✅ 던전 클리어! 마을로 귀환");
                 OnBackToTownClicked();
             }
             else
             {
-                Debug.Log("[GameSceneManager] 다음 방으로 이동");
                 ShowCorridorUI();
             }
         }
         else
         {
-            Debug.Log("[GameSceneManager] 패배! 마을로 귀환");
             OnBackToTownClicked();
         }
     }

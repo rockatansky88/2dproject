@@ -14,8 +14,8 @@ public class MercenaryDetailPopup : MonoBehaviour
     [SerializeField] private Image fullBodyImage;          // 전신 이미지
     [SerializeField] private Text nameText;                // 이름
     [SerializeField] private Text levelText;               // 레벨
-    [SerializeField] private Text costText;                // 고용 비용 (고용 모드에만 표시)
-    [SerializeField] private GameObject costPanel;         // 비용 패널 (고용 모드에만 활성화)
+    [SerializeField] private Text costText;                // 고용 비용 (추후 사용)
+    [SerializeField] private GameObject costPanel;         // 비용 패널 ( 추후 사용)
 
     [Header("Stat Display")]
     [SerializeField] private Text healthText;              // 체력
@@ -54,7 +54,6 @@ public class MercenaryDetailPopup : MonoBehaviour
 
     private void Awake()
     {
-        Debug.Log("[MercenaryDetailPopup] ━━━ Awake 시작 ━━━");
 
         // CanvasGroup 설정 (popupRoot에 있어야 함)
         if (popupRoot != null)
@@ -63,7 +62,6 @@ public class MercenaryDetailPopup : MonoBehaviour
             if (canvasGroup == null)
             {
                 canvasGroup = popupRoot.AddComponent<CanvasGroup>();
-                Debug.Log("[MercenaryDetailPopup] CanvasGroup 자동 추가됨");
             }
         }
 
@@ -71,7 +69,6 @@ public class MercenaryDetailPopup : MonoBehaviour
         if (recruitButton != null)
         {
             recruitButton.onClick.AddListener(OnRecruitClicked);
-            Debug.Log("[MercenaryDetailPopup] 고용 버튼 리스너 등록됨");
         }
         else
         {
@@ -81,7 +78,6 @@ public class MercenaryDetailPopup : MonoBehaviour
         if (dismissButton != null)
         {
             dismissButton.onClick.AddListener(OnDismissClicked);
-            Debug.Log("[MercenaryDetailPopup] 추방 버튼 리스너 등록됨");
         }
         else
         {
@@ -91,7 +87,6 @@ public class MercenaryDetailPopup : MonoBehaviour
         if (closeButton != null)
         {
             closeButton.onClick.AddListener(Close);
-            Debug.Log("[MercenaryDetailPopup] 닫기 버튼 리스너 등록됨");
         }
         else
         {
@@ -101,7 +96,6 @@ public class MercenaryDetailPopup : MonoBehaviour
         // 초기 상태: CanvasGroup으로 숨김 (popupRoot는 활성화 유지)
         HidePopup();
 
-        Debug.Log("[MercenaryDetailPopup] ✅ Awake 완료");
     }
 
     /// <summary>
@@ -116,7 +110,6 @@ public class MercenaryDetailPopup : MonoBehaviour
             canvasGroup.blocksRaycasts = false;
         }
 
-        Debug.Log("[MercenaryDetailPopup] 팝업 숨김 (CanvasGroup.alpha = 0)");
     }
 
     /// <summary>
@@ -131,7 +124,6 @@ public class MercenaryDetailPopup : MonoBehaviour
             canvasGroup.blocksRaycasts = true;
         }
 
-        Debug.Log("[MercenaryDetailPopup] 팝업 표시 (CanvasGroup.alpha = 1)");
     }
 
     /// <summary>
@@ -142,7 +134,6 @@ public class MercenaryDetailPopup : MonoBehaviour
         currentMercenary = mercenary;
         currentMode = PopupMode.Recruit;
 
-        Debug.Log($"[MercenaryDetailPopup] ━━━ 고용 모드 표시: {mercenary?.mercenaryName ?? "null"} ━━━");
 
         if (mercenary == null)
         {
@@ -173,7 +164,6 @@ public class MercenaryDetailPopup : MonoBehaviour
             costPanel.SetActive(true);
         }
 
-        Debug.Log("[MercenaryDetailPopup] ✅ 고용 모드 표시 완료");
     }
 
     /// <summary>
@@ -184,7 +174,6 @@ public class MercenaryDetailPopup : MonoBehaviour
         currentMercenary = mercenary;
         currentMode = PopupMode.Dismiss;
 
-        Debug.Log($"[MercenaryDetailPopup] ━━━ 추방 모드 표시: {mercenary?.mercenaryName ?? "null"} ━━━");
 
         if (mercenary == null)
         {
@@ -215,7 +204,6 @@ public class MercenaryDetailPopup : MonoBehaviour
             costPanel.SetActive(false);
         }
 
-        Debug.Log("[MercenaryDetailPopup] ✅ 추방 모드 표시 완료");
     }
 
 
@@ -228,14 +216,12 @@ public class MercenaryDetailPopup : MonoBehaviour
     /// </summary>
     private void SetupUI(MercenaryInstance mercenary)
     {
-        Debug.Log($"[MercenaryDetailPopup] UI 설정 시작: {mercenary.mercenaryName}");
 
         // 전신 이미지
         if (fullBodyImage != null)
         {
             fullBodyImage.sprite = mercenary.fullBodySprite;
             fullBodyImage.enabled = mercenary.fullBodySprite != null;
-            Debug.Log($"[MercenaryDetailPopup] 전신 이미지 설정: {mercenary.fullBodySprite?.name ?? "null"}");
         }
 
         // 이름
@@ -260,21 +246,18 @@ public class MercenaryDetailPopup : MonoBehaviour
         if (healthText != null)
         {
             healthText.text = $"HP: {mercenary.currentHP}/{mercenary.maxHP}";
-            Debug.Log($"[MercenaryDetailPopup] HP 표시: {mercenary.currentHP}/{mercenary.maxHP}");
         }
 
         // MP 텍스트
         if (manaText != null)
         {
             manaText.text = $"MP: {mercenary.currentMP}/{mercenary.maxMP}";
-            Debug.Log($"[MercenaryDetailPopup] MP 표시: {mercenary.currentMP}/{mercenary.maxMP}");
         }
 
         if (healthFillImage != null)
         {
             float hpFillAmount = mercenary.maxHP > 0 ? (float)mercenary.currentHP / mercenary.maxHP : 0f;
             healthFillImage.fillAmount = hpFillAmount;
-            Debug.Log($"[MercenaryDetailPopup] HP Fill Bar 업데이트: {hpFillAmount:P0} ({mercenary.currentHP}/{mercenary.maxHP})");
         }
         else
         {
@@ -286,7 +269,6 @@ public class MercenaryDetailPopup : MonoBehaviour
         {
             float mpFillAmount = mercenary.maxMP > 0 ? (float)mercenary.currentMP / mercenary.maxMP : 0f;
             manaFillImage.fillAmount = mpFillAmount;
-            Debug.Log($"[MercenaryDetailPopup] MP Fill Bar 업데이트: {mpFillAmount:P0} ({mercenary.currentMP}/{mercenary.maxMP})");
         }
         else
         {
@@ -319,7 +301,6 @@ public class MercenaryDetailPopup : MonoBehaviour
             speedText.text = $"SPD: {mercenary.speed}";
         }
 
-        Debug.Log($"[MercenaryDetailPopup] ✅ UI 설정 완료 - HP: {mercenary.currentHP}/{mercenary.maxHP}, MP: {mercenary.currentMP}/{mercenary.maxMP}");
     }
 
     /// <summary>
@@ -327,7 +308,6 @@ public class MercenaryDetailPopup : MonoBehaviour
     /// </summary>
     private void OnRecruitClicked()
     {
-        Debug.Log($"[MercenaryDetailPopup] 🖱️ 고용 버튼 클릭: {currentMercenary?.mercenaryName ?? "null"}");
 
         if (currentMercenary == null)
         {
@@ -342,12 +322,10 @@ public class MercenaryDetailPopup : MonoBehaviour
         }
 
         // 고용 시도
-        Debug.Log($"[MercenaryDetailPopup] MercenaryManager.RecruitMercenary() 호출...");
         bool success = MercenaryManager.Instance.RecruitMercenary(currentMercenary);
 
         if (success)
         {
-            Debug.Log($"[MercenaryDetailPopup] ✅✅✅ 고용 성공: {currentMercenary.mercenaryName}");
             Close();
         }
         else
@@ -361,7 +339,6 @@ public class MercenaryDetailPopup : MonoBehaviour
     /// </summary>
     private void OnDismissClicked()
     {
-        Debug.Log($"[MercenaryDetailPopup] 🖱️ 추방 버튼 클릭: {currentMercenary?.mercenaryName ?? "null"}");
 
         if (currentMercenary == null)
         {
@@ -376,12 +353,10 @@ public class MercenaryDetailPopup : MonoBehaviour
         }
 
         // 추방 시도
-        Debug.Log($"[MercenaryDetailPopup] MercenaryManager.DismissMercenary() 호출...");
         bool success = MercenaryManager.Instance.DismissMercenary(currentMercenary);
 
         if (success)
         {
-            Debug.Log($"[MercenaryDetailPopup] ✅ 추방 성공: {currentMercenary.mercenaryName}");
             Close();
         }
         else
@@ -395,7 +370,6 @@ public class MercenaryDetailPopup : MonoBehaviour
     /// </summary>
     public void Close()
     {
-        Debug.Log("[MercenaryDetailPopup] 팝업 닫기");
 
         HidePopup();
         currentMercenary = null;

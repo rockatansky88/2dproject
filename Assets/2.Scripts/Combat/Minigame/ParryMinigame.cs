@@ -34,7 +34,6 @@ public class ParryMinigame : MonoBehaviour
     private void Awake()
     {
         minigamePanel.SetActive(false);
-        Debug.Log("[ParryMinigame] 초기화 완료");
     }
 
     /// <summary>
@@ -42,7 +41,6 @@ public class ParryMinigame : MonoBehaviour
     /// </summary>
     public void StartMinigame()
     {
-        Debug.Log("[ParryMinigame] ━━━ 패링 미니게임 시작 ━━━");
 
         // 초기화
         isPlaying = true;
@@ -62,7 +60,6 @@ public class ParryMinigame : MonoBehaviour
 
         StartCoroutine(ShrinkIndicator());
 
-        Debug.Log($"[ParryMinigame] 제한 시간: {timeLimitSeconds}초, 패링 구간: {parryZoneSize}px");
     }
 
     private void Update()
@@ -102,7 +99,6 @@ public class ParryMinigame : MonoBehaviour
         {
             hasInput = true;
             isSuccess = false;
-            Debug.Log("[ParryMinigame] 타임아웃 - 자동 실패");
             StartCoroutine(ShowResult());
         }
     }
@@ -116,7 +112,6 @@ public class ParryMinigame : MonoBehaviour
         float sizeDifference = Mathf.Abs(currentSize - parryZoneSize);
         isSuccess = sizeDifference <= 30f; // 오차 범위 ±30px
 
-        Debug.Log($"[ParryMinigame] 패링 판정 - 현재 크기: {currentSize:F1}, 목표 크기: {parryZoneSize}, 오차: {sizeDifference:F1} => {(isSuccess ? "성공!" : "실패")}");
 
         StartCoroutine(ShowResult());
     }
@@ -137,6 +132,5 @@ public class ParryMinigame : MonoBehaviour
 
         OnParryComplete?.Invoke(isSuccess);
 
-        Debug.Log($"[ParryMinigame] ━━━ 패링 미니게임 종료: {(isSuccess ? "성공" : "실패")} ━━━");
     }
 }

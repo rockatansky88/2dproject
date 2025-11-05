@@ -33,7 +33,6 @@ public class TurnController : MonoBehaviour
     /// </summary>
     public void InitializeBattle(List<Character> partyList, List<Monster> enemyList)
     {
-        Debug.Log($"[TurnController] ━━━ 전투 초기화: 파티 {partyList.Count}명, 적 {enemyList.Count}마리 ━━━");
 
         party = partyList;
         enemies = enemyList;
@@ -61,10 +60,8 @@ public class TurnController : MonoBehaviour
         foreach (var combatant in allCombatants)
         {
             turnQueue.Enqueue(combatant);
-            Debug.Log($"[TurnController] 턴 큐 추가: {combatant.Name} (속도: {combatant.Speed})");
         }
 
-        Debug.Log($"[TurnController] ✅ 턴 큐 생성 완료 - 총 {turnQueue.Count}명");
 
         // 첫 턴 시작
         ProcessNextTurn();
@@ -81,12 +78,11 @@ public class TurnController : MonoBehaviour
             return;
         }
 
- 
+
         //  전투 종료 대기 중이면 턴 처리 중단
 
         if (isBattleEnding)
         {
-            Debug.Log("[TurnController] 전투 종료 대기 중 - 턴 처리 스킵");
             return;
         }
 
@@ -100,13 +96,11 @@ public class TurnController : MonoBehaviour
         while (turnQueue.Count > 0 && !turnQueue.Peek().IsAlive)
         {
             ICombatant dead = turnQueue.Dequeue();
-            Debug.Log($"[TurnController] {dead.Name}은(는) 사망하여 턴 스킵");
         }
 
         // 턴 큐가 비었으면 재생성
         if (turnQueue.Count == 0)
         {
-            Debug.Log("[TurnController] 턴 큐 비어있음 - 재생성");
             RebuildTurnQueue();
         }
 
@@ -114,18 +108,15 @@ public class TurnController : MonoBehaviour
         currentCombatant = turnQueue.Dequeue();
         isProcessingTurn = true;
 
-        Debug.Log($"[TurnController] ━━━ {currentCombatant.Name}의 턴 시작 (속도: {currentCombatant.Speed}) ━━━");
 
         OnTurnStart?.Invoke(currentCombatant);
 
         // AI 또는 플레이어 턴 처리
         if (currentCombatant.IsPlayer)
         {
-            Debug.Log($"[TurnController] 플레이어 {currentCombatant.Name} - 입력 대기 중...");
         }
         else
         {
-            Debug.Log($"[TurnController] AI {currentCombatant.Name} - 자동 행동 처리");
             StartCoroutine(ProcessAITurn(currentCombatant as Monster));
         }
     }
@@ -135,7 +126,6 @@ public class TurnController : MonoBehaviour
     /// </summary>
     private IEnumerator ProcessAITurn(Monster monster)
     {
-        Debug.Log($"[TurnController] 🤖 AI {monster.Name} 행동 결정 중...");
 
         yield return new WaitForSeconds(1f); // AI 사고 시간
 
@@ -159,7 +149,6 @@ public class TurnController : MonoBehaviour
             yield break;
         }
 
-        Debug.Log($"[TurnController] 🎯 AI {monster.Name}이(가) {target.Name}을(를) 타겟으로 {skill.skillName} 사용");
 
 
         // 타겟 화살표 표시 (용병 위에 화살표 표시)
@@ -168,7 +157,6 @@ public class TurnController : MonoBehaviour
         {
             // CombatUI를 통해 타겟 화살표 표시
             CombatManager.Instance.ShowTargetArrowForAI(target);
-            Debug.Log($"[TurnController] ✅ {target.Name} 위에 타겟 화살표 표시");
         }
 
         yield return new WaitForSeconds(0.5f); // 애니메이션 대기
@@ -201,7 +189,6 @@ public class TurnController : MonoBehaviour
     /// </summary>
     public void ExecutePlayerAction(SkillDataSO skill, ICombatant target)
     {
-        Debug.Log($"[TurnController] 플레이어 행동 실행: {skill.skillName} -> {target.Name}");
 
         StartCoroutine(ExecutePlayerActionCoroutine(skill, target));
     }
@@ -238,7 +225,6 @@ public class TurnController : MonoBehaviour
     /// </summary>
     public void EndTurn()
     {
-        Debug.Log($"[TurnController] {currentCombatant.Name}의 턴 종료");
 
         OnTurnEnd?.Invoke(currentCombatant);
 
@@ -259,7 +245,6 @@ public class TurnController : MonoBehaviour
     /// </summary>
     private void RebuildTurnQueue()
     {
-        Debug.Log("[TurnController] 턴 큐 재생성 중...");
     }
 
 
@@ -276,7 +261,6 @@ public class TurnController : MonoBehaviour
 
         if (allPartyDead)
         {
-            Debug.Log("[TurnController] ❌ 파티 전멸! 전투 패배");
             isBattleEnding = true;
             isProcessingTurn = false; // ← 턴 처리 플래그 해제
             OnBattleEnd?.Invoke();
@@ -285,11 +269,10 @@ public class TurnController : MonoBehaviour
 
         if (allMonstersDead)
         {
-            Debug.Log("[TurnController] ✅ 몬스터 전멸! 전투 승리");
-            
+
             isBattleEnding = true; // ← 전투 종료 대기 플래그 설정
             isProcessingTurn = false; // ← 턴 처리 플래그 해제
-            
+
             StartCoroutine(DelayedBattleEnd());
             return true; // ← true로 변경 (턴 처리 중단)
         }
@@ -324,12 +307,10 @@ public class TurnController : MonoBehaviour
     /// </summary>
     private IEnumerator DelayedBattleEnd()
     {
-        Debug.Log("[TurnController] 몬스터 페이드아웃 대기 중... (2초)");
-        
+
         // 페이드아웃 시간(1.5초) + 여유(0.5초) = 2초
         yield return new WaitForSeconds(2f);
-        
-        Debug.Log("[TurnController] ✅ 페이드아웃 완료 - 전투 종료 이벤트 발생");
+
         OnBattleEnd?.Invoke();
     }
 }
