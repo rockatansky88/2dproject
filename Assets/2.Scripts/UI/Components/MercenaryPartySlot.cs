@@ -46,10 +46,6 @@ public class MercenaryPartySlot : MonoBehaviour
             Debug.Log("[MercenaryPartySlot] 슬롯 버튼 리스너 등록됨");
         }
 
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🔧 수정: 초기 상태에서 스탯 패널 숨김 (빈 슬롯 상태)
-        // 용병이 할당되면 Initialize()에서 표시합니다
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         SetCombatStatsVisible(false);
 
         InitializeTurnOutline();
@@ -95,7 +91,9 @@ public class MercenaryPartySlot : MonoBehaviour
     {
         mercenaryData = mercenary;
 
-        Debug.Log($"[MercenaryPartySlot] Initialize - 용병: {mercenary?.mercenaryName ?? "null"}");
+        Debug.Log($"[MercenaryPartySlot] Initialize - 슬롯: {gameObject.name}\n" +
+                  $"  용병: {mercenary?.GetDisplayName() ?? "null"}\n" +
+                  $"  InstanceID: {mercenary?.instanceID}");
 
         if (mercenary == null)
         {
@@ -115,19 +113,14 @@ public class MercenaryPartySlot : MonoBehaviour
             portraitImage.color = Color.white;
         }
 
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🆕 수정: HP/MP UI를 항상 표시 (전투/비전투 무관)
-        // MercenaryInstance의 파생 스탯(maxHP/maxMP)을 사용합니다
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         SetCombatStatsVisible(true);
         UpdateCombatStats(mercenary.currentHP, mercenary.maxHP, mercenary.currentMP, mercenary.maxMP);
 
-        Debug.Log($"[MercenaryPartySlot] ✅ 초기화 완료: {mercenary.mercenaryName}\n" +
+        Debug.Log($"[MercenaryPartySlot] ✅ 초기화 완료: {mercenary.GetDisplayName()}\n" +
+                  $"  Slot: {gameObject.name}\n" +
                   $"  HP: {mercenary.currentHP}/{mercenary.maxHP}\n" +
                   $"  MP: {mercenary.currentMP}/{mercenary.maxMP}\n" +
                   $"  스탯 UI: 항상 표시");
-
-        Debug.Log($"[MercenaryPartySlot] ✅ 초기화 완료: {mercenary.mercenaryName}");
     }
 
     /// <summary>
@@ -164,10 +157,6 @@ public class MercenaryPartySlot : MonoBehaviour
 
         Debug.Log($"[MercenaryPartySlot] 전투 모드 설정: {isCombat}");
 
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🔧 수정: HP/MP UI는 항상 표시되므로 visibility 변경 불필요
-        // 전투 모드에서는 데이터만 갱신합니다
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         if (mercenaryData != null)
         {
             UpdateCombatStats(mercenaryData.currentHP, mercenaryData.maxHP, mercenaryData.currentMP, mercenaryData.maxMP);
@@ -183,10 +172,6 @@ public class MercenaryPartySlot : MonoBehaviour
     /// </summary>
     public void UpdateCombatStats(int currentHp, int maxHp, int currentMp, int maxMp)
     {
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🔧 수정: 전투 모드가 아닐 때도 업데이트 가능하도록 변경
-        // HP/MP는 항상 표시되므로 언제든지 갱신할 수 있습니다
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         Debug.Log($"[MercenaryPartySlot] 전투 스탯 업데이트: HP {currentHp}/{maxHp}, MP {currentMp}/{maxMp}");
 
         if (hpText != null)

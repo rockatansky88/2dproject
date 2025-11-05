@@ -79,7 +79,8 @@ public class Character : MonoBehaviour, ICombatant
 
     /// <summary>
     /// 초기화 (UI 슬롯 연결)
-    /// MercenaryInstance의 HP/MP를 전투 중 실시간으로 동기화하고, 이벤트 버프를 적용합니다.
+    /// MercenaryInstance의 HP/MP를 전투 중 실시간으로 동기화합니다.
+    /// 이벤트 버프는 이미 MercenaryInstance에 반영되어 있으므로 재적용하지 않습니다.
     /// </summary>
     public void Initialize(MercenaryInstance data, List<SkillDataSO> skills, MercenaryPartySlot slot = null)
     {
@@ -89,18 +90,20 @@ public class Character : MonoBehaviour, ICombatant
         Skills = skills;
         uiSlot = slot;
 
-        // 1. CombatStats 초기화 (MercenaryInstance에서 기본 스탯 로드)
+        // CombatStats는 MercenaryInstance 값을 그대로 로드
+        // 이벤트 버프는 이미 MercenaryInstance에 반영되어 있으므로 재계산 불필요
         Stats = new CombatStats();
         Stats.InitializeFromMercenary(data);
 
-        Debug.Log($"[Character] 1단계: 기본 스탯 로드 완료\n" +
+        Debug.Log($"[Character] 스탯 로드 완료 (버프 포함)\n" +
                   $"  STR: {Stats.Strength}, DEX: {Stats.Dexterity}, INT: {Stats.Intelligence}, WIS: {Stats.Wisdom}, SPD: {Stats.Speed}\n" +
-                  $"  HP: {Stats.CurrentHP}/{Stats.MaxHP}, MP: {Stats.CurrentMP}/{Stats.MaxMP}");
+                  $"  HP: {Stats.CurrentHP}/{Stats.MaxHP}, MP: {Stats.CurrentMP}/{Stats.MaxMP}\n" +
+                  $"  활성 버프: {data.activeBuffs.Count}개 (이미 스탯에 반영됨)");
 
-        // 🆕 2. 이벤트 버프 적용
-        ApplyEventBuffs(data);
+        // ❌ 기존 코드 제거: ApplyEventBuffs(data) - 불필요한 중복 처리
+        // 이미 MercenaryInstance에 버프가 반영되어 있음
 
-        // 3. HP/MP 변경 시 MercenaryInstance에 역반영
+        // HP/MP 변경 시 MercenaryInstance에 역반영
         Stats.OnHPChanged += (currentHP, maxHP) =>
         {
             if (mercenaryData != null)
@@ -127,7 +130,7 @@ public class Character : MonoBehaviour, ICombatant
             }
         };
 
-        // 4. 초기 HP/MP UI 업데이트
+        // 초기 HP/MP UI 업데이트
         if (uiSlot != null)
         {
             uiSlot.UpdateCombatStats(Stats.CurrentHP, Stats.MaxHP, Stats.CurrentMP, Stats.MaxMP);
@@ -137,56 +140,6 @@ public class Character : MonoBehaviour, ICombatant
                   $"  최종 스탯: STR {Stats.Strength}, DEX {Stats.Dexterity}, INT {Stats.Intelligence}, WIS {Stats.Wisdom}, SPD {Stats.Speed}\n" +
                   $"  HP: {Stats.CurrentHP}/{Stats.MaxHP}, MP: {Stats.CurrentMP}/{Stats.MaxMP}\n" +
                   $"  UI 연결: {(uiSlot != null ? "O" : "X")}");
-    }
-
-    /// <summary>
-    /// 이벤트 버프를 CombatStats에 적용
-    /// MercenaryInstance의 activeBuffs를 순회하여 스탯 보너스를 합산합니다.
-    /// </summary>
-    private void ApplyEventBuffs(MercenaryInstance data)
-    {
-        if (data.activeBuffs == null || data.activeBuffs.Count == 0)
-        {
-            Debug.Log($"[Character] {Name}: 활성 이벤트 버프 없음");
-            return;
-        }
-
-        Debug.Log($"[Character] ━━ {Name} 이벤트 버프 적용 시작 ({data.activeBuffs.Count}개) ━━");
-
-        int totalStr = 0, totalDex = 0, totalInt = 0, totalWis = 0, totalSpd = 0;
-
-        foreach (var buff in data.activeBuffs)
-        {
-            if (!buff.IsActive())
-            {
-                Debug.LogWarning($"[Character] ⚠️ 버프 '{buff.buffName}'가 비활성 상태 (duration: {buff.remainingDuration})");
-                continue;
-            }
-
-            totalStr += buff.strengthModifier;
-            totalDex += buff.dexterityModifier;
-            totalInt += buff.intelligenceModifier;
-            totalWis += buff.wisdomModifier;
-            totalSpd += buff.speedModifier;
-
-            Debug.Log($"[Character] 버프 '{buff.buffName}' 적용:\n" +
-                      $"  STR {buff.strengthModifier:+0;-#}, DEX {buff.dexterityModifier:+0;-#}, INT {buff.intelligenceModifier:+0;-#}, " +
-                      $"WIS {buff.wisdomModifier:+0;-#}, SPD {buff.speedModifier:+0;-#}");
-        }
-
-        // 합산된 버프를 CombatStats에 적용
-        if (totalStr != 0 || totalDex != 0 || totalInt != 0 || totalWis != 0 || totalSpd != 0)
-        {
-            Stats.ApplyStatModifier(totalStr, totalDex, totalInt, totalWis, totalSpd);
-
-            Debug.Log($"[Character] ✅ {Name} 이벤트 버프 적용 완료:\n" +
-                      $"  총 보너스: STR {totalStr:+0;-#}, DEX {totalDex:+0;-#}, INT {totalInt:+0;-#}, WIS {totalWis:+0;-#}, SPD {totalSpd:+0;-#}\n" +
-                      $"  최종 스탯: STR {Stats.Strength}, DEX {Stats.Dexterity}, INT {Stats.Intelligence}, WIS {Stats.Wisdom}, SPD {Stats.Speed}");
-        }
-        else
-        {
-            Debug.Log($"[Character] {Name}: 버프 보너스 없음 (모든 값 0)");
-        }
     }
 
     /// <summary>

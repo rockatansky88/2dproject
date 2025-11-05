@@ -50,10 +50,14 @@ public class MercenaryDataSO : ScriptableObject
     /// <summary>
     /// 랜덤 스탯을 가진 용병 인스턴스 생성
     /// HP/MP는 스탯 기반으로 자동 계산됩니다.
+    /// 고유 instanceID를 생성하여 같은 SO로 생성된 용병들을 구분합니다.
     /// </summary>
     public MercenaryInstance CreateRandomInstance()
     {
         MercenaryInstance instance = new MercenaryInstance();
+
+        instance.instanceID = System.Guid.NewGuid().ToString();
+
         instance.sourceData = this;
         instance.mercenaryID = mercenaryID;
         instance.mercenaryName = mercenaryName;
@@ -90,6 +94,7 @@ public class MercenaryDataSO : ScriptableObject
         }
 
         Debug.Log($"[MercenaryDataSO] ✅ 랜덤 용병 인스턴스 생성: {mercenaryName}\n" +
+                  $"InstanceID: {instance.instanceID.Substring(0, 8)}...\n" +
                   $"Lv.{instance.level} | BaseHP: {instance.health} → MaxHP: {instance.maxHP} (STR+{instance.strength * 5}) | " +
                   $"MP: {instance.currentMP}/{instance.maxMP} | " +
                   $"STR: {instance.strength} | DEX: {instance.dexterity} | WIS: {instance.wisdom} | INT: {instance.intelligence} | " +
@@ -102,10 +107,17 @@ public class MercenaryDataSO : ScriptableObject
 /// <summary>
 /// 런타임에 생성되는 용병 인스턴스 (랜덤 스탯 적용)
 /// 이벤트 버프/디버프를 관리하며, 던전이 끝날 때까지 임시 스탯이 적용됩니다.
+/// 각 인스턴스는 고유한 instanceID를 가지며, 같은 SO로 생성되어도 구분됩니다.
 /// </summary>
 [System.Serializable]
 public class MercenaryInstance
 {
+    /// <summary>
+    /// 이 용병 인스턴스의 고유 ID (GUID)
+    /// 같은 SO로 생성된 용병들을 구분하는 데 사용됩니다.
+    /// </summary>
+    public string instanceID;
+
     public MercenaryDataSO sourceData;
     public string mercenaryID;
     public string mercenaryName;
@@ -114,7 +126,7 @@ public class MercenaryInstance
     public GameObject prefab;
     public int recruitCost;
 
-    // 🔑 기본 스탯 (버프 적용 전 원본 값)
+    // 기본 스탯 (버프 적용 전 원본 값)
     public int level;
     public int health;
     public int strength;
@@ -131,47 +143,106 @@ public class MercenaryInstance
     public List<SkillDataSO> skills = new List<SkillDataSO>();
     public bool isRecruited = false;
 
-    // 🆕 추가: 이벤트 버프 리스트 (던전 동안 유지)
+    // 이벤트 버프 리스트 (던전 동안 유지)
     [System.NonSerialized]
     public List<EventBuffData> activeBuffs = new List<EventBuffData>();
 
     /// <summary>
-    /// 이벤트 버프 적용
-    /// 던전 이벤트에서 획득한 버프를 용병에게 추가합니다.
+    /// 이벤트 버프 적용 (즉시 스탯에 반영)
+    /// 던전 이벤트에서 획득한 버프를 용병의 기본 스탯에 추가하고, MaxHP/MaxMP를 재계산합니다.
     /// </summary>
     public void ApplyEventBuff(EventBuffData buff)
     {
         if (buff == null)
         {
-            Debug.LogError($"[MercenaryInstance] ❌ {mercenaryName}: buff가 null입니다!");
+            Debug.LogError($"[MercenaryInstance] ❌ {GetDisplayName()}: buff가 null입니다!");
             return;
         }
 
-        // 중복 버프 체크 (같은 ID의 버프가 있으면 덮어쓰기)
+        strength += buff.strengthModifier;
+        dexterity += buff.dexterityModifier;
+        intelligence += buff.intelligenceModifier;
+        wisdom += buff.wisdomModifier;
+        speed += buff.speedModifier;
+
+        // 파생 스탯 재계산
+        maxHP = health + (strength * 5);
+        maxMP = (maxMP - (wisdom - buff.wisdomModifier) * 3) + (wisdom * 3);
+        criticalChance = 5f + (dexterity * 0.5f);
+
+        // HP/MP는 최대값 증가 시 현재값도 증가 (버프 효과)
+        if (buff.wisdomModifier > 0)
+        {
+            int mpIncrease = buff.wisdomModifier * 3;
+            currentMP = Mathf.Min(maxMP, currentMP + mpIncrease);
+        }
+
+        if (buff.strengthModifier > 0)
+        {
+            int hpIncrease = buff.strengthModifier * 5;
+            currentHP = Mathf.Min(maxHP, currentHP + hpIncrease);
+        }
+
+        // 버프 기록 (표시 전용, 던전 종료 시 제거)
         EventBuffData existingBuff = activeBuffs.Find(b => b.buffID == buff.buffID);
         if (existingBuff != null)
         {
-            Debug.Log($"[MercenaryInstance] {mercenaryName}: 기존 버프 '{buff.buffName}' 갱신");
+            Debug.Log($"[MercenaryInstance] {GetDisplayName()}: 기존 버프 '{buff.buffName}' 갱신");
             activeBuffs.Remove(existingBuff);
         }
 
         activeBuffs.Add(buff);
 
-        Debug.Log($"[MercenaryInstance] ✅ {mercenaryName}: 버프 '{buff.buffName}' 적용\n" +
-                  $"STR {buff.strengthModifier:+0;-#}, DEX {buff.dexterityModifier:+0;-#}, INT {buff.intelligenceModifier:+0;-#}, " +
-                  $"WIS {buff.wisdomModifier:+0;-#}, SPD {buff.speedModifier:+0;-#}");
+        Debug.Log($"[MercenaryInstance] ✅ {GetDisplayName()}: 버프 '{buff.buffName}' 즉시 반영\n" +
+                  $"  스탯 변화: STR {buff.strengthModifier:+0;-#}, DEX {buff.dexterityModifier:+0;-#}, INT {buff.intelligenceModifier:+0;-#}, " +
+                  $"WIS {buff.wisdomModifier:+0;-#}, SPD {buff.speedModifier:+0;-#}\n" +
+                  $"  최종 스탯: STR {strength}, DEX {dexterity}, INT {intelligence}, WIS {wisdom}, SPD {speed}\n" +
+                  $"  MaxHP: {maxHP}, CurrentHP: {currentHP}, MaxMP: {maxMP}, CurrentMP: {currentMP}");
     }
 
     /// <summary>
     /// 모든 이벤트 버프 제거 (던전 퇴장 시 호출)
+    /// activeBuffs에 기록된 버프의 역효과를 적용하여 원래 스탯으로 되돌립니다.
     /// </summary>
     public void ClearEventBuffs()
     {
-        if (activeBuffs.Count > 0)
+        if (activeBuffs.Count == 0)
         {
-            Debug.Log($"[MercenaryInstance] {mercenaryName}: 이벤트 버프 {activeBuffs.Count}개 제거");
-            activeBuffs.Clear();
+            Debug.Log($"[MercenaryInstance] {GetDisplayName()}: 제거할 버프 없음");
+            return;
         }
+
+        Debug.Log($"[MercenaryInstance] {GetDisplayName()}: 이벤트 버프 {activeBuffs.Count}개 제거 시작");
+
+        foreach (var buff in activeBuffs)
+        {
+            strength -= buff.strengthModifier;
+            dexterity -= buff.dexterityModifier;
+            intelligence -= buff.intelligenceModifier;
+            wisdom -= buff.wisdomModifier;
+            speed -= buff.speedModifier;
+
+            Debug.Log($"[MercenaryInstance] 버프 '{buff.buffName}' 제거:\n" +
+                      $"  STR {-buff.strengthModifier:+0;-#}, DEX {-buff.dexterityModifier:+0;-#}, INT {-buff.intelligenceModifier:+0;-#}, " +
+                      $"WIS {-buff.wisdomModifier:+0;-#}, SPD {-buff.speedModifier:+0;-#}");
+        }
+
+        // 파생 스탯 재계산 (원래 값으로 복원)
+        maxHP = health + (strength * 5);
+
+        int baseMana = maxMP - (wisdom * 3);
+        maxMP = baseMana + (wisdom * 3);
+
+        criticalChance = 5f + (dexterity * 0.5f);
+
+        currentHP = Mathf.Min(currentHP, maxHP);
+        currentMP = Mathf.Min(currentMP, maxMP);
+
+        activeBuffs.Clear();
+
+        Debug.Log($"[MercenaryInstance] ✅ {GetDisplayName()}: 버프 제거 완료\n" +
+                  $"  복원된 스탯: STR {strength}, DEX {dexterity}, INT {intelligence}, WIS {wisdom}, SPD {speed}\n" +
+                  $"  MaxHP: {maxHP}, CurrentHP: {currentHP}, MaxMP: {maxMP}, CurrentMP: {currentMP}");
     }
 
     /// <summary>
@@ -235,7 +306,7 @@ public class MercenaryInstance
     {
         int before = currentHP;
         currentHP = Mathf.Min(maxHP, currentHP + amount);
-        Debug.Log($"[MercenaryInstance] 💚 {mercenaryName} HP 회복 +{amount}: {before} → {currentHP}/{maxHP}");
+        Debug.Log($"[MercenaryInstance] 💚 {GetDisplayName()} HP 회복 +{amount}: {before} → {currentHP}/{maxHP}");
     }
 
     /// <summary>
@@ -245,7 +316,7 @@ public class MercenaryInstance
     {
         int before = currentHP;
         currentHP = Mathf.Max(0, currentHP - damage);
-        Debug.Log($"[MercenaryInstance] 🩸 {mercenaryName} HP 감소 -{damage}: {before} → {currentHP}/{maxHP}");
+        Debug.Log($"[MercenaryInstance] 🩸 {GetDisplayName()} HP 감소 -{damage}: {before} → {currentHP}/{maxHP}");
     }
 
     /// <summary>
@@ -264,7 +335,7 @@ public class MercenaryInstance
     {
         int before = currentMP;
         currentMP = Mathf.Min(maxMP, currentMP + amount);
-        Debug.Log($"[MercenaryInstance] 🔵 {mercenaryName} MP 회복 +{amount}: {before} → {currentMP}/{maxMP}");
+        Debug.Log($"[MercenaryInstance] 🔵 {GetDisplayName()} MP 회복 +{amount}: {before} → {currentMP}/{maxMP}");
     }
 
     /// <summary>
@@ -274,7 +345,7 @@ public class MercenaryInstance
     {
         int before = currentMP;
         currentMP = Mathf.Max(0, currentMP - amount);
-        Debug.Log($"[MercenaryInstance] 💙 {mercenaryName} MP 소모 -{amount}: {before} → {currentMP}/{maxMP}");
+        Debug.Log($"[MercenaryInstance] 💙 {GetDisplayName()} MP 소모 -{amount}: {before} → {currentMP}/{maxMP}");
     }
 
     /// <summary>
@@ -283,5 +354,40 @@ public class MercenaryInstance
     public bool IsAlive()
     {
         return currentHP > 0;
+    }
+
+    /// <summary>
+    /// 디버깅 및 로그용 표시 이름 반환
+    /// 예: "Warrior (a3f2...)"
+    /// </summary>
+    public string GetDisplayName()
+    {
+        if (string.IsNullOrEmpty(instanceID))
+        {
+            return mercenaryName;
+        }
+
+        string shortID = instanceID.Length > 8 ? instanceID.Substring(0, 8) : instanceID;
+        return $"{mercenaryName} ({shortID})";
+    }
+
+    /// <summary>
+    /// 인스턴스 비교 (instanceID 기반)
+    /// </summary>
+    public override bool Equals(object obj)
+    {
+        if (obj is MercenaryInstance other)
+        {
+            return this.instanceID == other.instanceID;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// 해시 코드 반환 (instanceID 기반)
+    /// </summary>
+    public override int GetHashCode()
+    {
+        return instanceID?.GetHashCode() ?? 0;
     }
 }
