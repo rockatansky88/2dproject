@@ -1261,9 +1261,9 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 720087073}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 275, y: -25}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 450, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &150848446
@@ -1848,9 +1848,9 @@ RectTransform:
   - {fileID: 82515759}
   m_Father: {fileID: 1917990510}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 295, y: -69.16}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 300, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &285682288
@@ -2846,9 +2846,9 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1917990510}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 295, y: -109.16}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 160, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &406236278
@@ -3852,9 +3852,9 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1917990510}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 295, y: -269.16}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 160, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &640489534
@@ -4705,9 +4705,9 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 746308844}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 295, y: -65}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 160, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &702745935
@@ -5012,9 +5012,9 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 746308844}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 295, y: -120.83795}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 160, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &731628604
@@ -6573,6 +6573,64 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1148078540}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &895574451
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 895574452}
+  - component: {fileID: 895574453}
+  m_Layer: 5
+  m_Name: ParryMinigameRoot
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &895574452
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 895574451}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 163347390178565657}
+  m_Father: {fileID: 1772620636}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &895574453
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 895574451}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f96e73c6b554a4e4d835230b3108791a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  minigamePanel: {fileID: 538563589464125876}
+  attackIndicator: {fileID: 6336619255002840563}
+  parryZone: {fileID: 7046413374747550384}
+  resultText: {fileID: 2062965519}
+  instructionText: {fileID: 5087293288888138644}
+  shrinkSpeed: 1000
+  parryZoneSize: 50
+  timeLimitSeconds: 2
+  parryTolerance: 15
 --- !u!1 &918637757
 GameObject:
   m_ObjectHideFlags: 0
@@ -8019,9 +8077,9 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1917990510}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 295, y: -229.16}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 160, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1149508212
@@ -8253,9 +8311,9 @@ RectTransform:
   - {fileID: 671197146}
   m_Father: {fileID: 1917990510}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 295, y: -29.160004}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 300, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1187813538
@@ -10288,9 +10346,9 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1917990510}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 295, y: -149.16}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 160, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1444192884
@@ -11282,6 +11340,65 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1960662052}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1575058753
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1575058754}
+  - component: {fileID: 1575058755}
+  m_Layer: 5
+  m_Name: TPEMinigameRoot
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1575058754
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1575058753}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 3812275093407844142}
+  m_Father: {fileID: 1772620636}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1575058755
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1575058753}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 196f2c89e8483d4469f8d8889eef0c83, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  minigamePanel: {fileID: 3854811681855118810}
+  barBackground: {fileID: 8401874643285536185}
+  successZone: {fileID: 4068315580897153972}
+  arrow: {fileID: 2116833313353267598}
+  resultText: {fileID: 340666296881568190}
+  arrowSpeed: 1200
+  barWidth: 600
+  normalSuccessZoneWidth: 30
+  eliteSuccessZoneWidth: 25
+  bossSuccessZoneWidth: 15
 --- !u!1 &1578018260
 GameObject:
   m_ObjectHideFlags: 0
@@ -13206,8 +13323,8 @@ RectTransform:
   - {fileID: 1224068421}
   - {fileID: 925491097}
   - {fileID: 1566852038}
-  - {fileID: 3812275093407844142}
-  - {fileID: 163347390178565657}
+  - {fileID: 1575058754}
+  - {fileID: 895574452}
   m_Father: {fileID: 2082372961}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -14750,9 +14867,9 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1917990510}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 295, y: -189.16}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 160, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2020776031
@@ -15117,9 +15234,9 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 720087073}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 25, y: -25}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 50, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2057644667
@@ -15767,7 +15884,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 538563589464125876}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -15775,7 +15892,7 @@ RectTransform:
   - {fileID: 6336619255002840563}
   - {fileID: 1013794755226067511}
   - {fileID: 2062965518}
-  m_Father: {fileID: 1772620636}
+  m_Father: {fileID: 895574452}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -15827,7 +15944,6 @@ GameObject:
   - component: {fileID: 163347390178565657}
   - component: {fileID: 4041753353752666181}
   - component: {fileID: 8287028591114887511}
-  - component: {fileID: 8287028591114887512}
   m_Layer: 5
   m_Name: ParryMinigamePanel
   m_TagString: Untagged
@@ -16051,14 +16167,14 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3854811681855118810}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8401874643285536185}
   - {fileID: 3625918886220083057}
-  m_Father: {fileID: 1772620636}
+  m_Father: {fileID: 1575058754}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -16076,7 +16192,6 @@ GameObject:
   - component: {fileID: 3812275093407844142}
   - component: {fileID: 3801502022328539315}
   - component: {fileID: 1108120264499209785}
-  - component: {fileID: 7328975237225497390}
   m_Layer: 5
   m_Name: TPEMinigamePanel
   m_TagString: Untagged
@@ -16346,28 +16461,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &7328975237225497390
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3854811681855118810}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 196f2c89e8483d4469f8d8889eef0c83, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  minigamePanel: {fileID: 3854811681855118810}
-  barBackground: {fileID: 8401874643285536185}
-  successZone: {fileID: 4068315580897153972}
-  arrow: {fileID: 2116833313353267598}
-  resultText: {fileID: 340666296881568190}
-  arrowSpeed: 1200
-  barWidth: 600
-  normalSuccessZoneWidth: 30
-  eliteSuccessZoneWidth: 25
-  bossSuccessZoneWidth: 15
 --- !u!222 &8121919681748712981
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -16406,27 +16499,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &8287028591114887512
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 538563589464125876}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f96e73c6b554a4e4d835230b3108791a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  minigamePanel: {fileID: 538563589464125876}
-  attackIndicator: {fileID: 6336619255002840563}
-  parryZone: {fileID: 7046413374747550384}
-  resultText: {fileID: 2062965519}
-  instructionText: {fileID: 5087293288888138644}
-  shrinkSpeed: 1000
-  parryZoneSize: 50
-  timeLimitSeconds: 2
-  parryTolerance: 15
 --- !u!224 &8401874643285536185
 RectTransform:
   m_ObjectHideFlags: 0
