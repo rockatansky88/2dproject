@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mercenaryID: swordman_001
   mercenaryName: "\uC0AC\uC774\uCE78"
-  portrait: {fileID: 21300000, guid: f9518154cf69886469742474cb299c5f, type: 3}
-  fullBodySprite: {fileID: 21300000, guid: 51b8fbb1dc46bc744a2c0e95de60bc2d, type: 3}
+  portrait: {fileID: -1603008997, guid: f9518154cf69886469742474cb299c5f, type: 3}
+  fullBodySprite: {fileID: -699148436, guid: 51b8fbb1dc46bc744a2c0e95de60bc2d, type: 3}
   prefab: {fileID: 0}
   recruitCost: 100
   levelRange:

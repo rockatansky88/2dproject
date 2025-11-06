@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 15f841ff772bf8a49831633b921c2d50
+guid: 7a8aa41ffade28e4fb54d4ce0ea79978
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -48,7 +48,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 110
+  spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -110,13 +110,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: 20251021_164738-Photoroom_0
+      name: 5890c4ef-896c-45e5-85b9-c8b017f496df-Photoroom_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 183
-        height: 170
+        x: 131
+        y: 66
+        width: 784
+        height: 870
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -124,8 +124,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 7864217d5cc782044a313e345230e7e8
-      internalID: -259990241
+      spriteID: 9e32be3f17ec72b4f81b2d01e79478d8
+      internalID: 786006113
       vertices: []
       indices: 
       edges: []
@@ -141,7 +141,7 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      20251021_164738-Photoroom_0: -259990241
+      5890c4ef-896c-45e5-85b9-c8b017f496df-Photoroom_0: 786006113
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

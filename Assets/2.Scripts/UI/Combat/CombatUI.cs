@@ -523,7 +523,7 @@ public class CombatUI : MonoBehaviour
                 {
                     rt.position = new Vector3(
                         slot.transform.position.x,
-                        slot.transform.position.y + 50f,
+                        slot.transform.position.y + 150f,
                         rt.position.z
                     );
                 }
@@ -554,7 +554,7 @@ public class CombatUI : MonoBehaviour
                 {
                     rt.position = new Vector3(
                         slot.transform.position.x,
-                        slot.transform.position.y + 50f,
+                        slot.transform.position.y + 80f,
                         rt.position.z
                     );
                 }

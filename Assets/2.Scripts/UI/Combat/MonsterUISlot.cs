@@ -11,6 +11,8 @@ using System.Collections;
 /// - 몬스터 턴 표시 (빨간색 외곽선 깜빡임)
 /// - 턴 제어: 플레이어 턴에만 클릭 가능
 /// - 사망 시 페이드아웃 효과
+/// - 공격 애니메이션 재생 (SpriteAnimator 연동)
+/// - 몬스터별 개별 애니메이션 클립 동적 설정
 /// </summary>
 public class MonsterUISlot : MonoBehaviour
 {
@@ -33,21 +35,23 @@ public class MonsterUISlot : MonoBehaviour
     [SerializeField] private float damageFloatSpeed = 50f;
     [SerializeField] private float damageFadeDuration = 1f;
 
-    // 페이드아웃 설정
     [Header("Death FadeOut")]
-    [SerializeField] private float fadeOutDuration = 1.5f; // 페이드아웃 시간
-    [SerializeField] private CanvasGroup canvasGroup; // 전체 슬롯의 투명도 제어
+    [SerializeField] private float fadeOutDuration = 1.5f;
+    [SerializeField] private CanvasGroup canvasGroup;
+
+    [Header("Animation")]
+    [SerializeField] private SpriteAnimator spriteAnimator;
 
     private Outline turnOutline;
     private Coroutine turnBlinkCoroutine;
 
     private Monster monster;
 
-    // 클릭 이벤트
     public event Action<Monster> OnMonsterClicked;
 
     /// <summary>
     /// 초기화
+    /// Monster 데이터를 받아 UI 설정, SpriteAnimator 자동 생성 및 연결, 몬스터별 애니메이션 클립 설정
     /// </summary>
     public void Initialize(Monster target)
     {
@@ -55,27 +59,21 @@ public class MonsterUISlot : MonoBehaviour
 
         if (monster == null)
         {
-            Debug.LogError("[MonsterUISlot] monster가 null입니다!");
             return;
         }
 
-
-        // 1. 기본 정보 설정 - 몬스터 이름
         if (nameText != null)
         {
             nameText.text = monster.Name;
         }
 
-        // 2. 몬스터 스프라이트 설정
         if (monsterImage != null && monster.spawnData != null && monster.spawnData.monsterSprite != null)
         {
             monsterImage.sprite = monster.spawnData.monsterSprite;
             monsterImage.preserveAspect = true;
             monsterImage.color = Color.white;
-
         }
 
-        // 3. Outline 컴포넌트 자동 생성
         if (monsterImage != null)
         {
             turnOutline = monsterImage.GetComponent<Outline>();
@@ -88,40 +86,31 @@ public class MonsterUISlot : MonoBehaviour
             turnOutline.effectColor = new Color(1f, 0f, 0f, 1f);
             turnOutline.effectDistance = new Vector2(5f, 5f);
             turnOutline.enabled = false;
-
         }
 
-        // 4. 스탯 변화 이벤트 구독
         if (monster.Stats != null)
         {
             monster.Stats.OnHPChanged += UpdateHPBar;
         }
 
-        // 5. 초기 HP 바 업데이트
         UpdateHPBar(monster.Stats.CurrentHP, monster.Stats.MaxHP);
 
-        // 6. 선택 표시 숨김
         if (selectionIndicator != null)
         {
             selectionIndicator.SetActive(false);
         }
 
-        // 7. 버튼 이벤트 연결
         if (selectButton != null)
         {
             selectButton.onClick.RemoveAllListeners();
             selectButton.onClick.AddListener(OnButtonClicked);
-
         }
 
-        // 8. 데미지 텍스트 초기 숨김
         if (damageText != null)
         {
             damageText.gameObject.SetActive(false);
         }
 
-        // 
-        //  CanvasGroup 없을경우 자동 생성 
         if (canvasGroup == null)
         {
             canvasGroup = GetComponent<CanvasGroup>();
@@ -131,13 +120,78 @@ public class MonsterUISlot : MonoBehaviour
             }
         }
 
-        // 초기 알파값 1 (완전 불투명)
         canvasGroup.alpha = 1f;
 
+        // SpriteAnimator 자동 생성 및 연결
+        if (spriteAnimator == null && monsterImage != null)
+        {
+            spriteAnimator = monsterImage.GetComponent<SpriteAnimator>();
+            if (spriteAnimator == null)
+            {
+                spriteAnimator = monsterImage.gameObject.AddComponent<SpriteAnimator>();
+            }
+        }
+
+        // 몬스터별 애니메이션 클립 동적 설정
+        if (spriteAnimator != null && monster.spawnData != null && monster.spawnData.animationClips != null)
+        {
+            SetupMonsterAnimations(monster.spawnData.animationClips);
+        }
+    }
+
+    /// <summary>
+    /// SpriteAnimator에 몬스터별 애니메이션 클립 동적 설정
+    /// MonsterSpawnData의 animationClips 배열을 SpriteAnimator에 주입
+    /// </summary>
+    private void SetupMonsterAnimations(SpriteAnimationClip[] clips)
+    {
+        if (spriteAnimator == null || clips == null || clips.Length == 0)
+        {
+            return;
+        }
+
+        spriteAnimator.SetClips(clips);
+    }
+
+    /// <summary>
+    /// Idle 애니메이션 재생 (루프)
+    /// 몬스터가 대기 중일 때 반복 재생
+    /// </summary>
+    public void PlayIdleAnimation()
+    {
+        if (spriteAnimator != null)
+        {
+            spriteAnimator.Play("idle", loop: true);
+        }
+    }
+
+    /// <summary>
+    /// 공격 애니메이션 재생 (Coroutine 방식)
+    /// 스킬에서 지정한 애니메이션 클립 이름을 받아 재생하고, 완료될 때까지 대기 후 콜백 호출
+    /// </summary>
+    /// <param name="clipName">재생할 애니메이션 클립 이름 (예: attack, cast, slash)</param>
+    /// <param name="onComplete">애니메이션 완료 후 호출될 콜백</param>
+    public IEnumerator PlayAttackAnimation(string clipName, System.Action onComplete = null)
+    {
+        if (spriteAnimator == null)
+        {
+            onComplete?.Invoke();
+            yield break;
+        }
+
+        spriteAnimator.Play(clipName, loop: false);
+
+        yield return new WaitUntil(() => !spriteAnimator.IsPlaying(clipName));
+
+        // 애니메이션 완료 후 idle로 복귀
+        PlayIdleAnimation();
+
+        onComplete?.Invoke();
     }
 
     /// <summary>
     /// HP 바 업데이트
+    /// 현재 HP와 최대 HP를 받아 UI 갱신, HP가 0 이하일 때 사망 처리
     /// </summary>
     private void UpdateHPBar(int currentHP, int maxHP)
     {
@@ -145,7 +199,6 @@ public class MonsterUISlot : MonoBehaviour
         {
             float fillAmount = maxHP > 0 ? (float)currentHP / maxHP : 0f;
             hpFillImage.fillAmount = fillAmount;
-
         }
 
         if (hpText != null)
@@ -159,35 +212,30 @@ public class MonsterUISlot : MonoBehaviour
         }
     }
 
-    // 몬스터 사망- 페이드아웃 
-
     /// <summary>
     /// 몬스터 사망 처리 (페이드아웃 효과)
+    /// 버튼 비활성화, 턴 표시 제거, 페이드아웃 후 슬롯 비활성화
     /// </summary>
     private void OnMonsterDeath()
     {
-
-        // 버튼 비활성화
         if (selectButton != null)
         {
             selectButton.interactable = false;
         }
 
-        // 턴 표시 비활성화
         SetTurnActive(false);
 
-        // 페이드아웃 효과 시작
         StartCoroutine(FadeOutAndDestroy());
     }
 
     /// <summary>
     /// 페이드아웃 후 슬롯 비활성화
+    /// CanvasGroup alpha를 1 → 0으로 서서히 감소시켜 페이드아웃 효과 구현
     /// </summary>
     private IEnumerator FadeOutAndDestroy()
     {
         if (canvasGroup == null)
         {
-            Debug.LogWarning("[MonsterUISlot] ⚠️ CanvasGroup이 없어서 즉시 비활성화");
             gameObject.SetActive(false);
             yield break;
         }
@@ -195,7 +243,6 @@ public class MonsterUISlot : MonoBehaviour
         float elapsedTime = 0f;
         float startAlpha = canvasGroup.alpha;
 
-        // 알파값을 1 → 0으로 서서히 감소
         while (elapsedTime < fadeOutDuration)
         {
             elapsedTime += Time.deltaTime;
@@ -203,16 +250,13 @@ public class MonsterUISlot : MonoBehaviour
             yield return null;
         }
 
-        // 완전히 투명하게
         canvasGroup.alpha = 0f;
-
-
-        // 슬롯 비활성화 (파괴하지 않고 숨김)
         gameObject.SetActive(false);
     }
 
     /// <summary>
     /// 선택 표시
+    /// 타겟팅 시 시각적 피드백 제공
     /// </summary>
     public void SetSelected(bool selected)
     {
@@ -224,12 +268,12 @@ public class MonsterUISlot : MonoBehaviour
 
     /// <summary>
     /// 몬스터 턴 표시 활성화/비활성화
+    /// 빨간색 외곽선 깜빡임으로 현재 턴 표시
     /// </summary>
     public void SetTurnActive(bool active)
     {
         if (turnOutline == null)
         {
-            Debug.LogWarning($"[MonsterUISlot] ⚠️ {gameObject.name}: Outline 컴포넌트가 없습니다!");
             return;
         }
 
@@ -252,6 +296,7 @@ public class MonsterUISlot : MonoBehaviour
 
     /// <summary>
     /// 빨간색 외곽선 깜빡임 효과
+    /// alpha 값을 0.5 ↔ 1.0 사이에서 반복하여 깜빡이는 효과 구현
     /// </summary>
     private IEnumerator BlinkTurnOutline()
     {
@@ -296,7 +341,6 @@ public class MonsterUISlot : MonoBehaviour
     {
         if (damageText == null)
         {
-            Debug.LogWarning("[MonsterUISlot] ⚠️ damageText가 null입니다!");
             return;
         }
 
@@ -314,11 +358,11 @@ public class MonsterUISlot : MonoBehaviour
         }
 
         StartCoroutine(FloatingDamageAnimation());
-
     }
 
     /// <summary>
     /// 데미지 텍스트 애니메이션 (위로 떠오르면서 사라짐)
+    /// 위치를 위로 이동시키면서 alpha를 0으로 감소시켜 페이드아웃 효과
     /// </summary>
     private IEnumerator FloatingDamageAnimation()
     {
@@ -354,10 +398,6 @@ public class MonsterUISlot : MonoBehaviour
     {
         if (selectButton == null)
         {
-            Debug.LogWarning($"[MonsterUISlot] ⚠️ {gameObject.name}: selectButton이 null입니다!\n" +
-                           $"  - Monster: {(monster != null ? monster.Name : "null")}\n" +
-                           $"  - SetInteractable({interactable}) 호출 무시\n" +
-                           $"  - Inspector에서 SelectButton을 할당해주세요");
             return;
         }
 
@@ -366,28 +406,22 @@ public class MonsterUISlot : MonoBehaviour
 
     /// <summary>
     /// 버튼 클릭 이벤트
+    /// 몬스터 선택 시 이벤트 발생
     /// </summary>
     private void OnButtonClicked()
     {
-
         if (monster == null)
         {
-            Debug.LogWarning("[MonsterUISlot] ⚠️ monster가 null입니다!");
             return;
         }
 
         if (!monster.IsAlive)
         {
-            Debug.LogWarning("[MonsterUISlot] ⚠️ 사망한 몬스터는 선택할 수 없습니다!");
             return;
         }
 
-        // 버튼이 비활성화 상태면 클릭 무시
-        // (Unity Button 컴포넌트가 이미 처리하지만 추가 안전장치)
-
         if (selectButton != null && !selectButton.interactable)
         {
-            Debug.LogWarning("[MonsterUISlot] ⚠️ 현재 몬스터를 선택할 수 없는 턴입니다!");
             return;
         }
 

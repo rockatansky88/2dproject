@@ -3,8 +3,8 @@ using UnityEngine.UI;
 using System.Collections;
 
 /// <summary>
-/// 스프라이트 시퀀스 애니메이션 재생기
-/// SpriteRenderer와 UI Image 모두 지원합니다.
+/// 스프라이트 배열 기반 애니메이션 시스템
+/// SpriteRenderer와 UI Image 모두 지원하며, 런타임에 애니메이션 클립을 동적으로 설정 가능
 /// </summary>
 public class SpriteAnimator : MonoBehaviour
 {
@@ -25,7 +25,17 @@ public class SpriteAnimator : MonoBehaviour
     }
 
     /// <summary>
+    /// 애니메이션 클립 동적 설정
+    /// 런타임에 MonsterSpawnData 등에서 전달받은 클립 배열을 설정
+    /// </summary>
+    public void SetClips(SpriteAnimationClip[] newClips)
+    {
+        clips = newClips;
+    }
+
+    /// <summary>
     /// 애니메이션 재생
+    /// 지정된 클립 이름의 애니메이션을 재생, 루프 여부 설정 가능
     /// </summary>
     /// <param name="clipName">애니메이션 클립 이름</param>
     /// <param name="loop">반복 재생 여부</param>
@@ -35,7 +45,6 @@ public class SpriteAnimator : MonoBehaviour
 
         if (clip == null || clip.frames.Length == 0)
         {
-            Debug.LogWarning($"[SpriteAnimator] '{clipName}' 클립을 찾을 수 없습니다.");
             return;
         }
 
@@ -45,7 +54,7 @@ public class SpriteAnimator : MonoBehaviour
     }
 
     /// <summary>
-    /// 애니메이션 중지
+    /// 애니메이션 정지
     /// </summary>
     public void Stop()
     {
@@ -99,6 +108,7 @@ public class SpriteAnimator : MonoBehaviour
 
 /// <summary>
 /// 스프라이트 애니메이션 클립 데이터
+/// 클립 이름, 프레임 배열, 프레임 속도를 포함
 /// </summary>
 [System.Serializable]
 public class SpriteAnimationClip
@@ -109,6 +119,6 @@ public class SpriteAnimationClip
     [Tooltip("스프라이트 프레임 배열")]
     public Sprite[] frames;
 
-    [Tooltip("프레임당 지속 시간 (초)")]
+    [Tooltip("프레임당 대기 시간 (초)")]
     public float frameRate = 0.1f;
 }
