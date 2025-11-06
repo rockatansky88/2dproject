@@ -150,8 +150,13 @@ public class DungeonManager : MonoBehaviour
         }
 
         currentRoomIndex++;
+        UnityEngine.Debug.Log($"[DungeonManager] 방 선택 완료: currentRoomIndex = {currentRoomIndex}/{totalRooms}");
+
         OnRoomProgressed?.Invoke(currentRoomIndex, totalRooms);
         currentRoomType = DecideRoomType();
+
+        UnityEngine.Debug.Log($"[DungeonManager] 방 타입 결정: {currentRoomType}");
+
         OnRoomTypeSelected?.Invoke(currentRoomType);
         ProcessRoom();
     }
@@ -542,8 +547,10 @@ public class DungeonManager : MonoBehaviour
     /// </summary>
     public bool IsDungeonCleared()
     {
-        // 5번째 방을 완료하면 currentRoomIndex = 5이므로
         bool isCleared = currentRoomIndex >= totalRooms;
+
+        UnityEngine.Debug.Log($"[DungeonManager] 던전 클리어 체크: currentRoomIndex={currentRoomIndex}, totalRooms={totalRooms}, isCleared={isCleared}");
+
         return isCleared;
     }
 

@@ -449,6 +449,8 @@ public class CombatManager : MonoBehaviour
 
     /// <summary>
     /// 전투 종료 처리
+    /// 승리 시 보상 지급 후 OnCombatEnded 이벤트 발생
+    /// GameSceneManager에서 던전 완료 여부를 체크하여 화면 전환 처리
     /// </summary>
     public void EndCombat(bool isVictory)
     {
@@ -460,28 +462,16 @@ public class CombatManager : MonoBehaviour
             CalculateRewards();
             GiveRewards();
 
-
-            if (DungeonManager.Instance != null)
-            {
-                if (DungeonManager.Instance.IsDungeonCleared())
-                {
-                    DungeonManager.Instance.CompleteDungeon();
-                }
-                else
-                {
-                    DungeonManager.Instance.MoveToNextRoom();
-                }
-            }
+            // DungeonManager 호출 제거 (이벤트만 발생)
+            // GameSceneManager.OnCombatEnded()에서 던전 완료 체크 후 처리
         }
         else
         {
-
-            if (DungeonManager.Instance != null)
-            {
-                DungeonManager.Instance.ExitDungeon();
-            }
+            // 패배 시 Fail 화면 
+            // GameSceneManager.OnCombatEnded()에서 마을 귀환 처리
         }
 
+        // 이벤트 발생 (GameSceneManager가 처리)
         OnCombatEnded?.Invoke(isVictory);
 
         CleanupCombat();

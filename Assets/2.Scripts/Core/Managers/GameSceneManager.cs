@@ -475,12 +475,16 @@ public class GameSceneManager : MonoBehaviour
 
     private void OnProceedClicked()
     {
+        UnityEngine.Debug.Log($"[GameSceneManager] OnProceedClicked 호출");
+
         if (DungeonManager.Instance != null && DungeonManager.Instance.IsDungeonCleared())
         {
+            UnityEngine.Debug.Log($"[GameSceneManager] 이벤트 후 던전 클리어! 완료 화면 표시");
             ShowDungeonCompleteScreen();
             return;
         }
 
+        UnityEngine.Debug.Log($"[GameSceneManager] 이벤트 후 던전 진행 중... 통로 화면 표시");
         ShowCorridorUI();
     }
 
@@ -588,19 +592,24 @@ public class GameSceneManager : MonoBehaviour
 
     private void OnCombatEnded(bool isVictory)
     {
+        UnityEngine.Debug.Log($"[GameSceneManager] 전투 종료: isVictory={isVictory}");
+
         if (isVictory)
         {
             if (DungeonManager.Instance != null && DungeonManager.Instance.IsDungeonCleared())
             {
+                UnityEngine.Debug.Log($"[GameSceneManager] 던전 클리어! 완료 화면 표시");
                 ShowDungeonCompleteScreen();
             }
             else
             {
+                UnityEngine.Debug.Log($"[GameSceneManager] 던전 진행 중... 통로 화면 표시");
                 ShowCorridorUI();
             }
         }
         else
         {
+            UnityEngine.Debug.Log($"[GameSceneManager] 전투 패배! 마을 귀환");
             OnBackToTownClicked();
         }
     }
