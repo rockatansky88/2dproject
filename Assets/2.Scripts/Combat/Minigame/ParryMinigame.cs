@@ -5,23 +5,24 @@ using System.Collections;
 
 /// <summary>
 /// 패링 미니게임
-/// - 몬스터 공격 시 타이밍에 맞춰 Space 입력
-/// - 성공: 데미지 50% 감소 + 반격 데미지 50%
-/// - 실패: 일반 데미지 적용
+/// 몬스터 공격 시 타이밍 맞춰 Space 입력
+/// 성공: 데미지 무효화, 실패: 일반 데미지 적용
+/// 난이도 대폭 상승: 축소 속도 증가, 판정 범위 축소
 /// </summary>
 public class ParryMinigame : MonoBehaviour
 {
     [Header("UI 참조")]
     [SerializeField] private GameObject minigamePanel;
-    [SerializeField] private RectTransform attackIndicator; // 공격 타이밍 표시 원
-    [SerializeField] private RectTransform parryZone;       // 패링 성공 구간
+    [SerializeField] private RectTransform attackIndicator;
+    [SerializeField] private RectTransform parryZone;
     [SerializeField] private Text resultText;
     [SerializeField] private Text instructionText;
 
-    [Header("설정")]
-    [SerializeField] private float shrinkSpeed = 200f;      // 원이 줄어드는 속도
-    [SerializeField] private float parryZoneSize = 50f;     // 패링 성공 구간 크기
-    [SerializeField] private float timeLimitSeconds = 2f;   // 제한 시간
+    [Header("설정 - 난이도 상승")]
+    [SerializeField] private float shrinkSpeed = 350f;      // 축소 속도 증가 (200 → 350)
+    [SerializeField] private float parryZoneSize = 50f;
+    [SerializeField] private float timeLimitSeconds = 1.5f; // 제한 시간 단축 (2초 → 1.5초)
+    [SerializeField] private float parryTolerance = 15f;    // 판정 범위 축소 (30 → 15)
 
     private bool isPlaying = false;
     private bool hasInput = false;
@@ -29,12 +30,11 @@ public class ParryMinigame : MonoBehaviour
     private float currentSize;
     private float timer;
 
-    public event Action<bool> OnParryComplete; // true: 성공, false: 실패
+    public event Action<bool> OnParryComplete;
 
     private void Awake()
     {
         minigamePanel.SetActive(false);
-        Debug.Log("[ParryMinigame] 초기화 완료");
     }
 
     /// <summary>
@@ -42,34 +42,26 @@ public class ParryMinigame : MonoBehaviour
     /// </summary>
     public void StartMinigame()
     {
-        Debug.Log("[ParryMinigame] ━━━ 패링 미니게임 시작 ━━━");
-
-        // 초기화
         isPlaying = true;
         hasInput = false;
         isSuccess = false;
         timer = 0f;
 
-        // 초기 크기 설정
         currentSize = 300f;
         attackIndicator.sizeDelta = new Vector2(currentSize, currentSize);
         parryZone.sizeDelta = new Vector2(parryZoneSize, parryZoneSize);
 
-        // UI 활성화
         minigamePanel.SetActive(true);
         resultText.text = "";
-        instructionText.text = "Space 키를 눌러 패링!";
+        instructionText.text = "Space 키로 정확히 패링!";
 
         StartCoroutine(ShrinkIndicator());
-
-        Debug.Log($"[ParryMinigame] 제한 시간: {timeLimitSeconds}초, 패링 구간: {parryZoneSize}px");
     }
 
     private void Update()
     {
         if (!isPlaying || hasInput) return;
 
-        // 스페이스 입력
         if (Input.GetKeyDown(KeyCode.Space))
         {
             hasInput = true;
@@ -78,7 +70,7 @@ public class ParryMinigame : MonoBehaviour
     }
 
     /// <summary>
-    /// 공격 타이밍 원 줄어들기
+    /// 공격 타이밍 바 축소
     /// </summary>
     private IEnumerator ShrinkIndicator()
     {
@@ -97,32 +89,28 @@ public class ParryMinigame : MonoBehaviour
             yield return null;
         }
 
-        // 입력 없으면 자동 실패
         if (!hasInput)
         {
             hasInput = true;
             isSuccess = false;
-            Debug.Log("[ParryMinigame] 타임아웃 - 자동 실패");
             StartCoroutine(ShowResult());
         }
     }
 
     /// <summary>
     /// 패링 성공 여부 확인
+    /// 판정 범위를 더 엄격하게 설정
     /// </summary>
     private void CheckParrySuccess()
     {
-        // 원의 크기가 패링 구간과 비슷하면 성공
         float sizeDifference = Mathf.Abs(currentSize - parryZoneSize);
-        isSuccess = sizeDifference <= 30f; // 오차 범위 ±30px
-
-        Debug.Log($"[ParryMinigame] 패링 판정 - 현재 크기: {currentSize:F1}, 목표 크기: {parryZoneSize}, 오차: {sizeDifference:F1} => {(isSuccess ? "성공!" : "실패")}");
+        isSuccess = sizeDifference <= parryTolerance; // 30 → 15
 
         StartCoroutine(ShowResult());
     }
 
     /// <summary>
-    /// 결과 표시 및 종료
+    /// 결과 표시 후 종료
     /// </summary>
     private IEnumerator ShowResult()
     {
@@ -136,7 +124,5 @@ public class ParryMinigame : MonoBehaviour
         minigamePanel.SetActive(false);
 
         OnParryComplete?.Invoke(isSuccess);
-
-        Debug.Log($"[ParryMinigame] ━━━ 패링 미니게임 종료: {(isSuccess ? "성공" : "실패")} ━━━");
     }
 }

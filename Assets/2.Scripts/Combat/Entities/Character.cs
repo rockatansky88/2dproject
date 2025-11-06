@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 /// <summary>
 /// 전투 캐릭터 (용병)
+/// MercenaryInstance의 이벤트 버프를 전투 시작 시 적용합니다.
 /// </summary>
 public class Character : MonoBehaviour, ICombatant
 {
@@ -15,7 +16,6 @@ public class Character : MonoBehaviour, ICombatant
     [Header("스킬")]
     public List<SkillDataSO> Skills = new List<SkillDataSO>();
 
-    // ICombatant 구현
     public string Name => mercenaryData?.mercenaryName ?? "Unknown";
     public int Speed => Stats.Speed;
     public bool IsAlive => Stats.IsAlive;
@@ -33,13 +33,9 @@ public class Character : MonoBehaviour, ICombatant
         mercenaryData = data;
         Skills = skills;
 
-        // 스탯 초기화
         Stats = new CombatStats();
-
-
         Stats.InitializeFromMercenary(data);
 
-        Debug.Log($"[Character] ✅ {Name} 초기화 완료 - HP: {Stats.CurrentHP}/{Stats.MaxHP}, MP: {Stats.CurrentMP}/{Stats.MaxMP}");
     }
 
     /// <summary>
@@ -53,7 +49,6 @@ public class Character : MonoBehaviour, ICombatant
             return;
         }
 
-        // 임시 MercenaryInstance 생성
         mercenaryData = new MercenaryInstance
         {
             mercenaryName = "전투용_캐릭터",
@@ -67,50 +62,45 @@ public class Character : MonoBehaviour, ICombatant
 
         Skills = skills;
 
-        // 스탯 초기화 (레거시 방법 - 실시간 계산)
         Stats = new CombatStats();
-
         Stats.Initialize(
             characterStats.Strength,
             characterStats.Dexterity,
             characterStats.Intelligence,
             characterStats.Wisdom,
             characterStats.Speed,
-            characterStats.Health, // ← baseHealth 전달
+            characterStats.Health,
             baseCritChance: Random.Range(5f, 15f)
         );
 
-        Debug.Log($"[Character] ✅ {Name} 초기화 완료 (CharacterStatsSO) - HP: {Stats.CurrentHP}/{Stats.MaxHP}, MP: {Stats.CurrentMP}/{Stats.MaxMP}");
     }
 
     /// <summary>
     /// 초기화 (UI 슬롯 연결)
     /// MercenaryInstance의 HP/MP를 전투 중 실시간으로 동기화합니다.
+    /// 이벤트 버프는 이미 MercenaryInstance에 반영되어 있으므로 재적용하지 않습니다.
     /// </summary>
     public void Initialize(MercenaryInstance data, List<SkillDataSO> skills, MercenaryPartySlot slot = null)
     {
+
         mercenaryData = data;
         Skills = skills;
         uiSlot = slot;
 
-        // 스탯 초기화
+        // CombatStats는 MercenaryInstance 값을 그대로 로드
+        // 이벤트 버프는 이미 MercenaryInstance에 반영되어 있으므로 재계산 불필요
         Stats = new CombatStats();
-
         Stats.InitializeFromMercenary(data);
 
+
         // HP/MP 변경 시 MercenaryInstance에 역반영
-        // 전투 중 HP/MP 변화가 원본 데이터에도 저장되어
-        // 전투 종료 후에도 유지됩니다.
         Stats.OnHPChanged += (currentHP, maxHP) =>
         {
-            // MercenaryInstance 업데이트
             if (mercenaryData != null)
             {
                 mercenaryData.currentHP = currentHP;
-                Debug.Log($"[Character] {Name} HP 변경 → MercenaryInstance 업데이트: {currentHP}/{maxHP}");
             }
 
-            // UI 업데이트
             if (uiSlot != null)
             {
                 uiSlot.UpdateCombatStats(currentHP, maxHP, Stats.CurrentMP, Stats.MaxMP);
@@ -119,14 +109,11 @@ public class Character : MonoBehaviour, ICombatant
 
         Stats.OnMPChanged += (currentMP, maxMP) =>
         {
-            // MercenaryInstance 업데이트
             if (mercenaryData != null)
             {
                 mercenaryData.currentMP = currentMP;
-                Debug.Log($"[Character] {Name} MP 변경 → MercenaryInstance 업데이트: {currentMP}/{maxMP}");
             }
 
-            // UI 업데이트
             if (uiSlot != null)
             {
                 uiSlot.UpdateCombatStats(Stats.CurrentHP, Stats.MaxHP, currentMP, maxMP);
@@ -139,25 +126,43 @@ public class Character : MonoBehaviour, ICombatant
             uiSlot.UpdateCombatStats(Stats.CurrentHP, Stats.MaxHP, Stats.CurrentMP, Stats.MaxMP);
         }
 
-        Debug.Log($"[Character] ✅ {Name} 초기화 완료 - HP: {Stats.CurrentHP}/{Stats.MaxHP}, MP: {Stats.CurrentMP}/{Stats.MaxMP}, UI 연결: {(uiSlot != null ? "O" : "X")}");
     }
 
     /// <summary>
     /// 스킬 사용
     /// </summary>
-    public bool UseSkill(SkillDataSO skill, ICombatant target, bool isCritical)
+    public bool UseSkill(SkillDataSO skill, ICombatant target, bool isCritical = false)
     {
-        // 마나 체크
         if (!skill.isBasicAttack && !Stats.ConsumeMana(skill.manaCost))
         {
             Debug.LogWarning($"[Character] {Name} - 마나 부족으로 {skill.skillName} 사용 불가");
             return false;
         }
 
+        //  스킬 사운드 재생
+        if (SoundManager.Instance != null)
+        {
+            if (skill.skillSound != null)
+            {
+                // 스킬 전용 사운드 재생
+                SoundManager.Instance.PlaySkillSound(skill.skillSound);
+            }
+            else if (skill.isBasicAttack)
+            {
+                // 기본 공격 사운드 재생
+                SoundManager.Instance.PlayBasicAttackSound();
+            }
+        }
+
         // 데미지 계산
         int damage = skill.CalculateDamage(Stats, isCritical);
 
-        // 타겟에게 데미지
+        // 크리티컬 사운드 재생
+        if (isCritical && SoundManager.Instance != null)
+        {
+            SoundManager.Instance.PlayCriticalSound();
+        }
+
         target.TakeDamage(damage);
 
         if (target is Monster monster && monster.uiSlot != null)
@@ -165,12 +170,10 @@ public class Character : MonoBehaviour, ICombatant
             monster.uiSlot.ShowDamage(damage, isCritical);
         }
 
-        Debug.Log($"[Character] {Name}이(가) {skill.skillName} 사용 -> {target.Name}에게 {damage} 데미지{(isCritical ? " (크리티컬!)" : "")}!");
 
         return true;
     }
 
-    // ICombatant 구현
     public void TakeDamage(int damage)
     {
         Stats.TakeDamage(damage);
@@ -180,7 +183,6 @@ public class Character : MonoBehaviour, ICombatant
             uiSlot.ShowDamage(damage, isCritical: false);
         }
 
-        Debug.Log($"[Character] {Name} 피격 - {damage} 데미지, 남은 HP: {Stats.CurrentHP}/{Stats.MaxHP}");
     }
 
     public void Heal(int amount)

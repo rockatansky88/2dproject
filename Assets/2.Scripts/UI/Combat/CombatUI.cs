@@ -16,10 +16,6 @@ public class CombatUI : MonoBehaviour
     [SerializeField] private Transform monsterSpawnParent; // MonsterUI가 생성되는 부모
     private List<MonsterUISlot> monsterSlots = new List<MonsterUISlot>();
 
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🔧 수정: 스킬 컨테이너 참조 방식 변경
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
     [Header("스킬 슬롯")]
     [SerializeField] private Transform skillSlotParent; // SkillSlotParent (빈 컨테이너)
     [SerializeField] private GameObject skillContainerPrefab; // 🆕 SkillContainer 프리팹
@@ -45,7 +41,6 @@ public class CombatUI : MonoBehaviour
 
     private void Awake()
     {
-        Debug.Log("[CombatUI] 초기화");
 
         if (attackButton != null)
         {
@@ -65,10 +60,6 @@ public class CombatUI : MonoBehaviour
         // 🆕 추가: 스킬 컨테이너 생성
         CreateSkillContainer();
     }
-
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🆕 추가: SkillContainer 생성 메서드
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
     /// <summary>
     /// SkillContainer를 한 번만 생성하고 내부 슬롯 참조
@@ -93,7 +84,6 @@ public class CombatUI : MonoBehaviour
             Destroy(child.gameObject);
         }
 
-        Debug.Log("[CombatUI] SkillContainer 생성 시작");
 
         // 🆕 SkillContainer 인스턴스 생성
         skillContainerInstance = Instantiate(skillContainerPrefab, skillSlotParent);
@@ -110,7 +100,6 @@ public class CombatUI : MonoBehaviour
         }
 
         skillSlots.AddRange(foundSlots);
-        Debug.Log($"[CombatUI] ✅ SkillContainer 생성 완료 - 내부 슬롯 {skillSlots.Count}개 발견");
 
         // 초기엔 모든 슬롯 비활성화
         foreach (var slot in skillSlots)
@@ -124,13 +113,11 @@ public class CombatUI : MonoBehaviour
     /// </summary>
     public void InitializePartyUI(List<Character> party)
     {
-        Debug.Log($"[CombatUI] 파티 UI 전투 모드 전환: {party.Count}명");
 
         // 파티 슬롯 찾기
         if (partySlots.Count == 0 && mercenaryPartyRoot != null)
         {
             partySlots.AddRange(mercenaryPartyRoot.GetComponentsInChildren<MercenaryPartySlot>(true));
-            Debug.Log($"[CombatUI] 파티 슬롯 {partySlots.Count}개 발견");
         }
 
         // 전투 모드 활성화
@@ -139,7 +126,6 @@ public class CombatUI : MonoBehaviour
             if (i < party.Count)
             {
                 partySlots[i].SetCombatMode(true);
-                Debug.Log($"[CombatUI] 파티 슬롯 {i}: 전투 모드 활성화");
             }
             else
             {
@@ -148,9 +134,6 @@ public class CombatUI : MonoBehaviour
         }
     }
 
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🔧 수정: InitializeMonsterUI - 몬스터 클릭 이벤트 연결 및 타겟 선택 구현
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
     /// <summary>
     /// 몬스터 슬롯 찾기 및 클릭 이벤트 연결
@@ -161,7 +144,6 @@ public class CombatUI : MonoBehaviour
     /// </summary>
     public void InitializeMonsterUI(List<Monster> monsters)
     {
-        Debug.Log($"[CombatUI] ━━━ 몬스터 UI 초기화: {monsters.Count}마리 ━━━");
 
         // 🔧 수정: 몬스터 슬롯 새로 찾기 (이전 참조 제거)
         monsterSlots.Clear();
@@ -169,7 +151,6 @@ public class CombatUI : MonoBehaviour
         if (monsterSpawnParent != null)
         {
             monsterSlots.AddRange(monsterSpawnParent.GetComponentsInChildren<MonsterUISlot>(true));
-            Debug.Log($"[CombatUI] 몬스터 슬롯 {monsterSlots.Count}개 발견");
         }
         else
         {
@@ -200,15 +181,10 @@ public class CombatUI : MonoBehaviour
             slot.OnMonsterClicked -= OnMonsterSlotClicked;
             slot.OnMonsterClicked += OnMonsterSlotClicked;
 
-            Debug.Log($"[CombatUI] ✅ 몬스터 슬롯 {i}: {monster.Name} 클릭 이벤트 등록");
         }
 
-        Debug.Log("[CombatUI] ✅ 몬스터 UI 초기화 완료");
     }
 
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🆕 추가: 몬스터 클릭 핸들러
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
     /// <summary>
     /// 몬스터 슬롯 클릭 핸들러
@@ -226,7 +202,6 @@ public class CombatUI : MonoBehaviour
             return;
         }
 
-        Debug.Log($"[CombatUI] 🎯 몬스터 클릭: {monster.Name} - 타겟으로 설정");
 
         // 🔧 1. 모든 몬스터 슬롯 선택 해제
         foreach (var slot in monsterSlots)
@@ -243,7 +218,6 @@ public class CombatUI : MonoBehaviour
         if (clickedSlot != null)
         {
             clickedSlot.SetSelected(true);
-            Debug.Log($"[CombatUI] ✅ {monster.Name} 선택 표시 활성화");
         }
 
         // 🔧 3. 타겟 화살표 표시
@@ -253,16 +227,11 @@ public class CombatUI : MonoBehaviour
         currentTarget = monster;
     }
 
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🔧 수정: InitializeSkillSlots - SkillContainer 내부 슬롯 재사용
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
     /// <summary>
     /// 스킬 슬롯에 스킬 데이터 할당 (SkillContainer 내부 슬롯 재사용)
     /// </summary>
     public void InitializeSkillSlots(List<SkillDataSO> skills)
     {
-        Debug.Log($"[CombatUI] 스킬 슬롯 초기화: {skills?.Count ?? 0}개");
 
         if (skillSlots.Count == 0)
         {
@@ -294,7 +263,6 @@ public class CombatUI : MonoBehaviour
             slot.Initialize(skill);
             slot.gameObject.SetActive(true);
 
-            Debug.Log($"[CombatUI] 스킬 슬롯 {i}: {skill.skillName} 할당");
         }
 
         // 🆕 SkillContainer 활성화
@@ -308,12 +276,8 @@ public class CombatUI : MonoBehaviour
             skillSlotParent.gameObject.SetActive(true);
         }
 
-        Debug.Log($"[CombatUI] ✅ 스킬 슬롯 {skillCount}개 활성화 완료");
     }
 
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🆕 추가: 모든 스킬 슬롯 숨기기
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
     /// <summary>
     /// 모든 스킬 슬롯 비활성화
@@ -361,16 +325,12 @@ public class CombatUI : MonoBehaviour
         }
     }
 
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🔧 수정: UpdateCurrentTurn - SkillContainer 위치 이동 추가
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
     /// <summary>
     /// 현재 턴 표시
     /// </summary>
     public void UpdateCurrentTurn(ICombatant combatant)
     {
-        Debug.Log($"[CombatUI] 현재 턴 표시: {combatant.Name}");
 
         // 1. 모든 파티 슬롯 턴 표시 제거
         foreach (var slot in partySlots)
@@ -384,31 +344,30 @@ public class CombatUI : MonoBehaviour
             if (slot != null) slot.SetTurnActive(false);
         }
 
-        // 스킬 선택 초기화
         selectedSkill = null;
-
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🆕 추가: 턴에 따른 몬스터 클릭 가능 여부 제어
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
         if (combatant.IsPlayer)
         {
-            // ✅ 플레이어 턴 → 몬스터 클릭 가능
             SetMonsterSlotsInteractable(true);
 
-            // 용병 턴 처리
             Character character = combatant as Character;
             if (character != null)
             {
+
                 MercenaryPartySlot targetSlot = partySlots.FirstOrDefault(s =>
-                    s != null && s.GetMercenary() != null && s.GetMercenary().mercenaryName == character.Name);
+                    s != null &&
+                    s.GetMercenary() != null &&
+                    s.GetMercenary().instanceID == character.mercenaryData.instanceID); // ✅ ID로 비교
 
                 if (targetSlot != null)
                 {
                     targetSlot.SetTurnActive(true);
-                    Debug.Log($"[CombatUI] ✅ {character.Name} 턴 표시 (용병)");
 
                     MoveSkillContainerToMercenary(targetSlot);
+                }
+                else
+                {
+                    Debug.LogWarning($"[CombatUI] ⚠️ {character.mercenaryData.GetDisplayName()} (instanceID: {character.mercenaryData.instanceID})의 슬롯을 찾을 수 없습니다!");
                 }
 
                 if (skillSlotParent != null)
@@ -421,10 +380,8 @@ public class CombatUI : MonoBehaviour
         }
         else
         {
-            // ❌ 몬스터 턴 → 몬스터 클릭 불가
             SetMonsterSlotsInteractable(false);
 
-            // 몬스터 턴 처리
             Monster monster = combatant as Monster;
             if (monster != null)
             {
@@ -434,7 +391,6 @@ public class CombatUI : MonoBehaviour
                 if (targetSlot != null)
                 {
                     targetSlot.SetTurnActive(true);
-                    Debug.Log($"[CombatUI] ✅ {monster.Name} 턴 표시 (몬스터)");
                 }
                 else
                 {
@@ -449,10 +405,6 @@ public class CombatUI : MonoBehaviour
         }
     }
 
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🆕 추가: 모든 몬스터 슬롯 클릭 가능 여부 설정
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
     /// <summary>
     /// 모든 몬스터 슬롯의 클릭 가능 여부 설정
     /// 플레이어 턴에만 몬스터를 선택할 수 있도록 제어
@@ -460,11 +412,8 @@ public class CombatUI : MonoBehaviour
     /// <param name="interactable">true: 클릭 가능, false: 클릭 불가</param>
     private void SetMonsterSlotsInteractable(bool interactable)
     {
-        Debug.Log($"[CombatUI] 🔒 몬스터 슬롯 클릭 가능 여부 설정: {interactable}");
 
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🔧 수정: monsterSlots 리스트가 비어있는지 확인
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
         if (monsterSlots == null || monsterSlots.Count == 0)
         {
             Debug.LogWarning("[CombatUI] ⚠️ monsterSlots가 비어있습니다! InitializeMonsterUI()를 먼저 호출하세요");
@@ -491,25 +440,20 @@ public class CombatUI : MonoBehaviour
         }
     }
 
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🆕 추가: 첫 번째 살아있는 몬스터 자동 선택
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
     /// <summary>
     /// 용병 턴 시작 시 첫 번째 살아있는 몬스터를 자동으로 타겟 지정
     /// </summary>
     public void SelectFirstAliveMonster()
     {
-        Debug.Log("[CombatUI] 첫 번째 살아있는 몬스터 자동 선택 시도");
 
         // 살아있는 몬스터 슬롯 찾기
         MonsterUISlot firstAliveSlot = monsterSlots.FirstOrDefault(s =>
             s != null && s.GetMonster() != null && s.GetMonster().IsAlive);
 
         if (firstAliveSlot != null)
-        { firstAliveSlot.gameObject.SetActive(true);
+        {
+            firstAliveSlot.gameObject.SetActive(true);
             Monster firstMonster = firstAliveSlot.GetMonster();
-            Debug.Log($"[CombatUI] ✅ 첫 번째 몬스터 자동 선택: {firstMonster.Name}");
 
             // 몬스터 클릭 핸들러 호출 (수동 선택과 동일한 로직)
             OnMonsterSlotClicked(firstMonster);
@@ -520,9 +464,6 @@ public class CombatUI : MonoBehaviour
         }
     }
 
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🆕 추가: SkillContainer를 용병 위치로 이동
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
     /// <summary>
     /// SkillContainer(또는 Parent)를 턴인 용병 바로 위로 이동
@@ -553,11 +494,11 @@ public class CombatUI : MonoBehaviour
 
         containerRect.position = newPosition;
 
-        Debug.Log($"[CombatUI] ✅ SkillContainer를 {targetSlot.GetMercenary().mercenaryName} 위로 이동: {newPosition}");
     }
 
     /// <summary>
     /// 타겟 화살표 표시
+    /// MercenaryInstance의 instanceID를 기반으로 정확한 슬롯 위치를 찾습니다.
     /// </summary>
     public void ShowTargetArrow(ICombatant target)
     {
@@ -586,13 +527,25 @@ public class CombatUI : MonoBehaviour
                         rt.position.z
                     );
                 }
-                Debug.Log($"[CombatUI] 타겟 화살표 표시: {target.Name}");
+            }
+            else
+            {
+                Debug.LogWarning($"[CombatUI] ⚠️ 몬스터 {target.Name}의 슬롯을 찾을 수 없습니다!");
             }
         }
         else if (target is Character character)
         {
+
+            if (character.mercenaryData == null)
+            {
+                Debug.LogWarning($"[CombatUI] ⚠️ {character.Name}의 mercenaryData가 null입니다!");
+                return;
+            }
+
             MercenaryPartySlot slot = partySlots.FirstOrDefault(s =>
-                s != null && s.GetMercenary() != null && s.GetMercenary().mercenaryName == character.Name);
+                s != null &&
+                s.GetMercenary() != null &&
+                s.GetMercenary().instanceID == character.mercenaryData.instanceID); // ✅ ID로 비교
 
             if (slot != null)
             {
@@ -605,7 +558,10 @@ public class CombatUI : MonoBehaviour
                         rt.position.z
                     );
                 }
-                Debug.Log($"[CombatUI] 타겟 화살표 표시: {target.Name}");
+            }
+            else
+            {
+                Debug.LogWarning($"[CombatUI] ⚠️ {character.mercenaryData.GetDisplayName()} (instanceID: {character.mercenaryData.instanceID})의 슬롯을 찾을 수 없습니다!");
             }
         }
     }
@@ -642,7 +598,6 @@ public class CombatUI : MonoBehaviour
             selectedSlot.SetSelected(true);
         }
 
-        Debug.Log($"[CombatUI] 스킬 선택: {skill.skillName}");
     }
 
     /// <summary>
@@ -662,7 +617,6 @@ public class CombatUI : MonoBehaviour
             return;
         }
 
-        Debug.Log($"[CombatUI] 공격 버튼 클릭: {selectedSkill.skillName} -> {currentTarget.Name}");
 
         if (CombatManager.Instance != null)
         {
@@ -678,7 +632,6 @@ public class CombatUI : MonoBehaviour
         if (tpeMinigamePanel != null)
         {
             tpeMinigamePanel.SetActive(true);
-            Debug.Log("[CombatUI] TPE 미니게임 표시");
         }
     }
 
@@ -690,7 +643,6 @@ public class CombatUI : MonoBehaviour
         if (tpeMinigamePanel != null)
         {
             tpeMinigamePanel.SetActive(false);
-            Debug.Log("[CombatUI] TPE 미니게임 숨김");
         }
     }
 
@@ -702,7 +654,6 @@ public class CombatUI : MonoBehaviour
         if (parryMinigamePanel != null)
         {
             parryMinigamePanel.SetActive(true);
-            Debug.Log("[CombatUI] 패링 미니게임 표시");
         }
     }
 
@@ -714,17 +665,25 @@ public class CombatUI : MonoBehaviour
         if (parryMinigamePanel != null)
         {
             parryMinigamePanel.SetActive(false);
-            Debug.Log("[CombatUI] 패링 미니게임 숨김");
         }
     }
 
     /// <summary>
     /// 파티 멤버 스탯 업데이트
+    /// MercenaryInstance의 instanceID를 기반으로 정확한 슬롯을 찾습니다.
     /// </summary>
     public void UpdatePartyMemberStats(Character character)
     {
+        if (character == null || character.mercenaryData == null)
+        {
+            Debug.LogWarning("[CombatUI] ⚠️ character 또는 mercenaryData가 null입니다!");
+            return;
+        }
+
         MercenaryPartySlot targetSlot = partySlots.FirstOrDefault(s =>
-            s != null && s.GetMercenary() != null && s.GetMercenary().mercenaryName == character.Name);
+            s != null &&
+            s.GetMercenary() != null &&
+            s.GetMercenary().instanceID == character.mercenaryData.instanceID); //  ID로 비교
 
         if (targetSlot != null)
         {
@@ -734,6 +693,11 @@ public class CombatUI : MonoBehaviour
                 character.Stats.CurrentMP,
                 character.Stats.MaxMP
             );
+
+        }
+        else
+        {
+            Debug.LogWarning($"[CombatUI] ⚠️ {character.mercenaryData.GetDisplayName()} (instanceID: {character.mercenaryData.instanceID})의 슬롯을 찾을 수 없습니다!");
         }
     }
 

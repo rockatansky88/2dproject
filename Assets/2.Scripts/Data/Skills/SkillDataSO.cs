@@ -1,26 +1,21 @@
 ﻿using UnityEngine;
 
-/// <summary>
-/// 스킬 타입 - 물리 / 마법
-/// </summary>
 public enum SkillDamageType
 {
-    Physical,  // 물리 - STR 기반
-    Magical    // 마법 - INT 기반
+    Physical,
+    Magical
 }
 
-/// <summary>
-/// 타겟 타입 - 단일 / 다중
-/// </summary>
 public enum SkillTargetType
 {
-    Single,    // 단일 대상
-    All        // 전체 대상
+    Single,
+    All
 }
 
 /// <summary>
 /// 스킬 데이터 ScriptableObject
-/// - 기본 공격 스킬 + 특수 스킬 구현
+/// 기본 공격 스킬 + 특수 스킬 구현
+/// 스킬별 사운드 효과 및 스프라이트 애니메이션 포함
 /// </summary>
 [CreateAssetMenu(fileName = "New Skill", menuName = "Game/Combat/Skill Data")]
 public class SkillDataSO : ScriptableObject
@@ -65,42 +60,44 @@ public class SkillDataSO : ScriptableObject
     [Tooltip("기본 공격인지 여부 (true면 마나 소모 없음)")]
     public bool isBasicAttack = false;
 
+    [Header("사운드 효과")]
+    [Tooltip("스킬 사용 시 재생될 효과음")]
+    public AudioClip skillSound;
+
+    [Header("스프라이트 애니메이션")] // ✅ 추가
+    [Tooltip("스킬 이펙트 스프라이트 시퀀스 (타겟 위치에 재생)")]
+    public Sprite[] effectSprites;
+
+    [Tooltip("이펙트 프레임 속도 (초)")]
+    public float effectFrameRate = 0.1f;
+
+    [Tooltip("이펙트 스프라이트 크기 (기본: 1)")]
+    public float effectScale = 1f;
+
     /// <summary>
     /// 최종 데미지 계산
     /// </summary>
-    /// <param name="attackerStats">공격자 스탯</param>
-    /// <param name="isCritical">크리티컬 여부</param>
-    /// <returns>최종 데미지</returns>
     public int CalculateDamage(CombatStats attackerStats, bool isCritical)
     {
-        // 기본 데미지 랜덤 계산
         int baseDamage = Random.Range(baseDamageMin, baseDamageMax + 1);
 
-        // 스탯 기반 추가 데미지
         int statBonus = 0;
         if (damageType == SkillDamageType.Physical)
         {
-            // 물리 공격 = STR 기반
             statBonus = Mathf.RoundToInt(attackerStats.Strength * statScaling);
-            Debug.Log($"[SkillDataSO] 물리 데미지 계산: 기본 {baseDamage} + STR 보너스 {statBonus} (STR: {attackerStats.Strength} x {statScaling})");
         }
         else if (damageType == SkillDamageType.Magical)
         {
-            // 마법 공격 = INT 기반
             statBonus = Mathf.RoundToInt(attackerStats.Intelligence * statScaling);
-            Debug.Log($"[SkillDataSO] 마법 데미지 계산: 기본 {baseDamage} + INT 보너스 {statBonus} (INT: {attackerStats.Intelligence} x {statScaling})");
         }
 
         int totalDamage = baseDamage + statBonus;
 
-        // 크리티컬 적용 (1.5배)
         if (isCritical)
         {
             totalDamage = Mathf.RoundToInt(totalDamage * 1.5f);
-            Debug.Log($"[SkillDataSO] 💥 크리티컬! 데미지 1.5배 적용: {totalDamage}");
         }
 
-        Debug.Log($"[SkillDataSO] {skillName} 최종 데미지: {totalDamage}");
         return totalDamage;
     }
 }

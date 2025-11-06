@@ -17,9 +17,6 @@ public class SkillSlot : MonoBehaviour
     [SerializeField] private Text skillNameText;
     [SerializeField] private Text manaCostText;
 
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🆕 수정: Image 테두리 대신 Outline 컴포넌트 사용
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     //[Header("선택 테두리 - 빨간색")]
     //[SerializeField] private Image selectionBorder; // ❌ 기존: 선택 테두리 Image
 
@@ -44,9 +41,7 @@ public class SkillSlot : MonoBehaviour
 
     private void Awake()
     {
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🆕 추가: Outline 컴포넌트 초기화
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // Outline 컴포넌트 초기화
         InitializeSelectionOutline();
     }
 
@@ -69,7 +64,6 @@ public class SkillSlot : MonoBehaviour
         if (selectionOutline == null)
         {
             selectionOutline = skillIconImage.gameObject.AddComponent<Outline>();
-            Debug.Log($"[SkillSlot] ✅ Outline 컴포넌트 자동 생성");
         }
 
         // 초기 설정: 빨간색, 두께 5, 비활성화
@@ -77,7 +71,6 @@ public class SkillSlot : MonoBehaviour
         selectionOutline.effectDistance = new Vector2(5f, 5f); // 외곽선 두께
         selectionOutline.enabled = false; // 초기엔 비활성화
 
-        Debug.Log($"[SkillSlot] ✅ Outline 초기화 완료 (빨간색, 두께 5)");
     }
 
     /// <summary>
@@ -118,9 +111,7 @@ public class SkillSlot : MonoBehaviour
             }
         }
 
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🆕 수정: Outline 비활성화
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // Outline 비활성화
         if (selectionOutline != null)
         {
             selectionOutline.enabled = false;
@@ -139,12 +130,9 @@ public class SkillSlot : MonoBehaviour
             skillButton.onClick.AddListener(OnButtonClicked);
         }
 
-        Debug.Log($"[SkillSlot] {skill.skillName} 슬롯 초기화 완료");
     }
 
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🆕 수정: Outline 기반 선택 표시로 변경
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // Outline 기반 선택 표시로 변경
 
     /// <summary>
     /// 선택 표시 활성화/비활성화
@@ -177,7 +165,6 @@ public class SkillSlot : MonoBehaviour
 
             if (skill != null)
             {
-                Debug.Log($"[SkillSlot] ✅ {skill.skillName} 선택 표시 활성화 (빨간색 외곽선 깜빡임 시작)");
             }
         }
         else
@@ -187,7 +174,6 @@ public class SkillSlot : MonoBehaviour
 
             if (skill != null)
             {
-                Debug.Log($"[SkillSlot] {skill.skillName} 선택 표시 비활성화");
             }
         }
     }
@@ -274,7 +260,6 @@ public class SkillSlot : MonoBehaviour
         bool canUse = currentMP >= skill.manaCost;
         SetInteractable(canUse);
 
-        Debug.Log($"[SkillSlot] {skill.skillName} 사용 가능: {canUse} (현재 MP: {currentMP}, 필요 MP: {skill.manaCost})");
     }
 
     /// <summary>
@@ -288,7 +273,6 @@ public class SkillSlot : MonoBehaviour
             return;
         }
 
-        Debug.Log($"[SkillSlot] 스킬 클릭: {skill.skillName}");
         OnSkillClicked?.Invoke(skill);
     }
 

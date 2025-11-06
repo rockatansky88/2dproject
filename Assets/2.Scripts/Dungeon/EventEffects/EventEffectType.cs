@@ -1,12 +1,13 @@
-/// <summary>
-/// юл╨╔ф╝ х©╟З е╦ют
+О╩©/// <summary>
+/// Л²╢К╡╓М┼╦ М ╗ЙЁ╪ М┐─Л·┘
 /// </summary>
 public enum EventEffectType
 {
-    Buff,       // ╧Жга (╫╨ех аУ╟║)
-    Debuff,     // ╣П╧Жга (╫╨ех ╟╗╪р)
-    Heal,       // ц╪╥б х╦╨╧
-    Damage,     // ц╪╥б ╟╗╪р
-    GoldReward, // ╟Я╣Е ╨╦╩С
-    ItemReward  // ╬фюлеш ╨╦╩С
+    Buff,           // Л┼╓М┐╞ Л╕²Й╟─ (STR, DEX, HP М ▄КЁ╣ К⌠╠)
+    Debuff,         // Л┼╓М┐╞ Й╟░Л├▄ (STR Й╟░Л├▄, HP М■╪М∙╢ К⌠╠)
+    GoldReward,     // ЙЁ╗К⌠° КЁ╢Л┐│
+    ItemReward      // Л∙└Л²╢М┘° КЁ╢Л┐│
+
+    // П÷≈▒О╦▐ Л═°Й╠╟К░╗: Heal, Damage
+    // Б├▓ Buff/Debuff + StatType.HPК║° К▄─Л╡╢
 }

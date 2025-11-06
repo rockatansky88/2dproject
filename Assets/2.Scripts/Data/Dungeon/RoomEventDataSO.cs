@@ -1,51 +1,63 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 /// <summary>
-/// ´øÀü ÀÌº¥Æ® µ¥ÀÌÅÍ
-/// - ÆÄÆ¼ ÀüÃ¼¿¡ ¿µÇâÀ» ÁÖ´Â ÀÌº¥Æ® (¹öÇÁ, µğ¹öÇÁ, º¸»ó, ÇÇÇØ µî)
+/// ë˜ì „ ì´ë²¤íŠ¸ ë°ì´í„°
+/// íŒŒí‹° ì „ì²´ì— ì˜í–¥ì„ ì£¼ëŠ” ì´ë²¤íŠ¸ (ë²„í”„, ë””ë²„í”„, ë³´ìƒ ë“±)
 /// </summary>
 [CreateAssetMenu(fileName = "New Room Event", menuName = "Game/Dungeon/Room Event")]
 public class RoomEventDataSO : ScriptableObject
 {
-    [Header("ÀÌº¥Æ® ±âº» Á¤º¸")]
+    [Header("ì´ë²¤íŠ¸ ê¸°ë³¸ ì •ë³´")]
     public string eventID;
 
-    [Tooltip("ÀÌº¥Æ® Á¦¸ñ (¿¹: ½ÅºñÇÑ »ù¹°)")]
+    [Tooltip("ì´ë²¤íŠ¸ ì´ë¦„ (ì˜ˆ: ì‹ ë¹„í•œ ìƒ˜ë¬¼)")]
     public string eventName;
 
-    [Tooltip("ÀÌº¥Æ® ¹è°æ ÀÌ¹ÌÁö")]
+    [Tooltip("ì´ë²¤íŠ¸ ì¼ëŸ¬ìŠ¤íŠ¸ ì´ë¯¸ì§€")]
     public Sprite eventImage;
 
-    [Tooltip("ÀÌº¥Æ® ¼³¸í ÅØ½ºÆ®")]
+    [Tooltip("ì´ë²¤íŠ¸ ì„¤ëª… í…ìŠ¤íŠ¸")]
     [TextArea(3, 10)]
     public string description;
 
-    [Header("ÀÌº¥Æ® È¿°ú")]
-    [Tooltip("ÀÌº¥Æ® È¿°ú ¸®½ºÆ® (¿©·¯ È¿°ú µ¿½Ã Àû¿ë °¡´É)")]
+    [Header("ì´ë²¤íŠ¸ íš¨ê³¼")]
+    [Tooltip("ì´ë²¤íŠ¸ íš¨ê³¼ ë¦¬ìŠ¤íŠ¸ (ì—¬ëŸ¬ íš¨ê³¼ ë™ì‹œ ì ìš© ê°€ëŠ¥)")]
     public EventEffect[] effects;
 }
 
 /// <summary>
-/// ÀÌº¥Æ® È¿°ú µ¥ÀÌÅÍ
+/// ì´ë²¤íŠ¸ íš¨ê³¼ ë°ì´í„°
+/// Inspectorì—ì„œ ì„¤ì • ê°€ëŠ¥í•œ ê°œë³„ íš¨ê³¼ ë‹¨ìœ„ì…ë‹ˆë‹¤.
+/// 
+/// ì‚¬ìš© ì˜ˆì‹œ:
+/// - HP íšŒë³µ: Buff, HP, +50
+/// - HP í”¼í•´: Debuff, HP, 30 (ìŒìˆ˜ ìë™ ë³€í™˜)
+/// - STR ë²„í”„: Buff, Strength, +10, duration 0 (ë˜ì „ ì¢…ë£Œê¹Œì§€)
+/// - DEX ë””ë²„í”„: Debuff, Dexterity, 5, duration 3 (3í„´ê°„)
+/// - ê³¨ë“œ ë³´ìƒ: GoldReward, None, 200
 /// </summary>
 [System.Serializable]
 public class EventEffect
 {
-    [Tooltip("È¿°ú Å¸ÀÔ")]
+    [Tooltip("íš¨ê³¼ íƒ€ì… (Buff: ì¦ê°€, Debuff: ê°ì†Œ, GoldReward/ItemReward: ë³´ìƒ)")]
     public EventEffectType effectType;
 
-    [Tooltip("È¿°ú °ª (Ã¼·Â º¯È­·®, °ñµå ¾ç µî)")]
+    [Tooltip("ëŒ€ìƒ ìŠ¤íƒ¯ (HP, MP, Strength ë“±)\n" +
+             "GoldReward/ItemRewardëŠ” None ì„ íƒ")]
+    public StatType targetStat = StatType.None;
+
+    [Tooltip("íš¨ê³¼ ê°’ (ì¦ê°€/ê°ì†ŒëŸ‰, ê³¨ë“œ ì–‘ ë“±)\n" +
+             "DebuffëŠ” ìë™ìœ¼ë¡œ ìŒìˆ˜ ì²˜ë¦¬ë©ë‹ˆë‹¤.")]
     public int value;
 
-    [Tooltip("´ë»ó ½ºÅÈ (HP, Strength, Dexterity µî)")]
-    public string targetStat;
-
-    [Tooltip("º¸»ó ¾ÆÀÌÅÛ (ItemRewardÀÏ ¶§¸¸ »ç¿ë)")]
+    [Tooltip("ë³´ìƒ ì•„ì´í…œ (ItemRewardì¼ ê²½ìš° ì‚¬ìš©)")]
     public ItemDataSO rewardItem;
 
-    [Tooltip("¾ÆÀÌÅÛ °³¼ö")]
+    [Tooltip("ì•„ì´í…œ ê°œìˆ˜")]
     public int itemAmount = 1;
 
-    [Tooltip("È¿°ú Áö¼Ó ½Ã°£ (ÀüÅõ ¼ö, 0 = ¿µ±¸)")]
+    [Tooltip("íš¨ê³¼ ì§€ì† ì‹œê°„ (í„´ ìˆ˜)\n" +
+             "0 = ë˜ì „ ì¢…ë£Œê¹Œì§€\n" +
+             "HP/MP ì¦‰ì‹œ íš¨ê³¼ëŠ” duration ë¬´ì‹œ")]
     public int duration = 0;
 }

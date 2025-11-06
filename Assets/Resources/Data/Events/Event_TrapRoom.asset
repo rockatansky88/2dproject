@@ -18,9 +18,9 @@ MonoBehaviour:
   description: "\uBE60\uB974\uAC8C \uC9C0\uB098\uAC00\uB294 \uAC70\uB300 \uACE0\uBE14\uB9B0\uC5D0\uAC8C
     \uD53C\uD574\uB97C \uC785\uC74C\n\n( 30\uC758 \uD53C\uD574\uB97C \uC785\uC5C8\uB2E4.) "
   effects:
-  - effectType: 3
+  - effectType: 1
+    targetStat: 6
     value: 30
-    targetStat: HP
     rewardItem: {fileID: 0}
     itemAmount: 0
     duration: 0

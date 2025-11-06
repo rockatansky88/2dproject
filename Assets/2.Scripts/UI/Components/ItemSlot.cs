@@ -1,317 +1,338 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System;
 
 public enum SlotType
 {
-    Shop,    // »óÁ¡ (±¸¸Å)
-    Player   // ÇÃ·¹ÀÌ¾î (»ç¿ë/ÆÇ¸Å)
+	Shop,    // ìƒì  (êµ¬ë§¤)
+	Player   // í”Œë ˆì´ì–´ (ì‚¬ìš©/íŒë§¤)
 }
 
 /// <summary>
-/// ¾ÆÀÌÅÛ ½½·Ô (ÀÎº¥Åä¸® ¹× »óÁ¡)
-/// - ÁÂÅ¬¸¯: ¾ÆÀÌÅÛ µå·¡±× ½ÃÀÛ
-/// - ¿ìÅ¬¸¯: ¾ÆÀÌÅÛ »ç¿ë
-/// - Ctrl + ÁÂÅ¬¸¯: »óÁ¡¿¡¼­ ÆÇ¸Å
+/// ì•„ì´í…œ ìŠ¬ë¡¯ (ì¸ë²¤í† ë¦¬ ë° ìƒì )
+/// - ì¢Œí´ë¦­: ì•„ì´í…œ ë“œë˜ê·¸ ì‹œì‘
+/// - ìš°í´ë¦­: ì•„ì´í…œ ì‚¬ìš©
+/// - Ctrl + ì¢Œí´ë¦­: ìƒì ì—ì„œ íŒë§¤
 /// </summary>
-public class ItemSlot : MonoBehaviour, IPointerClickHandler, IBeginDragHandler, IEndDragHandler, IDropHandler
+public class ItemSlot : MonoBehaviour, IPointerClickHandler, IBeginDragHandler, IDragHandler, IEndDragHandler, IDropHandler
 {
-    [Header("UI References")]
-    [SerializeField] private Image iconImage;
-    [SerializeField] private Text nameText;
-    [SerializeField] private Text quantityText;
-    [SerializeField] private Text priceText;
-    [SerializeField] private Image backgroundImage;
+	[Header("UI References")]
+	[SerializeField] private Image iconImage;
+	[SerializeField] private Text nameText;
+	[SerializeField] private Text quantityText;
+	[SerializeField] private Text priceText;
+	[SerializeField] private Image backgroundImage;
 
-    private ItemDataSO itemData;
-    private SlotType slotType;
-    private int quantity;
-    private int maxStack = 5;
+	private ItemDataSO itemData;
+	private SlotType slotType;
+	private int quantity;
+	private int maxStack = 5;
 
-    // ÀÌº¥Æ®
-    public event Action<ItemDataSO> OnItemUsed;          // ¾ÆÀÌÅÛ »ç¿ë (¿ìÅ¬¸¯)
-    public event Action<ItemDataSO> OnItemSold;          // ¾ÆÀÌÅÛ ÆÇ¸Å (Ctrl+ÁÂÅ¬¸¯, »óÁ¡ ¸ğµå¸¸)
-    public event Action<ItemDataSO> OnItemBought;        // ¾ÆÀÌÅÛ ±¸¸Å (ÁÂÅ¬¸¯, »óÁ¡ ½½·Ô¸¸)
+	// ì´ë²¤íŠ¸
+	public event Action<ItemDataSO> OnItemUsed;          // ì•„ì´í…œ ì‚¬ìš© (ìš°í´ë¦­)
+	public event Action<ItemDataSO> OnItemSold;          // ì•„ì´í…œ íŒë§¤ (Ctrl+ì¢Œí´ë¦­, ìƒì  ëª¨ë“œë§Œ)
+	public event Action<ItemDataSO> OnItemBought;        // ì•„ì´í…œ êµ¬ë§¤ (ì¢Œí´ë¦­, ìƒì  ìŠ¬ë¡¯ë§Œ)
 
-    public ItemDataSO ItemData => itemData;
-    public int Quantity => quantity;
-    public SlotType SlotType => slotType;
+	public ItemDataSO ItemData => itemData;
+	public int Quantity => quantity;
+	public SlotType SlotType => slotType;
 
-    /// <summary>
-    /// ½½·Ô ÃÊ±âÈ­
-    /// </summary>
-    public void Initialize(ItemDataSO item, SlotType type, int qty = 1)
-    {
-        itemData = item;
-        slotType = type;
-        quantity = qty;
+	/// <summary>
+	/// ìŠ¬ë¡¯ ì´ˆê¸°í™”
+	/// </summary>
+	public void Initialize(ItemDataSO item, SlotType type, int qty = 1)
+	{
+		itemData = item;
+		slotType = type;
+		quantity = qty;
 
-        UpdateDisplay();
+		UpdateDisplay();
 
-        Debug.Log($"[ItemSlot] ½½·Ô ÃÊ±âÈ­: {itemData?.itemName ?? "ºó ½½·Ô"}, Å¸ÀÔ: {slotType}, ¼ö·®: {quantity}");
-    }
+	}
 
-    /// <summary>
-    /// ½½·Ô ºñ¿ì±â
-    /// </summary>
-    public void SetEmpty()
-    {
-        itemData = null;
-        quantity = 0;
-        UpdateDisplay();
-    }
+	/// <summary>
+	/// ìŠ¬ë¡¯ ë¹„ìš°ê¸°
+	/// </summary>
+	public void SetEmpty()
+	{
+		itemData = null;
+		quantity = 0;
+		UpdateDisplay();
+	}
 
-    /// <summary>
-    /// ¼ö·® Ãß°¡ (½ºÅÃ °¡´ÉÇÑ °æ¿ì)
-    /// </summary>
-    public bool TryAddQuantity(int amount)
-    {
-        if (itemData == null) return false;
-        if (itemData.itemType != ItemType.Potion) return false;
-        if (quantity + amount > maxStack) return false;
+	/// <summary>
+	/// ìˆ˜ëŸ‰ ì¶”ê°€ (ìŠ¤íƒ ê°€ëŠ¥í•œ ê²½ìš°)
+	/// </summary>
+	public bool TryAddQuantity(int amount)
+	{
+		if (itemData == null) return false;
+		if (itemData.itemType != ItemType.Potion) return false;
+		if (quantity + amount > maxStack) return false;
 
-        quantity += amount;
-        UpdateDisplay();
-        return true;
-    }
+		quantity += amount;
+		UpdateDisplay();
+		return true;
+	}
 
-    /// <summary>
-    /// ¼ö·® °¨¼Ò
-    /// </summary>
-    public void RemoveQuantity(int amount)
-    {
-        quantity -= amount;
-        if (quantity <= 0)
-        {
-            SetEmpty();
-        }
-        else
-        {
-            UpdateDisplay();
-        }
-    }
+	/// <summary>
+	/// ìˆ˜ëŸ‰ ê°ì†Œ
+	/// </summary>
+	public void RemoveQuantity(int amount)
+	{
+		quantity -= amount;
+		if (quantity <= 0)
+		{
+			SetEmpty();
+		}
+		else
+		{
+			UpdateDisplay();
+		}
+	}
 
-    /// <summary>
-    /// UI ¾÷µ¥ÀÌÆ®
-    /// </summary>
-    private void UpdateDisplay()
-    {
-        bool isEmpty = itemData == null;
+	/// <summary>
+	/// UI ì—…ë°ì´íŠ¸
+	/// </summary>
+	private void UpdateDisplay()
+	{
+		bool isEmpty = itemData == null;
 
-        // ¾ÆÀÌÄÜ
-        if (iconImage != null)
-        {
-            if (isEmpty)
-            {
-                iconImage.sprite = null;
-                iconImage.enabled = false;
-            }
-            else
-            {
-                iconImage.sprite = itemData.icon;
-                iconImage.enabled = itemData.icon != null;
+		// ì•„ì´ì½˜
+		if (iconImage != null)
+		{
+			if (isEmpty)
+			{
+				iconImage.sprite = null;
+				iconImage.enabled = false;
+			}
+			else
+			{
+				iconImage.sprite = itemData.icon;
+				iconImage.enabled = itemData.icon != null;
 
-                if (iconImage.enabled)
-                {
-                    var iconColor = iconImage.color;
-                    iconColor.a = 1f;
-                    iconImage.color = iconColor;
-                }
-            }
-        }
+				if (iconImage.enabled)
+				{
+					var iconColor = iconImage.color;
+					iconColor.a = 1f;
+					iconImage.color = iconColor;
+				}
+			}
+		}
 
-        // ÀÌ¸§
-        if (nameText != null)
-        {
-            nameText.text = isEmpty ? "" : itemData.itemName;
-        }
+		// ì´ë¦„
+		if (nameText != null)
+		{
+			nameText.text = isEmpty ? "" : itemData.itemName;
+		}
 
-        // ¼ö·® (Æ÷¼Ç¸¸)
-        if (quantityText != null)
-        {
-            if (!isEmpty && itemData.itemType == ItemType.Potion && quantity > 1)
-            {
-                quantityText.text = $"x{quantity}";
-                quantityText.enabled = true;
-            }
-            else
-            {
-                quantityText.enabled = false;
-            }
-        }
+		// ìˆ˜ëŸ‰ (í¬ì…˜ë§Œ)
+		if (quantityText != null)
+		{
+			if (!isEmpty && itemData.itemType == ItemType.Potion && quantity > 1)
+			{
+				quantityText.text = $"x{quantity}";
+				quantityText.enabled = true;
+			}
+			else
+			{
+				quantityText.enabled = false;
+			}
+		}
 
-        // °¡°İ
-        if (priceText != null)
-        {
-            if (isEmpty)
-            {
-                priceText.text = "";
-            }
-            else
-            {
-                if (slotType == SlotType.Shop)
-                {
-                    priceText.text = $"{itemData.buyPrice}G";
-                }
-                else
-                {
-                    priceText.text = $"{itemData.sellPrice}G";
-                }
-            }
-        }
+		// ê°€ê²©
+		if (priceText != null)
+		{
+			if (isEmpty)
+			{
+				priceText.text = "";
+			}
+			else
+			{
+				if (slotType == SlotType.Shop)
+				{
+					priceText.text = $"{itemData.buyPrice}G";
+				}
+				else
+				{
+					priceText.text = $"{itemData.sellPrice}G";
+				}
+			}
+		}
 
-        // ¹è°æ Åõ¸íµµ
-        if (backgroundImage != null)
-        {
-            var color = backgroundImage.color;
-            color.a = isEmpty ? 0.3f : 0.5f;
-            backgroundImage.color = color;
-        }
-    }
+		// ë°°ê²½ íˆ¬ëª…ë„
+		if (backgroundImage != null)
+		{
+			var color = backgroundImage.color;
+			color.a = isEmpty ? 0.3f : 0.5f;
+			backgroundImage.color = color;
+		}
+	}
 
-    /// <summary>
-    /// Å¬¸¯ ÀÌº¥Æ® Ã³¸®
-    /// - ÁÂÅ¬¸¯: »óÁ¡¿¡¼­ ±¸¸Å / ÀÎº¥Åä¸®¿¡¼­ µå·¡±× ÁØºñ
-    /// - ¿ìÅ¬¸¯: ¾ÆÀÌÅÛ »ç¿ë (´øÀü¿¡¼­¸¸)
-    /// - Ctrl + ÁÂÅ¬¸¯: ÆÇ¸Å (»óÁ¡ ¸ğµå¸¸)
-    /// </summary>
-    public void OnPointerClick(PointerEventData eventData)
-    {
-        if (itemData == null)
-        {
-            Debug.Log("[ItemSlot] ºó ½½·Ô Å¬¸¯µÊ");
-            return;
-        }
+	/// <summary>
+	/// í´ë¦­ ì´ë²¤íŠ¸ ì²˜ë¦¬
+	/// - ì¢Œí´ë¦­: ìƒì ì—ì„œ êµ¬ë§¤ / ì¸ë²¤í† ë¦¬ì—ì„œ ë“œë˜ê·¸ ì¤€ë¹„
+	/// - ìš°í´ë¦­: ì•„ì´í…œ ì‚¬ìš© (ë˜ì „ì—ì„œë§Œ)
+	/// - Ctrl + ì¢Œí´ë¦­: íŒë§¤ (ìƒì  ëª¨ë“œë§Œ)
+	/// </summary>
+	public void OnPointerClick(PointerEventData eventData)
+	{
+		if (itemData == null)
+		{
+			return;
+		}
 
-        // ¿ìÅ¬¸¯: ¾ÆÀÌÅÛ »ç¿ë
-        if (eventData.button == PointerEventData.InputButton.Right)
-        {
-            Debug.Log($"[ItemSlot] ¿ìÅ¬¸¯: {itemData.itemName} »ç¿ë ½Ãµµ");
-            OnRightClick();
-            return;
-        }
+		// ìš°í´ë¦­: ì•„ì´í…œ ì‚¬ìš©
+		if (eventData.button == PointerEventData.InputButton.Right)
+		{
+			OnRightClick();
+			return;
+		}
 
-        // ÁÂÅ¬¸¯
-        if (eventData.button == PointerEventData.InputButton.Left)
-        {
-            // Ctrl + ÁÂÅ¬¸¯: ÆÇ¸Å (»óÁ¡ ¸ğµå + ÀÎº¥Åä¸® ½½·Ô¸¸)
-            if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
-            {
-                if (IsShopMode() && slotType == SlotType.Player)
-                {
-                    Debug.Log($"[ItemSlot] Ctrl+ÁÂÅ¬¸¯: {itemData.itemName} ÆÇ¸Å");
-                    OnItemSold?.Invoke(itemData);
-                }
-                else
-                {
-                    Debug.LogWarning("[ItemSlot] »óÁ¡ÀÌ ¾Æ´Ï¹Ç·Î ÆÇ¸ÅÇÒ ¼ö ¾ø½À´Ï´Ù");
-                }
-                return;
-            }
+		// ì¢Œí´ë¦­
+		if (eventData.button == PointerEventData.InputButton.Left)
+		{
+			// Ctrl + ì¢Œí´ë¦­: íŒë§¤ (ìƒì  ëª¨ë“œ + ì¸ë²¤í† ë¦¬ ìŠ¬ë¡¯ë§Œ)
+			if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+			{
+				if (IsShopMode() && slotType == SlotType.Player)
+				{
+					OnItemSold?.Invoke(itemData);
+				}
+				else
+				{
+					Debug.LogWarning("[ItemSlot] ìƒì ì´ ì•„ë‹ˆë¯€ë¡œ íŒë§¤í•  ìˆ˜ ì—†ìŠµë‹ˆë‹¤");
+				}
+				return;
+			}
 
-            // ÀÏ¹İ ÁÂÅ¬¸¯: »óÁ¡ ½½·ÔÀÌ¸é ±¸¸Å
-            if (slotType == SlotType.Shop)
-            {
-                Debug.Log($"[ItemSlot] ÁÂÅ¬¸¯: {itemData.itemName} ±¸¸Å");
-                OnItemBought?.Invoke(itemData);
-            }
-            // µå·¡±×´Â IBeginDragHandler¿¡¼­ Ã³¸®
-        }
-    }
+			// ì¼ë°˜ ì¢Œí´ë¦­: ìƒì  ìŠ¬ë¡¯ì´ë©´ êµ¬ë§¤
+			if (slotType == SlotType.Shop)
+			{
+				OnItemBought?.Invoke(itemData);
+			}
+			// ë“œë˜ê·¸ëŠ” IBeginDragHandlerì—ì„œ ì²˜ë¦¬
+		}
+	}
 
-    /// <summary>
-    /// ¿ìÅ¬¸¯: ¾ÆÀÌÅÛ »ç¿ë
-    /// </summary>
-    private void OnRightClick()
-    {
-        if (itemData == null) return;
+	/// <summary>
+	/// ìš°í´ë¦­: ì•„ì´í…œ ì‚¬ìš©
+	/// </summary>
+	private void OnRightClick()
+	{
+		if (itemData == null) return;
 
-        // Æ÷¼ÇÀÌ ¾Æ´Ï¸é »ç¿ë ºÒ°¡
-        if (itemData.itemType != ItemType.Potion)
-        {
-            Debug.LogWarning($"[ItemSlot] {itemData.itemName}Àº(´Â) »ç¿ëÇÒ ¼ö ¾ø´Â ¾ÆÀÌÅÛÀÔ´Ï´Ù");
-            return;
-        }
+		// í¬ì…˜ì´ ì•„ë‹ˆë©´ ì‚¬ìš© ë¶ˆê°€
+		if (itemData.itemType != ItemType.Potion)
+		{
+			Debug.LogWarning($"[ItemSlot] {itemData.itemName}ì€(ëŠ”) ì‚¬ìš©í•  ìˆ˜ ì—†ëŠ” ì•„ì´í…œì…ë‹ˆë‹¤");
+			return;
+		}
 
-        // ´øÀü¿¡¼­¸¸ »ç¿ë °¡´É
-        if (!IsInDungeon())
-        {
-            Debug.LogWarning("[ItemSlot] ´øÀü¿¡¼­¸¸ ¾ÆÀÌÅÛÀ» »ç¿ëÇÒ ¼ö ÀÖ½À´Ï´Ù");
-            ShowMessage("´øÀü¿¡¼­¸¸ »ç¿ë °¡´ÉÇÕ´Ï´Ù");
-            return;
-        }
+		// ë˜ì „ì—ì„œë§Œ ì‚¬ìš© ê°€ëŠ¥
+		if (!IsInDungeon())
+		{
+			Debug.LogWarning("[ItemSlot] ë˜ì „ì—ì„œë§Œ ì•„ì´í…œì„ ì‚¬ìš©í•  ìˆ˜ ìˆìŠµë‹ˆë‹¤");
+			ShowMessage("ë˜ì „ì—ì„œë§Œ ì‚¬ìš© ê°€ëŠ¥í•©ë‹ˆë‹¤");
+			return;
+		}
 
-        Debug.Log($"[ItemSlot] ¾ÆÀÌÅÛ »ç¿ë: {itemData.itemName}");
-        OnItemUsed?.Invoke(itemData);
-    }
+		OnItemUsed?.Invoke(itemData);
+	}
 
-    /// <summary>
-    /// µå·¡±× ½ÃÀÛ
-    /// </summary>
-    public void OnBeginDrag(PointerEventData eventData)
-    {
-        if (itemData == null) return;
-        if (slotType == SlotType.Shop) return; // »óÁ¡ ¾ÆÀÌÅÛÀº µå·¡±× ºÒ°¡
+	/// <summary>
+	/// ë“œë˜ê·¸ ì‹œì‘
+	/// </summary>
+	public void OnBeginDrag(PointerEventData eventData)
+	{
 
-        Debug.Log($"[ItemSlot] µå·¡±× ½ÃÀÛ: {itemData.itemName}");
+		// ì¢Œí´ë¦­ì´ ì•„ë‹ˆë©´ ë“œë˜ê·¸ ì•ˆí•¨
+		if (eventData.button != PointerEventData.InputButton.Left)
+		{
+			Debug.LogWarning("[ItemSlot] âš ï¸ ì¢Œí´ë¦­ì´ ì•„ë‹ˆë¯€ë¡œ ë“œë˜ê·¸ ì·¨ì†Œ");
+			return;
+		}
 
-        if (ItemDragHandler.Instance != null)
-        {
-            ItemDragHandler.Instance.BeginDrag(this, itemData);
-        }
-    }
+		if (itemData == null)
+		{
+			Debug.LogWarning("[ItemSlot] âš ï¸ itemDataê°€ nullì´ë¯€ë¡œ ë“œë˜ê·¸ ì·¨ì†Œ");
+			return;
+		}
 
-    /// <summary>
-    /// µå·¡±× Á¾·á
-    /// </summary>
-    public void OnEndDrag(PointerEventData eventData)
-    {
-        if (ItemDragHandler.Instance != null && ItemDragHandler.Instance.IsDragging)
-        {
-            Debug.Log("[ItemSlot] µå·¡±× Á¾·á");
-            ItemDragHandler.Instance.CancelDrag();
-        }
-    }
+		if (slotType == SlotType.Shop)
+		{
+			Debug.LogWarning("[ItemSlot] âš ï¸ ìƒì  ì•„ì´í…œì€ ë“œë˜ê·¸ ë¶ˆê°€");
+			return;
+		}
 
-    /// <summary>
-    /// ´Ù¸¥ ½½·Ô¿¡ µå·Ó
-    /// </summary>
-    public void OnDrop(PointerEventData eventData)
-    {
-        if (ItemDragHandler.Instance != null && ItemDragHandler.Instance.IsDragging)
-        {
-            Debug.Log($"[ItemSlot] µå·Ó: {itemData?.itemName ?? "ºó ½½·Ô"}");
-            ItemDragHandler.Instance.EndDrag(this);
-        }
-    }
 
-    /// <summary>
-    /// ´øÀü ³»ºÎÀÎÁö È®ÀÎ
-    /// </summary>
-    private bool IsInDungeon()
-    {
-        return DungeonManager.Instance != null && DungeonManager.Instance.IsInDungeon;
-    }
+		if (ItemDragHandler.Instance != null)
+		{
+			ItemDragHandler.Instance.BeginDrag(this, itemData);
+		}
+		else
+		{
+			Debug.LogError("[ItemSlot] âŒ ItemDragHandler.Instanceê°€ nullì…ë‹ˆë‹¤!");
+		}
+	}
 
-    /// <summary>
-    /// »óÁ¡ ¸ğµåÀÎÁö È®ÀÎ (InventoryWindowÀÇ Shop ÆĞ³ÎÀÌ ¿­·ÁÀÖ´ÂÁö)
-    /// </summary>
-    private bool IsShopMode()
-    {
-        InventoryWindow inventoryWindow = FindObjectOfType<InventoryWindow>();
-        if (inventoryWindow == null) return false;
+	/// <summary>
+	/// ë“œë˜ê·¸ ì¤‘
+	/// </summary>
+	public void OnDrag(PointerEventData eventData)
+	{
+		// ItemDragHandlerì˜ Updateì—ì„œ ì²˜ë¦¬í•˜ë¯€ë¡œ ì—¬ê¸°ì„œëŠ” ë¹ˆ ìƒíƒœë¡œ ë‘ 
+	}
 
-        // ShopPanelÀÌ È°¼ºÈ­µÇ¾î ÀÖÀ¸¸é »óÁ¡ ¸ğµå
-        return inventoryWindow.IsShopModeActive;
-    }
+	/// <summary>
+	/// ë“œë˜ê·¸ ì¢…ë£Œ
+	/// </summary>
+	public void OnEndDrag(PointerEventData eventData)
+	{
 
-    /// <summary>
-    /// ¸Ş½ÃÁö Ç¥½Ã (°£´ÜÇÑ ·Î±× ¹öÀü, ÃßÈÄ UI Åä½ºÆ®·Î È®Àå °¡´É)
-    /// </summary>
-    private void ShowMessage(string message)
-    {
-        Debug.Log($"[ItemSlot] ¸Ş½ÃÁö: {message}");
-        // TODO: UI Åä½ºÆ® ¸Ş½ÃÁö ½Ã½ºÅÛ ±¸Çö ½Ã Ãß°¡
-    }
+		if (ItemDragHandler.Instance != null && ItemDragHandler.Instance.IsDragging)
+		{
+			ItemDragHandler.Instance.CancelDrag();
+		}
+	}
+
+	/// <summary>
+	/// ë‹¤ë¥¸ ìŠ¬ë¡¯ì— ë“œë¡­
+	/// </summary>
+	public void OnDrop(PointerEventData eventData)
+	{
+
+		if (ItemDragHandler.Instance != null && ItemDragHandler.Instance.IsDragging)
+		{
+			ItemDragHandler.Instance.EndDrag(this);
+		}
+	}
+
+	/// <summary>
+	/// ë˜ì „ ë‚´ë¶€ì¸ì§€ í™•ì¸
+	/// </summary>
+	private bool IsInDungeon()
+	{
+		return DungeonManager.Instance != null && DungeonManager.Instance.IsInDungeon;
+	}
+
+	/// <summary>
+	/// ìƒì  ëª¨ë“œì¸ì§€ í™•ì¸ (InventoryWindowì˜ Shop íŒ¨ë„ì´ ì—´ë ¤ìˆëŠ”ì§€)
+	/// </summary>
+	private bool IsShopMode()
+	{
+		InventoryWindow inventoryWindow = FindObjectOfType<InventoryWindow>();
+		if (inventoryWindow == null) return false;
+
+		// ShopPanelì´ í™œì„±í™”ë˜ì–´ ìˆìœ¼ë©´ ìƒì  ëª¨ë“œ
+		return inventoryWindow.IsShopModeActive;
+	}
+
+	/// <summary>
+	/// ë©”ì‹œì§€ í‘œì‹œ (ê°„ë‹¨í•œ ë¡œê·¸ ë²„ì „, ì¶”í›„ UI í† ìŠ¤íŠ¸ë¡œ í™•ì¥ ê°€ëŠ¥)
+	/// </summary>
+	private void ShowMessage(string message)
+	{
+		// TODO: UI í† ìŠ¤íŠ¸ ë©”ì‹œì§€ ì‹œìŠ¤í…œ êµ¬í˜„ ì‹œ ì¶”ê°€
+	}
 }

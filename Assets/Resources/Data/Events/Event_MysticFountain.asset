@@ -19,9 +19,9 @@ MonoBehaviour:
     \uCCB4\uB825\uC774 \uD68C\uBCF5\uB420 \uAC83 \uAC19\uC2B5\uB2C8\uB2E4. ( \uC804\uCCB4
     \uCCB4\uB825 \uD68C\uBCF5 50 ) "
   effects:
-  - effectType: 2
+  - effectType: 0
+    targetStat: 6
     value: 50
-    targetStat: HP
     rewardItem: {fileID: 0}
     itemAmount: 0
     duration: 0

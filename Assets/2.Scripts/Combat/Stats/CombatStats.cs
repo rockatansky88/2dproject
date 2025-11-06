@@ -28,9 +28,6 @@ public class CombatStats
     public event Action<int, int> OnHPChanged;  // (현재 HP, 최대 HP)
     public event Action<int, int> OnMPChanged;  // (현재 MP, 최대 MP)
 
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🆕 추가: MercenaryInstance에서 미리 계산된 스탯 로드
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     /// <summary>
     /// MercenaryInstance에서 이미 계산된 스탯을 그대로 로드합니다.
     /// HP/MP 재계산 없이 저장된 값을 사용합니다.
@@ -51,16 +48,9 @@ public class CombatStats
         CurrentMP = mercenary.currentMP;
         CriticalChance = mercenary.criticalChance;
 
-        Debug.Log($"[CombatStats] ✅ 초기화 완료 (MercenaryInstance 로드)\n" +
-                  $"STR: {Strength}, DEX: {Dexterity}, INT: {Intelligence}, WIS: {Wisdom}, SPD: {Speed}\n" +
-                  $"HP: {CurrentHP}/{MaxHP}, MP: {CurrentMP}/{MaxMP}, Crit: {CriticalChance:F1}%");
-
         OnStatsChanged?.Invoke();
     }
 
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🔧 수정: Initialize - baseHealth 파라미터 추가
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     /// <summary>
     /// 초기화 (기본 스탯 기반 - 실시간 계산)
     /// </summary>
@@ -86,9 +76,7 @@ public class CombatStats
         CurrentHP = MaxHP;
         CurrentMP = MaxMP;
 
-        Debug.Log($"[CombatStats] ✅ 초기화 완료 (실시간 계산)\n" +
-                  $"STR: {Strength}, DEX: {Dexterity}, INT: {Intelligence}, WIS: {Wisdom}, SPD: {Speed}\n" +
-                  $"BaseHP: {baseHealth} → MaxHP: {MaxHP}, MaxMP: {MaxMP}, Crit: {CriticalChance}%");
+
     }
 
     /// <summary>
@@ -108,7 +96,6 @@ public class CombatStats
         // 크리티컬 확률 = 기본 확률 + (DEX * 0.5%)
         CriticalChance = baseCritChance + (Dexterity * 0.5f);
 
-        Debug.Log($"[CombatStats] 파생 스탯 재계산 완료 - BaseHP: {baseHealth} → MaxHP: {MaxHP}, MaxMP: {MaxMP}, Crit: {CriticalChance}%");
 
         OnStatsChanged?.Invoke();
     }
@@ -121,7 +108,6 @@ public class CombatStats
         int oldHP = CurrentHP;
         CurrentHP = Mathf.Max(0, CurrentHP - damage);
 
-        Debug.Log($"[CombatStats] 🩸 데미지 {damage} 받음: {oldHP} -> {CurrentHP}");
 
         OnHPChanged?.Invoke(CurrentHP, MaxHP);
     }
@@ -134,7 +120,6 @@ public class CombatStats
         int oldHP = CurrentHP;
         CurrentHP = Mathf.Min(MaxHP, CurrentHP + amount);
 
-        Debug.Log($"[CombatStats] 💚 회복 {amount}: {oldHP} -> {CurrentHP}");
 
         OnHPChanged?.Invoke(CurrentHP, MaxHP);
     }
@@ -153,7 +138,6 @@ public class CombatStats
         int oldMP = CurrentMP;
         CurrentMP -= amount;
 
-        Debug.Log($"[CombatStats] 💙 마나 소모 {amount}: {oldMP} -> {CurrentMP}");
 
         OnMPChanged?.Invoke(CurrentMP, MaxMP);
         return true;
@@ -167,7 +151,6 @@ public class CombatStats
         int oldMP = CurrentMP;
         CurrentMP = Mathf.Min(MaxMP, CurrentMP + amount);
 
-        Debug.Log($"[CombatStats] 🔵 마나 회복 {amount}: {oldMP} -> {CurrentMP}");
 
         OnMPChanged?.Invoke(CurrentMP, MaxMP);
     }
@@ -181,7 +164,6 @@ public class CombatStats
         float roll = UnityEngine.Random.Range(0f, 100f);
         bool isCrit = roll < totalChance;
 
-        Debug.Log($"[CombatStats] 🎲 크리티컬 판정: {roll:F1} < {totalChance:F1}% => {(isCrit ? "성공!" : "실패")}");
 
         return isCrit;
     }
@@ -202,9 +184,5 @@ public class CombatStats
         Wisdom += wisMod;
         Speed += spdMod;
 
-        Debug.Log($"[CombatStats] 📊 스탯 버프 적용: STR {strMod:+0;-#}, DEX {dexMod:+0;-#}, INT {intMod:+0;-#}, WIS {wisMod:+0;-#}, SPD {spdMod:+0;-#}");
-
-        // ✅ 버프 적용 시 MaxHP/MaxMP는 변경하지 않음 (기본값 유지)
-        // 만약 MaxHP/MaxMP도 재계산하려면 baseHealth를 별도로 저장해야 함
     }
 }

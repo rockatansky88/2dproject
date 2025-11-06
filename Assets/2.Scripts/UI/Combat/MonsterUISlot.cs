@@ -33,9 +33,7 @@ public class MonsterUISlot : MonoBehaviour
     [SerializeField] private float damageFloatSpeed = 50f;
     [SerializeField] private float damageFadeDuration = 1f;
 
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🆕 추가: 페이드아웃 설정
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 페이드아웃 설정
     [Header("Death FadeOut")]
     [SerializeField] private float fadeOutDuration = 1.5f; // 페이드아웃 시간
     [SerializeField] private CanvasGroup canvasGroup; // 전체 슬롯의 투명도 제어
@@ -61,13 +59,11 @@ public class MonsterUISlot : MonoBehaviour
             return;
         }
 
-        Debug.Log($"[MonsterUISlot] ━━━ {monster.Name} UI 슬롯 초기화 시작 ━━━");
 
         // 1. 기본 정보 설정 - 몬스터 이름
         if (nameText != null)
         {
             nameText.text = monster.Name;
-            Debug.Log($"[MonsterUISlot] ✅ 이름 설정: {monster.Name}");
         }
 
         // 2. 몬스터 스프라이트 설정
@@ -77,7 +73,6 @@ public class MonsterUISlot : MonoBehaviour
             monsterImage.preserveAspect = true;
             monsterImage.color = Color.white;
 
-            Debug.Log($"[MonsterUISlot] ✅ 스프라이트 설정: {monster.spawnData.monsterSprite.name}");
         }
 
         // 3. Outline 컴포넌트 자동 생성
@@ -88,21 +83,18 @@ public class MonsterUISlot : MonoBehaviour
             if (turnOutline == null)
             {
                 turnOutline = monsterImage.gameObject.AddComponent<Outline>();
-                Debug.Log($"[MonsterUISlot] ✅ Outline 컴포넌트 자동 생성");
             }
 
             turnOutline.effectColor = new Color(1f, 0f, 0f, 1f);
             turnOutline.effectDistance = new Vector2(5f, 5f);
             turnOutline.enabled = false;
 
-            Debug.Log($"[MonsterUISlot] ✅ Outline 초기화 완료 (빨간색, 두께 5)");
         }
 
         // 4. 스탯 변화 이벤트 구독
         if (monster.Stats != null)
         {
             monster.Stats.OnHPChanged += UpdateHPBar;
-            Debug.Log("[MonsterUISlot] ✅ HP 변경 이벤트 구독 완료");
         }
 
         // 5. 초기 HP 바 업데이트
@@ -112,7 +104,6 @@ public class MonsterUISlot : MonoBehaviour
         if (selectionIndicator != null)
         {
             selectionIndicator.SetActive(false);
-            Debug.Log("[MonsterUISlot] ✅ 선택 표시 초기화 (비활성)");
         }
 
         // 7. 버튼 이벤트 연결
@@ -121,7 +112,6 @@ public class MonsterUISlot : MonoBehaviour
             selectButton.onClick.RemoveAllListeners();
             selectButton.onClick.AddListener(OnButtonClicked);
 
-            Debug.Log($"[MonsterUISlot] ✅ 버튼 클릭 이벤트 연결 완료");
         }
 
         // 8. 데미지 텍스트 초기 숨김
@@ -130,23 +120,20 @@ public class MonsterUISlot : MonoBehaviour
             damageText.gameObject.SetActive(false);
         }
 
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🆕 추가: CanvasGroup 자동 생성 (없으면)
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // 
+        //  CanvasGroup 없을경우 자동 생성 
         if (canvasGroup == null)
         {
             canvasGroup = GetComponent<CanvasGroup>();
             if (canvasGroup == null)
             {
                 canvasGroup = gameObject.AddComponent<CanvasGroup>();
-                Debug.Log($"[MonsterUISlot] ✅ CanvasGroup 자동 생성");
             }
         }
 
         // 초기 알파값 1 (완전 불투명)
         canvasGroup.alpha = 1f;
 
-        Debug.Log($"[MonsterUISlot] ✅ {monster.Name} UI 슬롯 초기화 완료");
     }
 
     /// <summary>
@@ -159,7 +146,6 @@ public class MonsterUISlot : MonoBehaviour
             float fillAmount = maxHP > 0 ? (float)currentHP / maxHP : 0f;
             hpFillImage.fillAmount = fillAmount;
 
-            Debug.Log($"[MonsterUISlot] {monster.Name} HP 바 업데이트: {currentHP}/{maxHP} ({fillAmount:P0})");
         }
 
         if (hpText != null)
@@ -173,16 +159,13 @@ public class MonsterUISlot : MonoBehaviour
         }
     }
 
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🔧 수정: 몬스터 사망 처리 - 페이드아웃 추가
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 몬스터 사망- 페이드아웃 
 
     /// <summary>
     /// 몬스터 사망 처리 (페이드아웃 효과)
     /// </summary>
     private void OnMonsterDeath()
     {
-        Debug.Log($"[MonsterUISlot] {monster.Name} 사망 - 페이드아웃 시작");
 
         // 버튼 비활성화
         if (selectButton != null)
@@ -193,9 +176,7 @@ public class MonsterUISlot : MonoBehaviour
         // 턴 표시 비활성화
         SetTurnActive(false);
 
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 페이드아웃 효과 시작
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         StartCoroutine(FadeOutAndDestroy());
     }
 
@@ -214,9 +195,7 @@ public class MonsterUISlot : MonoBehaviour
         float elapsedTime = 0f;
         float startAlpha = canvasGroup.alpha;
 
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 알파값을 1 → 0으로 서서히 감소
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         while (elapsedTime < fadeOutDuration)
         {
             elapsedTime += Time.deltaTime;
@@ -227,7 +206,6 @@ public class MonsterUISlot : MonoBehaviour
         // 완전히 투명하게
         canvasGroup.alpha = 0f;
 
-        Debug.Log($"[MonsterUISlot] ✅ {monster.Name} 페이드아웃 완료 - 슬롯 비활성화");
 
         // 슬롯 비활성화 (파괴하지 않고 숨김)
         gameObject.SetActive(false);
@@ -241,7 +219,6 @@ public class MonsterUISlot : MonoBehaviour
         if (selectionIndicator != null)
         {
             selectionIndicator.SetActive(selected);
-            Debug.Log($"[MonsterUISlot] {(monster != null ? monster.Name : "Unknown")} 선택 표시: {selected}");
         }
     }
 
@@ -266,12 +243,10 @@ public class MonsterUISlot : MonoBehaviour
         {
             turnOutline.enabled = true;
             turnBlinkCoroutine = StartCoroutine(BlinkTurnOutline());
-            Debug.Log($"[MonsterUISlot] ✅ {monster.Name} 턴 표시 활성화 (빨간색 외곽선 깜빡임 시작)");
         }
         else
         {
             turnOutline.enabled = false;
-            Debug.Log($"[MonsterUISlot] {(monster != null ? monster.Name : "Unknown")} 턴 표시 비활성화");
         }
     }
 
@@ -340,7 +315,6 @@ public class MonsterUISlot : MonoBehaviour
 
         StartCoroutine(FloatingDamageAnimation());
 
-        Debug.Log($"[MonsterUISlot] ✅ {monster.Name} 피격 표시: -{damage} (크리티컬: {isCritical})");
     }
 
     /// <summary>
@@ -378,9 +352,6 @@ public class MonsterUISlot : MonoBehaviour
     /// <param name="interactable">true: 클릭 가능 (플레이어 턴), false: 클릭 불가 (몬스터 턴)</param>
     public void SetInteractable(bool interactable)
     {
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🔧 수정: selectButton null 체크 추가
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         if (selectButton == null)
         {
             Debug.LogWarning($"[MonsterUISlot] ⚠️ {gameObject.name}: selectButton이 null입니다!\n" +
@@ -391,7 +362,6 @@ public class MonsterUISlot : MonoBehaviour
         }
 
         selectButton.interactable = interactable;
-        Debug.Log($"[MonsterUISlot] {(monster != null ? monster.Name : "Unknown")} 클릭 가능 여부: {interactable}");
     }
 
     /// <summary>
@@ -399,7 +369,6 @@ public class MonsterUISlot : MonoBehaviour
     /// </summary>
     private void OnButtonClicked()
     {
-        Debug.Log($"[MonsterUISlot] 🖱️ 버튼 클릭 감지! (Monster: {(monster != null ? monster.Name : "null")})");
 
         if (monster == null)
         {
@@ -413,17 +382,15 @@ public class MonsterUISlot : MonoBehaviour
             return;
         }
 
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🆕 추가: 버튼이 비활성화 상태면 클릭 무시
+        // 버튼이 비활성화 상태면 클릭 무시
         // (Unity Button 컴포넌트가 이미 처리하지만 추가 안전장치)
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
         if (selectButton != null && !selectButton.interactable)
         {
             Debug.LogWarning("[MonsterUISlot] ⚠️ 현재 몬스터를 선택할 수 없는 턴입니다!");
             return;
         }
 
-        Debug.Log($"[MonsterUISlot] ✅ 몬스터 클릭 이벤트 발생: {monster.Name}");
         OnMonsterClicked?.Invoke(monster);
     }
 

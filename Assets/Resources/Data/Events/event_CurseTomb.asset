@@ -17,11 +17,11 @@ MonoBehaviour:
   eventImage: {fileID: 21300000, guid: d462734f4d057f844883a3528d4ab934, type: 3}
   description: "\uC624\uB798\uB41C \uBB34\uB364\uC18D\uC5D4 \uACE0\uB300\uC758 \uBC14\uC774\uB7EC\uC2A4\uAC00
     \uC874\uC7AC\uD588\uB2E4. \uCF5C\uB85D..\n( \uBAA8\uB4E0 \uD30C\uD2F0\uC6D0\uB4E4\uC758
-    HP\uAC00 20% \uAC10\uC18C)"
+    HP\uAC00 50 \uAC10\uC18C)"
   effects:
   - effectType: 1
-    value: 30
-    targetStat: HP
+    targetStat: 6
+    value: 50
     rewardItem: {fileID: 0}
     itemAmount: 0
     duration: 0

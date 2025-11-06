@@ -74,13 +74,13 @@ public class MonsterSpawnData
     [Range(1, 100)]
     public int spawnWeight = 10;
 
-    // 🆕 추가: 몬스터 스킬 배열
+    // 몬스터 스킬 배열
     [Header("스킬")]
     [Tooltip("몬스터가 사용할 스킬 (첫 번째는 기본 공격)")]
     public SkillDataSO[] skills = new SkillDataSO[0];
 }
 
-// 🆕 추가: MonsterRarity enum (클래스 밖으로 이동)
+//  MonsterRarity enum (클래스 밖으로 이동)
 /// <summary>
 /// 몬스터 등급 (일반 전투 vs 보스 전투 구분)
 /// </summary>

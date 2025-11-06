@@ -16,5 +16,23 @@ MonoBehaviour:
   Dexterity: 4
   Wisdom: 3
   Intelligence: 4
-  Health: 50
+  Health: 10
   Speed: 7
+  strengthRange:
+    min: 5
+    max: 20
+  dexterityRange:
+    min: 5
+    max: 20
+  wisdomRange:
+    min: 5
+    max: 15
+  intelligenceRange:
+    min: 5
+    max: 15
+  healthRange:
+    min: 10
+    max: 15
+  speedRange:
+    min: 5
+    max: 15
