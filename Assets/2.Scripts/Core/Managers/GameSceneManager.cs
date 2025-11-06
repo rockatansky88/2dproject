@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.Video; // 🆕 VideoPlayer 네임스페이스 추가
 
 /// <summary>
 /// 게임 씬 전환 관리자 (마을, 던전 입구, 통로, 이벤트, 전투 화면)
@@ -66,7 +67,8 @@ public class GameSceneManager : MonoBehaviour
     [SerializeField] private GameObject monsterPrefab;
 
     [Header("Loading UI Elements")]
-    [SerializeField] private Image loadingBackgroundImage;
+    [SerializeField] private VideoPlayer loadingVideoPlayer;
+    [SerializeField] private RenderTexture loadingRenderTexture; // 🆕 Render Texture
 
     [Header("Dungeon Complete UI Elements")]
     [SerializeField] private Image dungeonCompleteBackgroundImage;
@@ -331,7 +333,19 @@ public class GameSceneManager : MonoBehaviour
             yield return StartCoroutine(MoveCameraSmooth(loadingPosition.position));
         }
 
-        yield return new WaitForSeconds(screenDisplayDuration);
+        // 동영상 재생
+        if (loadingVideoPlayer != null)
+        {
+            loadingVideoPlayer.targetTexture = loadingRenderTexture; // Render Texture 설정
+            loadingVideoPlayer.Play();
+
+            // 동영상 길이만큼 대기
+            yield return new WaitForSeconds((float)loadingVideoPlayer.length);
+        }
+        else
+        {
+            yield return new WaitForSeconds(screenDisplayDuration);
+        }
 
         if (DungeonManager.Instance != null)
         {

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dungeonID: Dungeon_Ratman_01
   dungeonName: "\uB7AB\uB9E8 \uB358\uC804"
-  entranceSprite: {fileID: 21300000, guid: 1b87cbbad2f438c4484286e6ab5e9e9d, type: 3}
+  entranceSprite: {fileID: 21300000, guid: bcefa9ed96f75f147bf27f80923500db, type: 3}
   corridorSprite: {fileID: 21300000, guid: 0af4ad4590360104db13404219494ff6, type: 3}
   combatBackgroundSprite: {fileID: 21300000, guid: aba99b3a92317474ebc770edbe88e0fd, type: 3}
   bossBackgroundSprite: {fileID: 21300000, guid: aba99b3a92317474ebc770edbe88e0fd, type: 3}
