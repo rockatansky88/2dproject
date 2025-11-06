@@ -50,6 +50,7 @@ public class DungeonDataSO : ScriptableObject
 
 /// <summary>
 /// 몬스터 스폰 정보
+/// 몬스터의 기본 정보, 스탯, 스킬, 애니메이션 클립을 포함
 /// </summary>
 [System.Serializable]
 public class MonsterSpawnData
@@ -57,7 +58,7 @@ public class MonsterSpawnData
     [Tooltip("몬스터 이름")]
     public string monsterName;
 
-    [Tooltip("몬스터 스프라이트")]
+    [Tooltip("몬스터 스프라이트 (대기 상태 기본 이미지)")]
     public Sprite monsterSprite;
 
     [Tooltip("몬스터 스탯 템플릿")]
@@ -66,7 +67,6 @@ public class MonsterSpawnData
     [Tooltip("몬스터 난이도")]
     public MonsterDifficulty difficulty = MonsterDifficulty.Normal;
 
-    // 🆕 추가: 몬스터 등급
     [Tooltip("몬스터 등급 (일반~에픽: 일반 전투, 보스: 보스 전투)")]
     public MonsterRarity rarity = MonsterRarity.Normal;
 
@@ -74,10 +74,13 @@ public class MonsterSpawnData
     [Range(1, 100)]
     public int spawnWeight = 10;
 
-    // 몬스터 스킬 배열
     [Header("스킬")]
     [Tooltip("몬스터가 사용할 스킬 (첫 번째는 기본 공격)")]
     public SkillDataSO[] skills = new SkillDataSO[0];
+
+    [Header("애니메이션")]
+    [Tooltip("몬스터 애니메이션 클립 배열 (idle, attack, cast 등)")]
+    public SpriteAnimationClip[] animationClips = new SpriteAnimationClip[0];
 }
 
 //  MonsterRarity enum (클래스 밖으로 이동)

@@ -68,7 +68,8 @@ public class CombatManager : MonoBehaviour
         if (turnController == null) turnController = GetComponent<TurnController>();
         if (tpeMinigame == null) tpeMinigame = FindObjectOfType<TPEMinigame>();
         if (parryMinigame == null) parryMinigame = FindObjectOfType<ParryMinigame>();
-        if (rewardInventoryUI == null) rewardInventoryUI = FindObjectOfType<RewardInventoryUI>(); // 보상 UI 자동 연결
+        if (rewardInventoryUI == null)
+            rewardInventoryUI = FindObjectOfType<RewardInventoryUI>(true);
     }
 
     private void Start()

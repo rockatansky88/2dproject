@@ -15,7 +15,7 @@ public enum SkillTargetType
 /// <summary>
 /// 스킬 데이터 ScriptableObject
 /// 기본 공격 스킬 + 특수 스킬 구현
-/// 스킬별 사운드 효과 및 스프라이트 애니메이션 포함
+/// 스킬별 사운드 효과, 스프라이트 애니메이션, 공격자 애니메이션 포함
 /// </summary>
 [CreateAssetMenu(fileName = "New Skill", menuName = "Game/Combat/Skill Data")]
 public class SkillDataSO : ScriptableObject
@@ -64,7 +64,11 @@ public class SkillDataSO : ScriptableObject
     [Tooltip("스킬 사용 시 재생될 효과음")]
     public AudioClip skillSound;
 
-    [Header("스프라이트 애니메이션")] // ✅ 추가
+    [Header("공격자 애니메이션")]
+    [Tooltip("스킬 사용 시 공격자가 재생할 애니메이션 클립 이름 (attack, cast, slash)")]
+    public string attackerAnimationClip = "attack";
+
+    [Header("타겟 이펙트 애니메이션")]
     [Tooltip("스킬 이펙트 스프라이트 시퀀스 (타겟 위치에 재생)")]
     public Sprite[] effectSprites;
 
@@ -76,6 +80,7 @@ public class SkillDataSO : ScriptableObject
 
     /// <summary>
     /// 최종 데미지 계산
+    /// 기본 데미지 + 스탯 보너스 계산, 크리티컬 시 1.5배 적용
     /// </summary>
     public int CalculateDamage(CombatStats attackerStats, bool isCritical)
     {

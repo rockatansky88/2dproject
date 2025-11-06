@@ -86,6 +86,7 @@ GameObject:
   - component: {fileID: 1863316663024000699}
   - component: {fileID: 265493285497832585}
   - component: {fileID: 5467430967647277566}
+  - component: {fileID: 3358599625363953617}
   m_Layer: 5
   m_Name: MonsterImage
   m_TagString: Untagged
@@ -150,6 +151,33 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &3358599625363953617
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 459299569945148693}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e85e127b35080147a8e93405ca6ea69, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spriteRenderer: {fileID: 0}
+  uiImage: {fileID: 5467430967647277566}
+  clips:
+  - name: idle
+    frames:
+    - {fileID: -394961435, guid: fd8305f36f5ff1a48bdb449fd5649702, type: 3}
+    frameRate: 0.1
+  - name: attack
+    frames:
+    - {fileID: -394961435, guid: fd8305f36f5ff1a48bdb449fd5649702, type: 3}
+    - {fileID: 426071086, guid: a932a1c9acc65b846a37bcdbdef421cf, type: 3}
+    - {fileID: -61020538, guid: e76d0bdc585945142bbc42cb4a025754, type: 3}
+    - {fileID: -1939126870, guid: 2f59f0e7cfa8c6741a242133fe6c666d, type: 3}
+    - {fileID: -394961435, guid: fd8305f36f5ff1a48bdb449fd5649702, type: 3}
+    frameRate: 0.1
 --- !u!1 &2525302313199309093
 GameObject:
   m_ObjectHideFlags: 0
@@ -167,7 +195,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1255777391725061856
 RectTransform:
   m_ObjectHideFlags: 0
@@ -722,6 +750,9 @@ MonoBehaviour:
   damageText: {fileID: 2552816224117677873}
   damageFloatSpeed: 50
   damageFadeDuration: 1
+  fadeOutDuration: 1.5
+  canvasGroup: {fileID: 0}
+  spriteAnimator: {fileID: 0}
 --- !u!225 &128884099046603957
 CanvasGroup:
   m_ObjectHideFlags: 0
