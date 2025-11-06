@@ -17,18 +17,18 @@ public class CombatManager : MonoBehaviour
     public static CombatManager Instance { get; private set; }
 
     [Header("전투 설정")]
-    [SerializeField] private Transform partySpawnParent;    // 파티 생성 위치
-    [SerializeField] private Transform monsterSpawnParent;  // 몬스터 생성 위치
-    //[SerializeField] private GameObject characterPrefab;     // 캐릭터 프리팹 
+    [SerializeField] private Transform partySpawnParent;
+    [SerializeField] private Transform monsterSpawnParent;
 
     [Header("몬스터 프리팹")]
-    [SerializeField] private GameObject monsterUISlotPrefab; // MonsterUISlot 프리팹
+    [SerializeField] private GameObject monsterUISlotPrefab;
 
     [Header("컴포넌트 참조")]
     [SerializeField] private CombatUI combatUI;
     [SerializeField] private TurnController turnController;
     [SerializeField] private TPEMinigame tpeMinigame;
     [SerializeField] private ParryMinigame parryMinigame;
+    [SerializeField] private RewardInventoryUI rewardInventoryUI; // 보상 UI 추가
 
     // 전투 상태
     private List<Character> currentParty = new List<Character>();
@@ -64,16 +64,15 @@ public class CombatManager : MonoBehaviour
             return;
         }
 
-        // 컴포넌트 자동 연결
         if (combatUI == null) combatUI = FindObjectOfType<CombatUI>();
         if (turnController == null) turnController = GetComponent<TurnController>();
         if (tpeMinigame == null) tpeMinigame = FindObjectOfType<TPEMinigame>();
         if (parryMinigame == null) parryMinigame = FindObjectOfType<ParryMinigame>();
+        if (rewardInventoryUI == null) rewardInventoryUI = FindObjectOfType<RewardInventoryUI>(); // 보상 UI 자동 연결
     }
 
     private void Start()
     {
-        // 턴 컨트롤러 이벤트 연결
         if (turnController != null)
         {
             turnController.OnTurnStart += OnTurnStarted;
@@ -81,19 +80,22 @@ public class CombatManager : MonoBehaviour
             turnController.OnBattleEnd += OnBattleEnded;
         }
 
-        // TPE 미니게임 이벤트 연결
         if (tpeMinigame != null)
         {
             tpeMinigame.OnMinigameComplete += OnTPEComplete;
         }
 
-        // 패링 미니게임 이벤트 연결
         if (parryMinigame != null)
         {
             parryMinigame.OnParryComplete += OnParryComplete;
         }
-    }
 
+        // 보상 UI 이벤트 연결
+        if (rewardInventoryUI != null)
+        {
+            rewardInventoryUI.OnAllRewardsClaimed += OnRewardsClaimed;
+        }
+    }
 
     /// <summary>
     /// 전투 시작 (DungeonManager에서 호출)
@@ -101,22 +103,13 @@ public class CombatManager : MonoBehaviour
     /// </summary>
     public void StartCombat(List<MonsterSpawnData> monsterDataList, bool isBoss)
     {
-
         isCombatActive = true;
         isBossFight = isBoss;
 
-        // 1. 파티 생성
         SpawnParty();
-
-        // 2. 몬스터 생성
         SpawnMonsters(monsterDataList);
-
-        // 3. UI 초기화
         InitializeCombatUI();
-
-        // 4. 턴 시스템 시작 - 올바른 메서드 사용
         turnController.InitializeBattle(currentParty, currentMonsters);
-
     }
 
     /// <summary>
@@ -124,12 +117,10 @@ public class CombatManager : MonoBehaviour
     /// </summary>
     private void SpawnParty()
     {
-
         currentParty.Clear();
 
         if (MercenaryManager.Instance == null)
         {
-            Debug.LogError("[CombatManager] ❌ MercenaryManager.Instance가 null입니다!");
             return;
         }
 
@@ -137,70 +128,50 @@ public class CombatManager : MonoBehaviour
 
         if (party.Count == 0)
         {
-            Debug.LogError("[CombatManager] ❌ 파티가 비어있습니다!");
             return;
         }
 
         if (combatUI == null)
         {
-            Debug.LogError("[CombatManager] ❌ CombatUI가 null입니다!");
             return;
         }
 
-        // 파티 멤버 수만큼 Character 데이터 생성
         for (int i = 0; i < party.Count; i++)
         {
             MercenaryInstance mercData = party[i];
 
-
-            // GameObject를 생성하지 않고, 데이터만 담는 경량 오브젝트 생성
             GameObject charDataObj = new GameObject($"CharacterData_{mercData.mercenaryName}");
             charDataObj.transform.SetParent(partySpawnParent);
             charDataObj.transform.localPosition = Vector3.zero;
 
             Character character = charDataObj.AddComponent<Character>();
 
-            // 스킬은 MercenaryInstance에서 가져옴
             List<SkillDataSO> skills = new List<SkillDataSO>(mercData.skills);
 
-            // UI 슬롯과 함께 초기화
             MercenaryPartySlot uiSlot = combatUI.GetPartySlot(i);
             character.Initialize(mercData, skills, uiSlot);
 
             currentParty.Add(character);
-
         }
-
     }
 
     /// <summary>
     /// 몬스터 생성 (MonsterUISlot과 Monster 데이터 통합)
-    /// 로직:
-    /// 0. MonsterSpawnParent 밑의 기존 자식 오브젝트 모두 제거 (빈 슬롯 정리)
-    /// 1. MonsterUISlot 프리팹을 MonsterSpawnParent 밑에 생성
-    /// 2. Monster 데이터 오브젝트를 MonsterUISlot 밑에 생성
-    /// 3. Monster.Initialize()에서 UI 슬롯과 연결
-    /// 4. MonsterUISlot.Initialize()에서 Monster 데이터 연결
-    /// 5. CombatUI.InitializeMonsterUI()로 클릭 이벤트 연결
     /// </summary>
     private void SpawnMonsters(List<MonsterSpawnData> monsterDataList)
     {
-
         currentMonsters.Clear();
 
         if (combatUI == null)
         {
-            Debug.LogError("[CombatManager] ❌ CombatUI가 null입니다!");
             return;
         }
 
         if (monsterUISlotPrefab == null)
         {
-            Debug.LogError("[CombatManager] ❌ MonsterUISlot 프리팹이 할당되지 않았습니다! Inspector에서 할당해주세요.");
             return;
         }
 
-        // 0단계: MonsterSpawnParent 밑의 기존 자식 오브젝트 모두 제거 (빈 슬롯 정리)
         if (monsterSpawnParent != null)
         {
             int childCount = monsterSpawnParent.childCount;
@@ -210,54 +181,38 @@ public class CombatManager : MonoBehaviour
                 Transform child = monsterSpawnParent.GetChild(i);
                 Destroy(child.gameObject);
             }
-
         }
 
         for (int i = 0; i < monsterDataList.Count; i++)
         {
             MonsterSpawnData data = monsterDataList[i];
 
-            // 1단계: MonsterUISlot 생성 (MonsterSpawnParent 밑에)
             GameObject monsterUIObj = Instantiate(monsterUISlotPrefab, monsterSpawnParent);
             monsterUIObj.name = $"MonsterUISlot_{data.monsterName}_{i}";
             MonsterUISlot uiSlot = monsterUIObj.GetComponent<MonsterUISlot>();
 
             if (uiSlot == null)
             {
-                Debug.LogError($"[CombatManager] ❌ MonsterUISlot 컴포넌트를 찾을 수 없습니다! (오브젝트: {monsterUIObj.name})");
                 Destroy(monsterUIObj);
                 continue;
             }
 
-            // 2단계: Monster 데이터 오브젝트 생성 (MonsterUISlot 밑에 숨김)
             GameObject monsterDataObj = new GameObject($"MonsterData_{data.monsterName}_{i}");
             monsterDataObj.transform.SetParent(monsterUIObj.transform);
             monsterDataObj.transform.localPosition = Vector3.zero;
 
             Monster monster = monsterDataObj.AddComponent<Monster>();
 
-            // 3단계: 스킬 로드
             List<SkillDataSO> monsterSkills = LoadMonsterSkills(data);
 
-            // 4단계: Monster 초기화 (UI 슬롯 연결)
             monster.Initialize(data, monsterSkills, uiSlot);
 
-            // 5단계: MonsterUISlot 초기화 (Monster 데이터 연결)
             uiSlot.Initialize(monster);
 
             currentMonsters.Add(monster);
-
-            Debug.Log($"[CombatManager] ✅ {data.monsterName} 생성 완료\n" +
-                     $"  - UI 슬롯: {uiSlot.name}\n" +
-                     $"  - 데이터: {monster.name}\n" +
-                     $"  - HP: {monster.Stats.CurrentHP}/{monster.Stats.MaxHP}\n" +
-                     $"  - 스프라이트 연결: {(data.monsterSprite != null ? "O" : "X")}");
         }
 
-
-        //CombatUI에 몬스터 슬롯 연결 및 클릭 이벤트 등록
         combatUI.InitializeMonsterUI(currentMonsters);
-
     }
 
     /// <summary>
@@ -265,16 +220,11 @@ public class CombatManager : MonoBehaviour
     /// </summary>
     private List<SkillDataSO> LoadMonsterSkills(MonsterSpawnData data)
     {
-
         List<SkillDataSO> skills = new List<SkillDataSO>();
 
         if (data.skills != null && data.skills.Length > 0)
         {
             skills.AddRange(data.skills);
-        }
-        else
-        {
-            Debug.LogWarning($"[CombatManager] ⚠️ {data.monsterName}에 스킬이 없습니다!");
         }
 
         return skills;
@@ -285,16 +235,12 @@ public class CombatManager : MonoBehaviour
     /// </summary>
     private void InitializeCombatUI()
     {
-
         if (combatUI == null)
         {
-            Debug.LogError("[CombatManager] ❌ CombatUI가 null입니다!");
             return;
         }
 
-        // 파티 UI 초기화 (전투 모드 전환)
         combatUI.InitializePartyUI(currentParty);
-
     }
 
     /// <summary>
@@ -302,11 +248,8 @@ public class CombatManager : MonoBehaviour
     /// </summary>
     private void OnTurnStarted(ICombatant combatant)
     {
-
-        // UI 업데이트
         combatUI.UpdateCurrentTurn(combatant);
 
-        // 플레이어 턴이면 스킬 슬롯 표시
         if (combatant.IsPlayer)
         {
             Character character = combatant as Character;
@@ -320,8 +263,6 @@ public class CombatManager : MonoBehaviour
     /// </summary>
     private void OnTurnEnded(ICombatant combatant)
     {
-
-        // HP/MP UI 업데이트
         UpdateAllCombatantUI();
     }
 
@@ -330,10 +271,7 @@ public class CombatManager : MonoBehaviour
     /// </summary>
     private void OnBattleEnded()
     {
-
         bool isVictory = CheckVictory();
-        // 2초 대기후 전투 종료
-
         EndCombat(isVictory);
     }
 
@@ -342,7 +280,6 @@ public class CombatManager : MonoBehaviour
     /// </summary>
     private void OnTPEComplete(bool success)
     {
-
         tpeSuccess = success;
 
         if (combatUI != null)
@@ -360,7 +297,6 @@ public class CombatManager : MonoBehaviour
     {
         if (pendingSkill == null || pendingTarget == null)
         {
-            Debug.LogError("[CombatManager] ❌ 대기 중인 스킬 또는 타겟이 없습니다!");
             return;
         }
 
@@ -368,14 +304,11 @@ public class CombatManager : MonoBehaviour
 
         if (player == null)
         {
-            Debug.LogError("[CombatManager] ❌ 현재 턴이 플레이어가 아닙니다!");
             return;
         }
 
-
         float critBonus = tpeSuccess ? 30f : 0f;
         bool isCritical = player.Stats.RollCritical(critBonus);
-
 
         player.UseSkill(pendingSkill, pendingTarget, isCritical);
 
@@ -390,16 +323,12 @@ public class CombatManager : MonoBehaviour
     /// </summary>
     private void OnParryComplete(bool success)
     {
-
         if (combatUI != null)
         {
             combatUI.HideParryMinigame();
         }
 
-        if (success)
-        {
-        }
-        else
+        if (!success)
         {
             pendingDefender.TakeDamage(pendingDamage);
         }
@@ -449,12 +378,10 @@ public class CombatManager : MonoBehaviour
 
     /// <summary>
     /// 전투 종료 처리
-    /// 승리 시 보상 지급 후 OnCombatEnded 이벤트 발생
-    /// GameSceneManager에서 던전 완료 여부를 체크하여 화면 전환 처리
+    /// 승리 시 보상 UI를 표시하고, 모든 보상 수령 후 OnCombatEnded 이벤트를 발생시킵니다.
     /// </summary>
     public void EndCombat(bool isVictory)
     {
-
         isCombatActive = false;
 
         if (isVictory)
@@ -462,18 +389,32 @@ public class CombatManager : MonoBehaviour
             CalculateRewards();
             GiveRewards();
 
-            // DungeonManager 호출 제거 (이벤트만 발생)
-            // GameSceneManager.OnCombatEnded()에서 던전 완료 체크 후 처리
+            // 보상 UI 표시 (RewardInventoryUI.OnAllRewardsClaimed 이벤트 대기)
+            if (rewardInventoryUI != null)
+            {
+                rewardInventoryUI.ShowRewardInventory();
+            }
+            else
+            {
+                // 보상 UI가 없으면 즉시 이벤트 발생
+                OnCombatEnded?.Invoke(isVictory);
+                CleanupCombat();
+            }
         }
         else
         {
-            // 패배 시 Fail 화면 
-            // GameSceneManager.OnCombatEnded()에서 마을 귀환 처리
+            OnCombatEnded?.Invoke(isVictory);
+            CleanupCombat();
         }
+    }
 
-        // 이벤트 발생 (GameSceneManager가 처리)
-        OnCombatEnded?.Invoke(isVictory);
-
+    /// <summary>
+    /// 모든 보상 수령 완료 이벤트 핸들러
+    /// 보상 수령이 완료되면 전투 종료 이벤트를 발생시킵니다.
+    /// </summary>
+    private void OnRewardsClaimed()
+    {
+        OnCombatEnded?.Invoke(true);
         CleanupCombat();
     }
 
@@ -496,7 +437,6 @@ public class CombatManager : MonoBehaviour
             totalGoldReward *= 2;
             totalExpReward *= 2;
         }
-
     }
 
     /// <summary>
@@ -508,7 +448,6 @@ public class CombatManager : MonoBehaviour
         {
             GameManager.Instance.AddGold(totalGoldReward);
         }
-
     }
 
     /// <summary>
@@ -516,7 +455,6 @@ public class CombatManager : MonoBehaviour
     /// </summary>
     private void CleanupCombat()
     {
-
         foreach (var character in currentParty)
         {
             if (character != null)
@@ -534,7 +472,6 @@ public class CombatManager : MonoBehaviour
             }
         }
         currentMonsters.Clear();
-
     }
 
     private void OnDestroy()
@@ -555,6 +492,11 @@ public class CombatManager : MonoBehaviour
         {
             parryMinigame.OnParryComplete -= OnParryComplete;
         }
+
+        if (rewardInventoryUI != null)
+        {
+            rewardInventoryUI.OnAllRewardsClaimed -= OnRewardsClaimed;
+        }
     }
 
     /// <summary>
@@ -562,7 +504,6 @@ public class CombatManager : MonoBehaviour
     /// </summary>
     public void RequestPlayerAction(SkillDataSO skill, ICombatant target)
     {
-
         pendingSkill = skill;
         pendingTarget = target;
 
@@ -580,7 +521,6 @@ public class CombatManager : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("[CombatManager] ⚠️ TPEMinigame가 없어서 바로 공격 실행");
             ExecutePlayerAttack();
         }
     }
@@ -590,11 +530,9 @@ public class CombatManager : MonoBehaviour
     /// </summary>
     public void ExecuteAIAttack(Monster monster, SkillDataSO skill, Character target)
     {
-
         bool isCritical = monster.Stats.RollCritical();
 
         int damage = skill.CalculateDamage(monster.Stats, isCritical);
-
 
         pendingDamage = damage;
         pendingDefender = target;
@@ -606,7 +544,6 @@ public class CombatManager : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("[CombatManager] ⚠️ ParryMinigame가 없어서 바로 데미지 적용");
             target.TakeDamage(damage);
             turnController.EndCurrentTurn();
         }
@@ -619,13 +556,11 @@ public class CombatManager : MonoBehaviour
     {
         if (combatUI == null)
         {
-            Debug.LogError("[CombatManager] ❌ CombatUI가 null입니다!");
             return;
         }
 
         if (target == null)
         {
-            Debug.LogError("[CombatManager] ❌ 타겟이 null입니다!");
             return;
         }
 
