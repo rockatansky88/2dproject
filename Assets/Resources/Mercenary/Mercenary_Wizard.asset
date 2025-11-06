@@ -15,7 +15,7 @@ MonoBehaviour:
   mercenaryID: wizard_001
   mercenaryName: "\uC544\uD06C"
   portrait: {fileID: 21300000, guid: 26962d7aaf16d0a42812fb0e9ff2c591, type: 3}
-  fullBodySprite: {fileID: 21300000, guid: 1b7b1ddd49be8e744be6594499599204, type: 2}
+  fullBodySprite: {fileID: 1492976947, guid: 6f21c490237c7fd4aaa413d2702779e5, type: 3}
   prefab: {fileID: 0}
   recruitCost: 100
   levelRange:
@@ -24,6 +24,9 @@ MonoBehaviour:
   healthRange:
     min: 80
     max: 120
+  manaRange:
+    min: 50
+    max: 100
   strengthRange:
     min: 8
     max: 15
@@ -43,6 +46,3 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 2e332f753a8f8184c8415b8f6c9c1aa2, type: 2}
   - {fileID: 11400000, guid: d5e208fca91498042ac0b4a89d60594c, type: 2}
   - {fileID: 11400000, guid: d11c0f7bb53c585418a92450b77ecd2c, type: 2}
-  manaRange:
-    min: 50
-    max: 100

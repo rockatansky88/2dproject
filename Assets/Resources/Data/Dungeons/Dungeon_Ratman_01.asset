@@ -21,7 +21,7 @@ MonoBehaviour:
   eventBackgroundSprite: {fileID: 21300000, guid: aba99b3a92317474ebc770edbe88e0fd, type: 3}
   normalMonsters:
   - monsterName: Ratman
-    monsterSprite: {fileID: 21300000, guid: 73bdedb82f3fa604c9a70fe73311bcd1, type: 3}
+    monsterSprite: {fileID: -394961435, guid: fd8305f36f5ff1a48bdb449fd5649702, type: 3}
     monsterStats: {fileID: 11400000, guid: c0bae7cd76d602e4d8e48d8d34aa8ce2, type: 2}
     difficulty: 0
     rarity: 0
@@ -38,7 +38,7 @@ MonoBehaviour:
       - {fileID: -394961435, guid: fd8305f36f5ff1a48bdb449fd5649702, type: 3}
       frameRate: 0.1
   - monsterName: Ratman Worrior
-    monsterSprite: {fileID: 21300000, guid: f7df2aafde5faab41bb2cbb3c4018bcb, type: 3}
+    monsterSprite: {fileID: -1982994425, guid: c224121a80c6b164c9c9e245d75e8adb, type: 3}
     monsterStats: {fileID: 11400000, guid: c0bae7cd76d602e4d8e48d8d34aa8ce2, type: 2}
     difficulty: 1
     rarity: 1
@@ -91,7 +91,7 @@ MonoBehaviour:
       - {fileID: 1275286021, guid: 68d2af4feb188c543bc3f9a468217b3d, type: 3}
       - {fileID: -1010630691, guid: 101d6ad76f561104f865b0ce36e802e7, type: 3}
       - {fileID: 786006113, guid: 7a8aa41ffade28e4fb54d4ce0ea79978, type: 3}
-      frameRate: 0.1
+      frameRate: 0.2
   possibleEvents:
   - {fileID: 11400000, guid: 8cb9e6893d85b2b428b4186f0489642e, type: 2}
   - {fileID: 11400000, guid: 8cb9e6893d85b2b428b4186f0489642e, type: 2}

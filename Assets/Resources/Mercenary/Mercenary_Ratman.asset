@@ -15,7 +15,7 @@ MonoBehaviour:
   mercenaryID: ratman_001
   mercenaryName: "\uC96C\uB3C4"
   portrait: {fileID: 21300000, guid: a420c5cd5501bc24096042d511057cea, type: 3}
-  fullBodySprite: {fileID: 21300000, guid: 7a7427737cd312e428d3a0c4efc793cb, type: 3}
+  fullBodySprite: {fileID: 1506472773, guid: 7a7427737cd312e428d3a0c4efc793cb, type: 3}
   prefab: {fileID: 0}
   recruitCost: 100
   levelRange:
@@ -24,6 +24,9 @@ MonoBehaviour:
   healthRange:
     min: 80
     max: 120
+  manaRange:
+    min: 50
+    max: 100
   strengthRange:
     min: 10
     max: 25
@@ -41,6 +44,3 @@ MonoBehaviour:
     max: 5
   availableSkills:
   - {fileID: 11400000, guid: 2e332f753a8f8184c8415b8f6c9c1aa2, type: 2}
-  manaRange:
-    min: 50
-    max: 100

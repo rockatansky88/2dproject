@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mercenaryID: warlock_001
   mercenaryName: "\uB9B4\uB9AC\uC2A4"
-  portrait: {fileID: 21300000, guid: 15f841ff772bf8a49831633b921c2d50, type: 3}
+  portrait: {fileID: 21300000, guid: c522805848f3fe845be93d89a5b9ebaf, type: 3}
   fullBodySprite: {fileID: 21300000, guid: 0ac898d721e5f5343b0dfd587aa00104, type: 3}
   prefab: {fileID: 0}
   recruitCost: 100
@@ -24,6 +24,9 @@ MonoBehaviour:
   healthRange:
     min: 80
     max: 120
+  manaRange:
+    min: 50
+    max: 100
   strengthRange:
     min: 8
     max: 15
@@ -43,6 +46,3 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 2e332f753a8f8184c8415b8f6c9c1aa2, type: 2}
   - {fileID: 11400000, guid: d5e208fca91498042ac0b4a89d60594c, type: 2}
   - {fileID: 11400000, guid: d11c0f7bb53c585418a92450b77ecd2c, type: 2}
-  manaRange:
-    min: 50
-    max: 100
