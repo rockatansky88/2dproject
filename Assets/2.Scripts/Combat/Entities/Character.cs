@@ -131,7 +131,7 @@ public class Character : MonoBehaviour, ICombatant
     /// <summary>
     /// 스킬 사용
     /// </summary>
-    public bool UseSkill(SkillDataSO skill, ICombatant target, bool isCritical)
+    public bool UseSkill(SkillDataSO skill, ICombatant target, bool isCritical = false)
     {
         if (!skill.isBasicAttack && !Stats.ConsumeMana(skill.manaCost))
         {
@@ -139,7 +139,30 @@ public class Character : MonoBehaviour, ICombatant
             return false;
         }
 
+        //  스킬 사운드 재생
+        if (SoundManager.Instance != null)
+        {
+            if (skill.skillSound != null)
+            {
+                // 스킬 전용 사운드 재생
+                SoundManager.Instance.PlaySkillSound(skill.skillSound);
+            }
+            else if (skill.isBasicAttack)
+            {
+                // 기본 공격 사운드 재생
+                SoundManager.Instance.PlayBasicAttackSound();
+            }
+        }
+
+        // 데미지 계산
         int damage = skill.CalculateDamage(Stats, isCritical);
+
+        // 크리티컬 사운드 재생
+        if (isCritical && SoundManager.Instance != null)
+        {
+            SoundManager.Instance.PlayCriticalSound();
+        }
+
         target.TakeDamage(damage);
 
         if (target is Monster monster && monster.uiSlot != null)

@@ -144,21 +144,16 @@ public class DungeonManager : MonoBehaviour
     /// </summary>
     public void SelectPath(int pathIndex)
     {
-
         if (currentDungeon == null)
         {
             return;
         }
 
-        currentRoomType = DecideRoomType();
-
         currentRoomIndex++;
-
         OnRoomProgressed?.Invoke(currentRoomIndex, totalRooms);
+        currentRoomType = DecideRoomType();
         OnRoomTypeSelected?.Invoke(currentRoomType);
-
         ProcessRoom();
-
     }
 
     /// <summary>
@@ -166,8 +161,7 @@ public class DungeonManager : MonoBehaviour
     /// </summary>
     private DungeonRoomType DecideRoomType()
     {
-
-        if (currentRoomIndex >= totalRooms - 1)
+        if (currentRoomIndex >= totalRooms)
         {
             return DungeonRoomType.Boss;
         }
@@ -544,9 +538,11 @@ public class DungeonManager : MonoBehaviour
 
     /// <summary>
     /// 던전 클리어 체크
+    /// 5번째 방(보스)을 완료했는지 확인합니다.
     /// </summary>
     public bool IsDungeonCleared()
     {
+        // 5번째 방을 완료하면 currentRoomIndex = 5이므로
         bool isCleared = currentRoomIndex >= totalRooms;
         return isCleared;
     }

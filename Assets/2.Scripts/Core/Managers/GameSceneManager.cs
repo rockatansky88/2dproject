@@ -2,10 +2,12 @@
 using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 /// <summary>
 /// 게임 씬 전환 관리자 (마을, 던전 입구, 통로, 이벤트, 전투 화면)
 /// 카메라 이동 방식으로 화면 전환하며, 각 씬의 배경 이미지를 동적으로 설정합니다.
+/// 로딩 화면과 던전 완료 화면을 3초간 표시 후 자동 전환합니다.
 /// </summary>
 public class GameSceneManager : MonoBehaviour
 {
@@ -21,6 +23,8 @@ public class GameSceneManager : MonoBehaviour
     [SerializeField] private Transform corridorPosition;
     [SerializeField] private Transform eventPosition;
     [SerializeField] private Transform combatPosition;
+    [SerializeField] private Transform loadingPosition;
+    [SerializeField] private Transform dungeonCompletePosition;
 
     [Header("UI Panels")]
     [SerializeField] private GameObject townUI;
@@ -28,6 +32,8 @@ public class GameSceneManager : MonoBehaviour
     [SerializeField] private GameObject corridorUI;
     [SerializeField] private GameObject eventUI;
     [SerializeField] private GameObject combatUI;
+    [SerializeField] private GameObject loadingUI;
+    [SerializeField] private GameObject dungeonCompleteUI;
 
     [Header("Town UI Elements")]
     [SerializeField] private Image townBackgroundImage;
@@ -59,20 +65,26 @@ public class GameSceneManager : MonoBehaviour
     [SerializeField] private Transform monsterSpawnParent;
     [SerializeField] private GameObject monsterPrefab;
 
+    [Header("Loading UI Elements")]
+    [SerializeField] private Image loadingBackgroundImage;
+
+    [Header("Dungeon Complete UI Elements")]
+    [SerializeField] private Image dungeonCompleteBackgroundImage;
+
     [Header("Mercenary Party UI")]
     [SerializeField] private MercenaryParty mercenaryParty;
     [SerializeField] private MercenaryWindow mercenaryWindow;
+
+    [Header("Screen Display Duration")]
+    [SerializeField] private float screenDisplayDuration = 3f;
 
     private DungeonDataSO currentDungeonData;
 
     private void Awake()
     {
-
-
         if (Instance == null)
         {
             Instance = this;
-
         }
         else
         {
@@ -80,7 +92,6 @@ public class GameSceneManager : MonoBehaviour
             return;
         }
 
-        // 버튼 리스너 등록
         if (enterDungeonButton != null)
         {
             enterDungeonButton.onClick.AddListener(OnEnterDungeonClicked);
@@ -108,12 +119,10 @@ public class GameSceneManager : MonoBehaviour
             townShopButtons[1].onClick.AddListener(OnMerchantShopClicked);
             townShopButtons[2].onClick.AddListener(OnMercenaryShopClicked);
         }
-
     }
 
     private void Start()
     {
-
         if (DungeonManager.Instance != null)
         {
             DungeonManager.Instance.OnDungeonEntered += OnDungeonEntered;
@@ -130,7 +139,6 @@ public class GameSceneManager : MonoBehaviour
         }
 
         ShowTownUI();
-
     }
 
     /// <summary>
@@ -138,7 +146,6 @@ public class GameSceneManager : MonoBehaviour
     /// </summary>
     private void ShowTownUI()
     {
-
         HideAllUI();
         townUI.SetActive(true);
 
@@ -147,10 +154,9 @@ public class GameSceneManager : MonoBehaviour
             townBackgroundImage.sprite = townBackgroundSprite;
         }
 
-        // 🔧 수정: 마을에서는 파티 UI 표시 + HP/MP UI 표시 (비전투 모드)
         if (mercenaryParty != null)
         {
-            mercenaryParty.SetCombatMode(false); // 전투 모드 아님 (HP/MP 숨김)
+            mercenaryParty.SetCombatMode(false);
             mercenaryParty.Show();
         }
 
@@ -158,7 +164,6 @@ public class GameSceneManager : MonoBehaviour
         {
             StartCoroutine(MoveCameraSmooth(townPosition.position));
         }
-
     }
 
     /// <summary>
@@ -166,7 +171,6 @@ public class GameSceneManager : MonoBehaviour
     /// </summary>
     public void ShowEntranceUI(DungeonDataSO dungeon)
     {
-
         currentDungeonData = dungeon;
 
         HideAllUI();
@@ -196,7 +200,6 @@ public class GameSceneManager : MonoBehaviour
         {
             StartCoroutine(MoveCameraSmooth(entrancePosition.position));
         }
-
     }
 
     /// <summary>
@@ -204,7 +207,6 @@ public class GameSceneManager : MonoBehaviour
     /// </summary>
     private void ShowCorridorUI()
     {
-
         HideAllUI();
         corridorUI.SetActive(true);
 
@@ -222,7 +224,6 @@ public class GameSceneManager : MonoBehaviour
         {
             StartCoroutine(MoveCameraSmooth(corridorPosition.position));
         }
-
     }
 
     /// <summary>
@@ -231,7 +232,6 @@ public class GameSceneManager : MonoBehaviour
     /// </summary>
     private void ShowEventUI(RoomEventDataSO eventData)
     {
-
         HideAllUI();
         eventUI.SetActive(true);
 
@@ -255,10 +255,9 @@ public class GameSceneManager : MonoBehaviour
             eventDescriptionText.text = eventData.description;
         }
 
-        //  이벤트에서도 HP/MP UI 표시
         if (mercenaryParty != null)
         {
-            mercenaryParty.SetCombatMode(true); // 전투 모드로 설정하여 HP/MP UI 활성화
+            mercenaryParty.SetCombatMode(true);
             mercenaryParty.Show();
         }
 
@@ -267,12 +266,10 @@ public class GameSceneManager : MonoBehaviour
             StartCoroutine(MoveCameraSmooth(eventPosition.position));
         }
 
-        // 이벤트 효과 자동 적용
         if (DungeonManager.Instance != null)
         {
             DungeonManager.Instance.ApplyEventEffects();
         }
-
     }
 
     /// <summary>
@@ -280,7 +277,6 @@ public class GameSceneManager : MonoBehaviour
     /// </summary>
     private void ShowCombatUI(bool isBoss)
     {
-
         HideAllUI();
         combatUI.SetActive(true);
 
@@ -298,7 +294,7 @@ public class GameSceneManager : MonoBehaviour
 
         if (mercenaryParty != null)
         {
-            mercenaryParty.SetCombatMode(true); // 전투 모드 활성화
+            mercenaryParty.SetCombatMode(true);
             mercenaryParty.Show();
         }
 
@@ -306,7 +302,78 @@ public class GameSceneManager : MonoBehaviour
         {
             StartCoroutine(MoveCameraSmooth(combatPosition.position));
         }
+    }
 
+    /// <summary>
+    /// 로딩 화면 표시 (3초 후 던전 입장)
+    /// PNG 이미지만 표시하고 3초 후 자동으로 던전으로 전환됩니다.
+    /// </summary>
+    private void ShowLoadingScreen()
+    {
+        StartCoroutine(LoadingScreenCoroutine());
+    }
+
+    /// <summary>
+    /// 로딩 화면 코루틴
+    /// </summary>
+    private IEnumerator LoadingScreenCoroutine()
+    {
+        HideAllUI();
+        loadingUI.SetActive(true);
+
+        if (mercenaryParty != null)
+        {
+            mercenaryParty.Hide();
+        }
+
+        if (mainCamera != null && loadingPosition != null)
+        {
+            yield return StartCoroutine(MoveCameraSmooth(loadingPosition.position));
+        }
+
+        yield return new WaitForSeconds(screenDisplayDuration);
+
+        if (DungeonManager.Instance != null)
+        {
+            DungeonManager.Instance.EnterDungeon(currentDungeonData);
+        }
+    }
+
+    /// <summary>
+    /// 던전 완료 화면 표시 (3초 후 마을로 귀환)
+    /// PNG 이미지만 표시하고 3초 후 자동으로 마을로 이동합니다.
+    /// </summary>
+    private void ShowDungeonCompleteScreen()
+    {
+        StartCoroutine(DungeonCompleteScreenCoroutine());
+    }
+
+    /// <summary>
+    /// 던전 완료 화면 코루틴
+    /// </summary>
+    private IEnumerator DungeonCompleteScreenCoroutine()
+    {
+        HideAllUI();
+        dungeonCompleteUI.SetActive(true);
+
+        if (mercenaryParty != null)
+        {
+            mercenaryParty.Hide();
+        }
+
+        if (mainCamera != null && dungeonCompletePosition != null)
+        {
+            yield return StartCoroutine(MoveCameraSmooth(dungeonCompletePosition.position));
+        }
+
+        yield return new WaitForSeconds(screenDisplayDuration);
+
+        if (DungeonManager.Instance != null)
+        {
+            DungeonManager.Instance.ExitDungeon();
+        }
+
+        ShowTownUI();
     }
 
     /// <summary>
@@ -314,12 +381,13 @@ public class GameSceneManager : MonoBehaviour
     /// </summary>
     private void HideAllUI()
     {
-
         townUI.SetActive(false);
         entranceUI.SetActive(false);
         corridorUI.SetActive(false);
         eventUI.SetActive(false);
         combatUI.SetActive(false);
+        loadingUI.SetActive(false);
+        dungeonCompleteUI.SetActive(false);
     }
 
     /// <summary>
@@ -327,7 +395,6 @@ public class GameSceneManager : MonoBehaviour
     /// </summary>
     private IEnumerator MoveCameraSmooth(Vector3 targetPosition)
     {
-
         Vector3 startPosition = mainCamera.transform.position;
         Vector3 adjustedTarget = new Vector3(targetPosition.x, targetPosition.y, startPosition.z);
 
@@ -344,7 +411,6 @@ public class GameSceneManager : MonoBehaviour
         }
 
         mainCamera.transform.position = adjustedTarget;
-
     }
 
     /// <summary>
@@ -352,7 +418,6 @@ public class GameSceneManager : MonoBehaviour
     /// </summary>
     private void SpawnMonsterSprites(List<MonsterSpawnData> monsters)
     {
-
         foreach (Transform child in monsterSpawnParent)
         {
             Destroy(child.gameObject);
@@ -378,27 +443,20 @@ public class GameSceneManager : MonoBehaviour
                 rect.anchoredPosition = new Vector2(offset + i * spacing, 0f);
             }
         }
-
     }
 
     private void OnEnterDungeonClicked()
     {
-
         if (currentDungeonData == null)
         {
-            Debug.LogError("[GameSceneManager] ❌ currentDungeonData가 null입니다!");
             return;
         }
 
-        if (DungeonManager.Instance != null)
-        {
-            DungeonManager.Instance.EnterDungeon(currentDungeonData);
-        }
+        ShowLoadingScreen();
     }
 
     private void OnBackToTownClicked()
     {
-
         if (DungeonManager.Instance != null)
         {
             DungeonManager.Instance.ExitDungeon();
@@ -409,7 +467,6 @@ public class GameSceneManager : MonoBehaviour
 
     private void OnPathSelected(int pathIndex)
     {
-
         if (DungeonManager.Instance != null)
         {
             DungeonManager.Instance.SelectPath(pathIndex);
@@ -418,10 +475,9 @@ public class GameSceneManager : MonoBehaviour
 
     private void OnProceedClicked()
     {
-
         if (DungeonManager.Instance != null && DungeonManager.Instance.IsDungeonCleared())
         {
-            OnBackToTownClicked();
+            ShowDungeonCompleteScreen();
             return;
         }
 
@@ -430,7 +486,6 @@ public class GameSceneManager : MonoBehaviour
 
     private void OnMerchantShopClicked()
     {
-
         if (mercenaryParty != null)
         {
             mercenaryParty.Hide();
@@ -441,30 +496,19 @@ public class GameSceneManager : MonoBehaviour
         {
             inventoryWindow.OpenShopMode();
         }
-        else
-        {
-            Debug.LogError("[GameSceneManager] ❌ InventoryWindow를 찾을 수 없습니다!");
-        }
     }
 
     private void OnDungeonEntranceClicked()
     {
-
         if (availableDungeons != null && availableDungeons.Length > 0)
         {
             DungeonDataSO selectedDungeon = availableDungeons[0];
-
             ShowEntranceUI(selectedDungeon);
-        }
-        else
-        {
-            Debug.LogError("[GameSceneManager] ❌ availableDungeons가 비어있습니다!");
         }
     }
 
     private void OnMercenaryShopClicked()
     {
-
         if (mercenaryParty != null)
         {
             mercenaryParty.Hide();
@@ -474,14 +518,16 @@ public class GameSceneManager : MonoBehaviour
         {
             mercenaryWindow.Open();
         }
-        else
-        {
-            Debug.LogError("[GameSceneManager] ❌ MercenaryWindow가 할당되지 않았습니다!");
-        }
     }
 
     private void OnDungeonEntered(DungeonDataSO dungeon)
     {
+        // 던전 입장 시 0/5 표시
+        if (roomProgressText != null)
+        {
+            roomProgressText.text = $"던전 진행도 0/{dungeon.totalRooms}";
+        }
+
         ShowCorridorUI();
     }
 
@@ -491,7 +537,6 @@ public class GameSceneManager : MonoBehaviour
     /// </summary>
     private void OnDungeonExited()
     {
-
         if (mercenaryParty != null)
         {
             mercenaryParty.ResetCombatState();
@@ -502,20 +547,17 @@ public class GameSceneManager : MonoBehaviour
 
     private void OnRoomProgressed(int currentRoom, int totalRooms)
     {
-
         if (roomProgressText != null)
         {
-            roomProgressText.text = $"방 {currentRoom}/{totalRooms}";
+            roomProgressText.text = $"던전 진행도 {currentRoom}/{totalRooms}";
         }
     }
 
     private void OnRoomTypeSelected(DungeonRoomType roomType)
     {
-
         switch (roomType)
         {
             case DungeonRoomType.Event:
-                // 이벤트 UI는 OnEventTriggered에서 표시
                 break;
 
             case DungeonRoomType.Combat:
@@ -530,7 +572,6 @@ public class GameSceneManager : MonoBehaviour
 
     private void OnMonstersSpawned(List<MonsterSpawnData> monsters)
     {
-
         SpawnMonsterSprites(monsters);
 
         if (CombatManager.Instance != null)
@@ -547,12 +588,11 @@ public class GameSceneManager : MonoBehaviour
 
     private void OnCombatEnded(bool isVictory)
     {
-
         if (isVictory)
         {
             if (DungeonManager.Instance != null && DungeonManager.Instance.IsDungeonCleared())
             {
-                OnBackToTownClicked();
+                ShowDungeonCompleteScreen();
             }
             else
             {
