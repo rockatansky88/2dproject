@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ddbbd26b676d82147bff70d61722b4d2, type: 3}
+  m_Name: BossMonsterBasicAttack 1
+  m_EditorClassIdentifier: 
+  skillID: basic_attack_03
+  skillName: "\uBCF4\uC2A4\uBAAC\uC2A4\uD130_\uAE30\uBCF8\uACF5\uACA9"
+  skillIcon: {fileID: -636365454, guid: 2c345100849c40446b29b33e16829ec7, type: 3}
+  description: "\uBCF4\uC2A4\uBAAC\uC2A4\uD130\uC758 \uAE30\uBCF8\uACF5\uACA9\n"
+  damageType: 0
+  targetType: 0
+  baseDamageMin: 35
+  baseDamageMax: 50
+  statScaling: 0.5
+  manaCost: 0
+  isBasicAttack: 1
+  skillSound: {fileID: 0}
+  effectSprites: []
+  effectFrameRate: 0.1
+  effectScale: 1
