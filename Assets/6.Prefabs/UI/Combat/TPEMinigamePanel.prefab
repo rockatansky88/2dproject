@@ -326,11 +326,15 @@ MonoBehaviour:
   successZone: {fileID: 7682851797629929042}
   arrow: {fileID: 5731946361303706728}
   resultText: {fileID: 6219818837201194072}
+  successZoneCollider: {fileID: 0}
+  arrowCollider: {fileID: 0}
   arrowSpeed: 500
   barWidth: 600
   normalSuccessZoneWidth: 60
   eliteSuccessZoneWidth: 40
   bossSuccessZoneWidth: 20
+  colliderHeight: 50
+  arrowColliderWidth: 10
 --- !u!1 &8944077389464390430
 GameObject:
   m_ObjectHideFlags: 0
